@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.spec
+/.venv/
+/venv/
+/env/
+/src/build/
+/src/dist/
+/Fertilizante corrigida/
+.idea/
+.vscode/
+*.ipynb_checkpoints/

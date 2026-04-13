@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .tab { fill: #1a2130; stroke: #2a3142; stroke-width: 1; }
+      .tab_on { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 12px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 800 26px "Segoe UI", Arial, sans-serif; }
+      .pill_ok { fill: #143426; stroke: #2b6b4a; stroke-width: 1; }
+      .ok { fill: #41d18a; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .warn { fill: #ffb020; font: 700 12px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="62">OrionAgroquim</text>
+  <text class="subtitle" x="242" y="60">Teste — Forma 1 (mais viável e simples)</text>
+
+  <rect class="panel" x="24" y="104" width="420" height="772" rx="12"/>
+  <text class="title" x="48" y="146">Alvos e Condições</text>
+  <text class="subtitle" x="48" y="170">Exemplo: N 10.00% | P2O5 5.0241% | B 1.50%</text>
+
+  <rect class="panel2" x="44" y="192" width="380" height="92" rx="10"/>
+  <text class="label" x="60" y="220">Temperatura (°C)</text>
+  <rect class="chip" x="60" y="232" width="130" height="34" rx="8"/>
+  <text class="mono" x="74" y="254">25</text>
+  <text class="label" x="212" y="220">Volume Q.S.P (L)</text>
+  <rect class="chip" x="212" y="232" width="130" height="34" rx="8"/>
+  <text class="mono" x="226" y="254">100</text>
+
+  <rect class="panel2" x="44" y="300" width="380" height="250" rx="10"/>
+  <text class="label" x="60" y="328">Nutrientes-alvo (%)</text>
+
+  <rect class="chip" x="60" y="352" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="376">N</text>
+  <rect class="panel2" x="105" y="360" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="376">10.00</text>
+
+  <rect class="chip" x="60" y="398" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="422">P2O5</text>
+  <rect class="panel2" x="105" y="406" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="422">5.0241</text>
+
+  <rect class="chip" x="60" y="444" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="468">B</text>
+  <rect class="panel2" x="105" y="452" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="468">1.50</text>
+
+  <rect class="panel2" x="44" y="566" width="380" height="132" rx="10"/>
+  <text class="label" x="60" y="594">Observação (Forma 1)</text>
+  <text class="muted" x="60" y="618">A forma mais simples prioriza:</text>
+  <text class="muted" x="60" y="640">- menos aditivos obrigatórios</text>
+  <text class="muted" x="60" y="662">- preparo em 25°C</text>
+  <text class="muted" x="60" y="684">- menor risco operacional</text>
+
+  <rect class="panel" x="464" y="104" width="952" height="772" rx="12"/>
+  <text class="title" x="488" y="146">Formas de Atingir (Top 5)</text>
+  <text class="subtitle" x="488" y="170">Aba atual: FORMA 1 — a mais viável e simples</text>
+
+  <rect class="panel2" x="484" y="192" width="912" height="52" rx="12"/>
+  <rect class="tab_on" x="500" y="204" width="160" height="28" rx="14"/>
+  <text class="label" x="546" y="224" fill="#071014">FORMA 1</text>
+  <rect class="tab" x="668" y="204" width="160" height="28" rx="14"/>
+  <text class="label" x="714" y="224">FORMA 2</text>
+  <rect class="tab" x="836" y="204" width="160" height="28" rx="14"/>
+  <text class="label" x="882" y="224">FORMA 3</text>
+  <rect class="tab" x="1004" y="204" width="160" height="28" rx="14"/>
+  <text class="label" x="1050" y="224">FORMA 4</text>
+  <rect class="tab" x="1172" y="204" width="160" height="28" rx="14"/>
+  <text class="label" x="1218" y="224">FORMA 5</text>
+
+  <rect class="panel2" x="484" y="258" width="912" height="150" rx="12"/>
+  <rect class="pill_ok" x="500" y="278" width="140" height="28" rx="14"/>
+  <text class="ok" x="540" y="298">SIMPLES</text>
+  <text class="label" x="656" y="296">Receita direta (mínimo de aditivos)</text>
+  <text class="muted" x="656" y="318">Alvo vs atingido: N 10.00% | P2O5 5.0241% | B 1.50% (fechou)</text>
+  <text class="text" x="500" y="350">Resumo:</text>
+  <text class="mono" x="560" y="350">Status: ok | Densidade estimada: 1.18 kg/L | T: 25°C | Q.S.P: 100 L</text>
+  <rect class="btn2" x="1230" y="286" width="146" height="36" rx="10"/>
+  <text class="label" x="1250" y="310">GERAR LAUDO</text>
+
+  <rect class="panel2" x="484" y="424" width="570" height="452" rx="12"/>
+  <text class="label" x="504" y="452">Formulação (Forma 1) — 100 L</text>
+
+  <rect class="chip" x="504" y="468" width="530" height="34" rx="10"/>
+  <text class="label" x="520" y="490">Insumo</text>
+  <text class="label" x="878" y="490">Massa (kg)</text>
+  <text class="label" x="960" y="490">Teores na fórmula</text>
+
+  <rect class="panel2" x="504" y="514" width="530" height="220" rx="10"/>
+  <text class="mono" x="520" y="544">Fosfato Monoamônico Cristal (MAP Cristal)</text>
+  <text class="mono" x="890" y="544">10.484</text>
+  <text class="mono" x="960" y="544">P2O5: 5.0242% | N: 0.9211%</text>
+
+  <text class="mono" x="520" y="572">Octaborato de Sódio</text>
+  <text class="mono" x="890" y="572">9.390</text>
+  <text class="mono" x="960" y="572">B: 1.5000%</text>
+
+  <text class="mono" x="520" y="600">Uréia</text>
+  <text class="mono" x="890" y="600">25.260</text>
+  <text class="mono" x="960" y="600">N: 9.0790%</text>
+
+  <text class="mono" x="520" y="628">Água</text>
+  <text class="mono" x="890" y="628">80.067</text>
+  <text class="mono" x="960" y="628">Q.S.P</text>
+
+  <rect class="chip" x="504" y="748" width="530" height="112" rx="10"/>
+  <text class="label" x="520" y="774">Ressalvas (Forma 1)</text>
+  <text class="muted" x="520" y="796">- Sem quelante obrigatório (não há Ca/Mg/P conflitantes)</text>
+  <text class="muted" x="520" y="818">- Se houver ureia: considerar IN39 NBPT (antiurease) para reduzir perdas</text>
+  <text class="muted" x="520" y="840">- Manter preparo em 25°C e boa agitação; evitar resfriamento forte</text>
+
+  <rect class="panel2" x="1070" y="424" width="326" height="452" rx="12"/>
+  <text class="label" x="1090" y="452">Dicas do Especialista</text>
+  <rect class="panel2" x="1090" y="468" width="286" height="392" rx="10"/>
+  <text class="warn" x="1108" y="498">Ureia presente</text>
+  <text class="muted" x="1108" y="520">Sugestão IN39: NBPT (inibidor de urease)</text>
+  <text class="muted" x="1108" y="542">pH ideal 4.0–8.0 | dose máx 1%</text>
+  <text class="muted" x="1108" y="586">Ordem de preparo (simplificada):</text>
+  <text class="muted" x="1108" y="608">1) Água (parcial) + ureia</text>
+  <text class="muted" x="1108" y="630">2) MAP Cristal</text>
+  <text class="muted" x="1108" y="652">3) Octaborato</text>
+  <text class="muted" x="1108" y="674">4) Completar volume</text>
+</svg>

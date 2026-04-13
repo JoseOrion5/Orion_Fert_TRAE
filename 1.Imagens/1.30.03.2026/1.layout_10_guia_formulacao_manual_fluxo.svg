@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .tab { fill: #1a2130; stroke: #2a3142; stroke-width: 1; }
+      .tab_on { fill: #16c6d4; }
+      .btn { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 12px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 800 26px "Segoe UI", Arial, sans-serif; }
+      .chk { fill: #0e1320; stroke: #2a3142; stroke-width: 1; }
+      .chk_on { fill: #0d2b2e; stroke: #16c6d4; stroke-width: 1; }
+      .chk_mark { fill: none; stroke: #d7dde8; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+      .pill_ok { fill: #143426; stroke: #2b6b4a; stroke-width: 1; }
+      .ok { fill: #41d18a; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .pill_warn { fill: #3a2c12; stroke: #8b6a2b; stroke-width: 1; }
+      .warn { fill: #ffb020; font: 700 12px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="62">OrionAgroquim</text>
+  <text class="subtitle" x="242" y="60">Guia: Formulação Manual (montagem por nutrientes e insumos)</text>
+
+  <rect class="panel" x="24" y="104" width="1392" height="772" rx="12"/>
+
+  <rect class="panel2" x="44" y="124" width="1352" height="54" rx="12"/>
+  <rect class="tab" x="60" y="136" width="210" height="30" rx="15"/>
+  <text class="label" x="118" y="157">PRINCIPAL</text>
+  <rect class="tab" x="278" y="136" width="240" height="30" rx="15"/>
+  <text class="label" x="336" y="157">TOP 5 FORMAS</text>
+  <rect class="tab_on" x="526" y="136" width="280" height="30" rx="15"/>
+  <text class="label" x="566" y="157" fill="#071014">FORMULAÇÃO MANUAL</text>
+  <rect class="tab" x="814" y="136" width="160" height="30" rx="15"/>
+  <text class="label" x="866" y="157">LAUDO</text>
+
+  <rect class="panel" x="44" y="192" width="470" height="664" rx="12"/>
+  <text class="title" x="68" y="232">Passo 1 — Nutrientes</text>
+  <text class="subtitle" x="68" y="256">Marque macro/micro. Ao marcar, abre o “Passo 2” com insumos compatíveis.</text>
+
+  <rect class="panel2" x="64" y="276" width="430" height="206" rx="10"/>
+  <text class="label" x="80" y="306">Macronutrientes</text>
+  <rect class="chip" x="80" y="324" width="200" height="30" rx="10"/>
+  <rect class="chk" x="90" y="331" width="16" height="16" rx="3"/>
+  <text class="text" x="116" y="345">N</text>
+  <rect class="chip" x="294" y="324" width="200" height="30" rx="10"/>
+  <rect class="chk_on" x="304" y="331" width="16" height="16" rx="3"/>
+  <path class="chk_mark" d="M308 339 L311 343 L318 334"/>
+  <text class="text" x="330" y="345">P2O5</text>
+
+  <rect class="chip" x="80" y="362" width="200" height="30" rx="10"/>
+  <rect class="chk" x="90" y="369" width="16" height="16" rx="3"/>
+  <text class="text" x="116" y="383">K2O</text>
+  <rect class="chip" x="294" y="362" width="200" height="30" rx="10"/>
+  <rect class="chk" x="304" y="369" width="16" height="16" rx="3"/>
+  <text class="text" x="330" y="383">Ca</text>
+
+  <rect class="chip" x="80" y="400" width="200" height="30" rx="10"/>
+  <rect class="chk" x="90" y="407" width="16" height="16" rx="3"/>
+  <text class="text" x="116" y="421">Mg</text>
+  <rect class="chip" x="294" y="400" width="200" height="30" rx="10"/>
+  <rect class="chk" x="304" y="407" width="16" height="16" rx="3"/>
+  <text class="text" x="330" y="421">S</text>
+  <text class="muted" x="80" y="456">A meta (%) de cada nutriente é preenchida no Passo 3.</text>
+
+  <rect class="panel2" x="64" y="496" width="430" height="230" rx="10"/>
+  <text class="label" x="80" y="526">Micronutrientes</text>
+  <rect class="chip" x="80" y="544" width="200" height="30" rx="10"/>
+  <rect class="chk" x="90" y="551" width="16" height="16" rx="3"/>
+  <text class="text" x="116" y="565">B</text>
+  <rect class="chip" x="294" y="544" width="200" height="30" rx="10"/>
+  <rect class="chk" x="304" y="551" width="16" height="16" rx="3"/>
+  <text class="text" x="330" y="565">Zn</text>
+  <rect class="chip" x="80" y="582" width="200" height="30" rx="10"/>
+  <rect class="chk" x="90" y="589" width="16" height="16" rx="3"/>
+  <text class="text" x="116" y="603">Mn</text>
+  <rect class="chip" x="294" y="582" width="200" height="30" rx="10"/>
+  <rect class="chk" x="304" y="589" width="16" height="16" rx="3"/>
+  <text class="text" x="330" y="603">Cu</text>
+  <rect class="chip" x="80" y="620" width="200" height="30" rx="10"/>
+  <rect class="chk" x="90" y="627" width="16" height="16" rx="3"/>
+  <text class="text" x="116" y="641">Fe</text>
+  <rect class="chip" x="294" y="620" width="200" height="30" rx="10"/>
+  <rect class="chk" x="304" y="627" width="16" height="16" rx="3"/>
+  <text class="text" x="330" y="641">Mo</text>
+  <text class="muted" x="80" y="686">Depois de escolher um insumo, o sistema volta a pedir o próximo nutriente.</text>
+
+  <rect class="panel" x="534" y="192" width="862" height="324" rx="12"/>
+  <text class="title" x="558" y="232">Passo 2 — Insumos (do nutriente ativo)</text>
+  <text class="subtitle" x="558" y="256">Nutriente ativo: P2O5. Lista vem do CSV e filtra insumos inerentes ao nutriente.</text>
+
+  <rect class="panel2" x="554" y="276" width="822" height="220" rx="12"/>
+  <rect class="chip" x="574" y="296" width="782" height="44" rx="12"/>
+  <rect class="chk_on" x="586" y="310" width="16" height="16" rx="3"/>
+  <path class="chk_mark" d="M590 318 L593 322 L600 313"/>
+  <text class="label" x="612" y="326">MAP (Fosfato Monoamônico)</text>
+  <text class="muted" x="1180" y="326">P2O5 + N</text>
+  <rect class="chip" x="574" y="346" width="782" height="44" rx="12"/>
+  <rect class="chk" x="586" y="360" width="16" height="16" rx="3"/>
+  <text class="label" x="612" y="376">Ácido Fosfórico</text>
+  <text class="muted" x="1180" y="376">P2O5</text>
+  <rect class="chip" x="574" y="396" width="782" height="44" rx="12"/>
+  <rect class="chk" x="586" y="410" width="16" height="16" rx="3"/>
+  <text class="label" x="612" y="426">Fosfato Mono Potássico (MKP)</text>
+  <text class="muted" x="1180" y="426">P2O5 + K2O</text>
+  <rect class="pill_ok" x="574" y="448" width="190" height="28" rx="14"/>
+  <text class="ok" x="598" y="468">Selecionado: MAP</text>
+
+  <rect class="panel" x="534" y="532" width="862" height="324" rx="12"/>
+  <text class="title" x="558" y="572">Passo 3 — Meta (%) e Tabela</text>
+  <text class="subtitle" x="558" y="596">Define % alvo do nutriente, adiciona a linha e calcula o que o insumo gera.</text>
+
+  <rect class="panel2" x="554" y="616" width="822" height="86" rx="12"/>
+  <text class="label" x="574" y="646">Meta para P2O5 (%)</text>
+  <rect class="chip" x="574" y="658" width="140" height="34" rx="8"/>
+  <text class="mono" x="588" y="680">6.00</text>
+  <text class="muted" x="724" y="680">%</text>
+  <rect class="btn2" x="1060" y="654" width="150" height="40" rx="12"/>
+  <text class="label" x="1082" y="680">ADICIONAR</text>
+  <rect class="btn" x="1218" y="654" width="158" height="40" rx="12"/>
+  <text class="label" x="1250" y="680" fill="#071014">CALCULAR</text>
+
+  <rect class="panel2" x="554" y="714" width="822" height="128" rx="12"/>
+  <rect class="chip" x="574" y="732" width="782" height="34" rx="10"/>
+  <text class="label" x="590" y="754">Insumo</text>
+  <text class="label" x="1050" y="754">Massa (kg)</text>
+  <text class="label" x="1180" y="754">Gera</text>
+  <rect class="panel2" x="574" y="774" width="782" height="52" rx="10"/>
+  <text class="mono" x="590" y="804">MAP (Fosfato Monoamônico)</text>
+  <text class="mono" x="1050" y="804">12.430</text>
+  <text class="mono" x="1180" y="804">P2O5 6.00% + N 1.10%</text>
+  <text class="muted" x="574" y="842">Em seguida, o nutriente ativo pode mudar (ex.: N) e o fluxo se repete.</text>
+</svg>

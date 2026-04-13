@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .tab { fill: #1a2130; stroke: #2a3142; stroke-width: 1; }
+      .tab_on { fill: #16c6d4; }
+      .btn { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 12px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 800 26px "Segoe UI", Arial, sans-serif; }
+      .pill_ok { fill: #143426; stroke: #2b6b4a; stroke-width: 1; }
+      .pill_warn { fill: #3a2c12; stroke: #8b6a2b; stroke-width: 1; }
+      .ok { fill: #41d18a; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .warn { fill: #ffb020; font: 700 12px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="62">OrionAgroquim</text>
+  <text class="subtitle" x="242" y="60">Top 5 formas de atingir os alvos (guias)</text>
+  <rect class="chip" x="1160" y="34" width="110" height="40" rx="10"/>
+  <text class="label" x="1178" y="59">Modo</text>
+  <text class="text" x="1226" y="59">Dark</text>
+  <rect class="chip" x="1286" y="34" width="110" height="40" rx="10"/>
+  <text class="label" x="1304" y="59">Base</text>
+  <text class="text" x="1348" y="59">IN39</text>
+
+  <rect class="panel" x="24" y="104" width="420" height="772" rx="12"/>
+  <text class="title" x="48" y="146">Alvos e Condições</text>
+  <text class="subtitle" x="48" y="170">O sistema gera 5 formas + permite formulação manual.</text>
+
+  <rect class="panel2" x="44" y="192" width="380" height="92" rx="10"/>
+  <text class="label" x="60" y="220">Temperatura (°C)</text>
+  <rect class="chip" x="60" y="232" width="130" height="34" rx="8"/>
+  <text class="mono" x="74" y="254">25</text>
+  <text class="label" x="212" y="220">Volume Q.S.P (L)</text>
+  <rect class="chip" x="212" y="232" width="130" height="34" rx="8"/>
+  <text class="mono" x="226" y="254">100</text>
+
+  <rect class="panel2" x="44" y="300" width="380" height="272" rx="10"/>
+  <text class="label" x="60" y="328">Nutrientes-alvo (%)</text>
+  <text class="muted" x="60" y="350">Ex.: N, P2O5, K2O, Ca, Mg, S, B, Zn...</text>
+  <rect class="chip" x="60" y="370" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="394">N</text>
+  <rect class="panel2" x="105" y="378" width="110" height="22" rx="6"/>
+  <text class="mono" x="116" y="394">30.00</text>
+  <rect class="chip" x="60" y="416" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="440">K2O</text>
+  <rect class="panel2" x="105" y="424" width="110" height="22" rx="6"/>
+  <text class="mono" x="116" y="440">10.00</text>
+  <rect class="chip" x="60" y="462" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="486">S</text>
+  <rect class="panel2" x="105" y="470" width="110" height="22" rx="6"/>
+  <text class="mono" x="116" y="486">2.32</text>
+
+  <rect class="btn" x="44" y="728" width="380" height="52" rx="12"/>
+  <text class="label" x="168" y="761" fill="#071014">CALCULAR TOP 5</text>
+
+  <rect class="panel" x="464" y="104" width="952" height="772" rx="12"/>
+  <text class="title" x="488" y="146">Formas de Atingir (guias)</text>
+  <text class="subtitle" x="488" y="170">Forma 1..5 + guia de Formulação Manual.</text>
+
+  <rect class="panel2" x="484" y="192" width="912" height="56" rx="12"/>
+  <rect class="tab" x="500" y="204" width="140" height="30" rx="15"/>
+  <text class="label" x="536" y="225">FORMA 1</text>
+  <rect class="tab_on" x="648" y="204" width="140" height="30" rx="15"/>
+  <text class="label" x="684" y="225" fill="#071014">FORMA 2</text>
+  <rect class="tab" x="796" y="204" width="140" height="30" rx="15"/>
+  <text class="label" x="832" y="225">FORMA 3</text>
+  <rect class="tab" x="944" y="204" width="140" height="30" rx="15"/>
+  <text class="label" x="980" y="225">FORMA 4</text>
+  <rect class="tab" x="1092" y="204" width="140" height="30" rx="15"/>
+  <text class="label" x="1128" y="225">FORMA 5</text>
+  <rect class="tab" x="1240" y="204" width="140" height="30" rx="15"/>
+  <text class="label" x="1252" y="225">FORM. MANUAL</text>
+
+  <rect class="panel2" x="484" y="262" width="912" height="172" rx="12"/>
+  <rect class="pill_warn" x="500" y="282" width="132" height="28" rx="14"/>
+  <text class="warn" x="534" y="302">MITIGADA</text>
+  <text class="label" x="648" y="300">Forma 2 — requer mitigadores (aditivo/ordem)</text>
+  <text class="muted" x="648" y="322">Aba “FORM. MANUAL” permite montar a receita escolhendo insumos e metas.</text>
+  <text class="text" x="500" y="356">Receita (resumo):</text>
+  <text class="mono" x="600" y="356">Nitrato de Potássio + Fonte de S + Quelante (opcional) + Água</text>
+  <text class="text" x="500" y="382">Mitigadores:</text>
+  <text class="mono" x="600" y="382">Aditivo IN39 (EDTA) | Ajuste de T | Pré-mix</text>
+  <rect class="btn2" x="1230" y="290" width="146" height="36" rx="10"/>
+  <text class="label" x="1250" y="314">GERAR LAUDO</text>
+
+  <rect class="panel2" x="484" y="448" width="570" height="428" rx="12"/>
+  <text class="label" x="504" y="476">Detalhes</text>
+  <rect class="chip" x="504" y="492" width="530" height="66" rx="10"/>
+  <text class="muted" x="520" y="520">Se Ca estiver presente, evitar mistura direta com fosfato/sulfato.</text>
+  <text class="muted" x="520" y="542">Sugestão: usar quelante e ordem de dissolução.</text>
+  <rect class="chip" x="504" y="566" width="530" height="86" rx="10"/>
+  <text class="muted" x="520" y="596">Ordem de preparo:</text>
+  <text class="muted" x="520" y="618">1) água + aditivo (se usado)</text>
+  <text class="muted" x="520" y="640">2) fontes de N/K</text>
+  <text class="muted" x="520" y="662">3) fontes de S/micros por solubilidade</text>
+
+  <rect class="panel2" x="1070" y="448" width="326" height="428" rx="12"/>
+  <text class="label" x="1090" y="476">Atalhos</text>
+  <rect class="chip" x="1090" y="494" width="286" height="48" rx="10"/>
+  <text class="label" x="1106" y="522">Abrir Formulação Manual</text>
+  <rect class="chip" x="1090" y="550" width="286" height="48" rx="10"/>
+  <text class="label" x="1106" y="578">Comparar com Forma 1</text>
+  <rect class="chip" x="1090" y="606" width="286" height="48" rx="10"/>
+  <text class="label" x="1106" y="634">Comparar com Forma 3</text>
+  <rect class="chip" x="1090" y="662" width="286" height="198" rx="10"/>
+  <text class="muted" x="1106" y="694">Motor do cálculo afeta:</text>
+  <text class="muted" x="1106" y="716">- ranking das formas</text>
+  <text class="muted" x="1106" y="738">- critérios de risco</text>
+  <text class="muted" x="1106" y="760">- explicações/validações</text>
+</svg>
