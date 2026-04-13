@@ -32,6 +32,32 @@ SOLUBILITY_NUTRIENT_PCT_CAPS: Dict[str, Dict[str, float]] = {
     "ácido bórico": {"B": 1.2},
 }
 
+FAMILY_KEYWORDS: Dict[str, Tuple[str, ...]] = {
+    "ureia": ("ureia", "uréia"),
+    "nitrato_amonio": ("nitrato de amonio", "nitrato de amônio"),
+    "acido_borico": ("acido borico", "ácido bórico"),
+    "borato_sodio": (
+        "borato de sodio", "borato de sódio",
+        "tetraborato de sodio", "tetraborato de sódio",
+        "borax", "bórax",
+        "octaborato de sodio", "octaborato de sódio",
+        "pentaborato de sodio", "pentaborato de sódio",
+    ),
+}
+
+SPLIT_RULES: List[Dict[str, Any]] = [
+    {"tier": 1, "nutrient": "N", "threshold_pct": 28.0, "min_family_shares": {"nitrato_amonio": 0.30, "ureia": 0.30}},
+    {"tier": 1, "nutrient": "B", "threshold_pct": 1.5, "min_family_shares": {"acido_borico": 0.40, "borato_sodio": 0.40}},
+]
+
+def _name_has_any(name: str, keys: Sequence[str]) -> bool:
+    nm = _norm_text(name)
+    return any(_norm_text(k) in nm for k in keys if k)
+
+def _insumo_is_family(ins: Insumo, family: str) -> bool:
+    keys = FAMILY_KEYWORDS.get(family, ())
+    return _name_has_any(ins.nome, keys)
+
 BLOCKED_INSUMO_PATTERNS: List[str] = [
     "acetato", "alga marinha", "amonia anidra", "amônia anidra", "aquamonio", "aquamônio",
     "bicarbonato", "borato de monoetanolamina", "carbonato", "composto natural de folhelho carbonoso",
@@ -536,6 +562,7 @@ def recommend_process_and_aditivos(
     volume_l: float,
     temp_c: float,
     *,
+    reactor_level_available: Optional[int] = None,
     experimental: bool = False,
     strategy_label: Optional[str] = None,
     extreme_adjuvants: bool = False,
@@ -623,11 +650,38 @@ def recommend_process_and_aditivos(
         if pct is None or pct <= 0 or volume_l <= 0:
             return add_step(counter, f"Adicionar {a.nome} (Função: {funcao}).")
         massa_kg = (volume_l * pct) / 100.0
+        
+        # Injetar o aditivo diretamente como uma linha (FormulaLine) na lista da receita
+        aditivo_como_linha = FormulaLine(
+            insumo_nome=f"{a.nome} ({a.abreviatura})" if a.abreviatura else a.nome,
+            massa_kg=massa_kg,
+            contrib_pct={},
+            preco_unit=a.preco_unit,
+            custo_linha=massa_kg * a.preco_unit,
+            is_local=False,
+            fornecedor="Aditivo"
+        )
+        # Hack para adicionar à lista imutável/tuple mutável ou lidar com o fato de lines ser Sequence
+        if isinstance(lines, list):
+            lines.append(aditivo_como_linha)
+            
         return add_step(counter, f"Adicionar {format_num(massa_kg, 3)} kg de {a.nome} (Função: {funcao}; dose {format_num(pct, 2)}%).")
 
-    if lvl <= 3: setup = "Tanque simples de PEAD ou Fibra. Operação a frio."
-    elif lvl <= 7: setup = "Tanque de aço inox com agitação mecânica (turbina/hélice)."
-    else: setup = "Reator Encamisado com agitação de alto torque e controle térmico rigoroso."
+    required_reactor_level = 1 if lvl <= 3 else (2 if lvl <= 7 else 3)
+    available_level = 3 if reactor_level_available is None else max(1, min(3, int(reactor_level_available)))
+    selected_level = min(required_reactor_level, available_level)
+
+    if selected_level == 1:
+        setup = "Tanque simples de PEAD ou Fibra. Operação a frio."
+    elif selected_level == 2:
+        setup = "Tanque de aço inox com agitação mecânica (turbina/hélice)."
+    else:
+        setup = "Reator Encamisado com agitação de alto torque e controle térmico rigoroso."
+
+    if available_level < required_reactor_level:
+        process.append(
+            f"Passo 0: ALERTA - Formula exige SETUP nível {required_reactor_level}, mas o disponível é nível {available_level}. Ajustar estratégia/receita ou aceitar maior risco de instabilidade."
+        )
     process.append(f"Passo 0: SETUP - {setup}")
 
     agua_total = calcular_agua_qsp(volume_l, lines, insumos)
@@ -745,6 +799,40 @@ def build_top12_forms(volume_l: float, targets: Dict[str, float], insumos: Seque
             if "Ca" in ins.teor_por_nutriente_pct or "calcio" in nm or "cálcio" in nm: has_ca = True
             if "P2O5" in ins.teor_por_nutriente_pct or "S" in ins.teor_por_nutriente_pct or "fosfato" in nm or "sulfato" in nm: has_p_s = True
 
+        def _line_is_family(line: FormulaLine, family: str) -> bool:
+            keys = FAMILY_KEYWORDS.get(family, ())
+            return _name_has_any(line.insumo_nome or "", keys)
+
+        def _family_contrib_pct(lines_seq: Sequence[FormulaLine], nutrient: str, family: str) -> float:
+            return sum((l.contrib_pct.get(nutrient, 0.0) or 0.0) for l in lines_seq if _line_is_family(l, family))
+
+        def _try_add_family_target_pct(nutrient: str, family: str, target_pct: float) -> None:
+            nonlocal remaining, lines
+            need_pct = remaining.get(nutrient, 0.0) or 0.0
+            if need_pct <= 0 or target_pct <= 0:
+                return
+            target_pct = min(float(target_pct), float(need_pct))
+            cands = [i for i in insumos if (nutrient in i.teor_por_nutriente_pct) and not _is_blocked_insumo_name(i.nome) and is_compatible(i) and _insumo_is_family(i, family)]
+            cands.sort(key=lambda x: (commodity_rank(x), x.rank_solubilidade, -x.teor_por_nutriente_pct.get(nutrient, 0.0)))
+            for pick in cands:
+                teor = pick.teor_por_nutriente_pct.get(nutrient, 0.0) or 0.0
+                if teor <= 0:
+                    continue
+                mass_need = compute_mass_kg_for_target(volume_l, target_pct, teor)
+                if mass_need is None or mass_need <= 0:
+                    continue
+                ub = _solubility_cap_mass_kg(pick, volume_l, targets, multiplier)
+                mass = float(mass_need)
+                if ub is not None and ub > 0 and mass > ub:
+                    mass = float(ub)
+                if mass <= 0:
+                    continue
+                contrib = {n: compute_contrib_percent(volume_l, mass, t) for n, t in pick.teor_por_nutriente_pct.items()}
+                lines.append(FormulaLine(pick.nome, mass, contrib, pick.preco_unit, mass * pick.preco_unit, pick.fornecedor, pick.lead_time, pick.is_local))
+                remaining = _apply_contrib_to_remaining(remaining, contrib)
+                update_comp(pick)
+                return
+
         if remaining.get("N", 0.0) > 0 and remaining.get("P2O5", 0.0) > 0:
             np_lines = _build_np_combo_lines(volume_l, remaining, insumos, idx, is_compatible, commodity_rank)
             for l in np_lines:
@@ -753,9 +841,50 @@ def build_top12_forms(volume_l: float, targets: Dict[str, float], insumos: Seque
                 found = next((i for i in insumos if i.nome == l.insumo_nome), None)
                 if found: update_comp(found)
 
+        if tier == 1:
+            for rule in SPLIT_RULES:
+                if int(rule.get("tier", 0)) != tier:
+                    continue
+                nutrient = str(rule.get("nutrient", "")).strip()
+                if not nutrient:
+                    continue
+                threshold = float(rule.get("threshold_pct", 0.0) or 0.0)
+                target_pct_total = float(targets.get(nutrient, 0.0) or 0.0)
+                if target_pct_total < threshold or target_pct_total <= 0:
+                    continue
+                min_family_shares = rule.get("min_family_shares") or {}
+                if not isinstance(min_family_shares, dict):
+                    continue
+                for fam, share in min_family_shares.items():
+                    fam_name = str(fam).strip()
+                    min_share = float(share or 0.0)
+                    if not fam_name or min_share <= 0:
+                        continue
+                    already = _family_contrib_pct(lines, nutrient, fam_name)
+                    required = (target_pct_total * min_share) - already
+                    if required > 1e-9:
+                        _try_add_family_target_pct(nutrient, fam_name, required)
+
         for n, _ in NUTRIENT_COLUMNS:
             if remaining.get(n, 0.0) is None or remaining.get(n, 0.0) <= 0: continue
-            cands = [i for i in insumos if n in i.teor_por_nutriente_pct and not _is_blocked_insumo_name(i.nome) and is_compatible(i)]
+            cands = []
+            for i in insumos:
+                if n not in i.teor_por_nutriente_pct:
+                    continue
+                if _is_blocked_insumo_name(i.nome) or not is_compatible(i):
+                    continue
+                teor = i.teor_por_nutriente_pct.get(n, 0.0) or 0.0
+                if teor <= 0:
+                    continue
+                mass_need = compute_mass_kg_for_target(volume_l, remaining.get(n, 0.0) or 0.0, teor)
+                if mass_need is None or mass_need <= 0:
+                    continue
+                ub = _solubility_cap_mass_kg(i, volume_l, targets, multiplier)
+                if ub is not None and ub > 0:
+                    used_mass = sum(l.massa_kg for l in lines if l.insumo_nome == i.nome)
+                    if (used_mass + float(mass_need)) > float(ub) + 1e-9:
+                        continue
+                cands.append(i)
             cands.sort(key=lambda x: (commodity_rank(x), x.rank_solubilidade, -x.teor_por_nutriente_pct.get(n, 0.0)))
             if not cands: continue
             pick = cands[min(idx, len(cands)-1)]
@@ -824,6 +953,37 @@ def _build_optimized_forms(volume_l: float, targets: Dict[str, float], insumos: 
                 A_ub.append(row)
                 b_ub.append(float(ub))
 
+            if tier == 1:
+                for rule in SPLIT_RULES:
+                    if int(rule.get("tier", 0)) != tier:
+                        continue
+                    nutrient = str(rule.get("nutrient", "")).strip()
+                    if not nutrient:
+                        continue
+                    threshold = float(rule.get("threshold_pct", 0.0) or 0.0)
+                    target_pct_total = float(targets.get(nutrient, 0.0) or 0.0)
+                    if target_pct_total < threshold or target_pct_total <= 0:
+                        continue
+                    total_kg = (target_pct_total * volume_l) / 100.0
+                    if total_kg <= 0:
+                        continue
+                    min_family_shares = rule.get("min_family_shares") or {}
+                    if not isinstance(min_family_shares, dict):
+                        continue
+                    for fam, share in min_family_shares.items():
+                        fam_name = str(fam).strip()
+                        min_share = float(share or 0.0)
+                        if not fam_name or min_share <= 0:
+                            continue
+                        fam_idxs = [j for j, ins in enumerate(valid_insumos) if (nutrient in ins.teor_por_nutriente_pct) and _insumo_is_family(ins, fam_name)]
+                        if not fam_idxs:
+                            continue
+                        row = [0.0 for _ in range(num_insumos)]
+                        for j in fam_idxs:
+                            row[j] = -(valid_insumos[j].teor_por_nutriente_pct.get(nutrient, 0.0) / 100.0)
+                        A_ub.append(row)
+                        b_ub.append(-(min_share * total_kg))
+
             bounds = [(0, None) for _ in range(num_insumos)]
 
             res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method='highs')
@@ -840,6 +1000,12 @@ def _build_optimized_forms(volume_l: float, targets: Dict[str, float], insumos: 
                         if x_val > max_mass:
                             max_mass = x_val
                             max_insumo = ins.nome
+
+                has_ca = any((l.contrib_pct.get("Ca", 0.0) or 0.0) > 0 or _name_has_any(l.insumo_nome, ("calcio", "cálcio")) for l in best_lines)
+                has_ps = any((l.contrib_pct.get("P2O5", 0.0) or 0.0) > 0 or (l.contrib_pct.get("S", 0.0) or 0.0) > 0 or (l.contrib_pct.get("SO4", 0.0) or 0.0) > 0 or _name_has_any(l.insumo_nome, ("fosfato", "sulfato")) for l in best_lines)
+                if has_ca and has_ps:
+                    forms.append([])
+                    continue
                 
                 if tier == 2:
                     massa_glicerina = volume_l * 0.02

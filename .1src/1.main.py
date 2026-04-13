@@ -44,13 +44,17 @@ def parse_targets_from_fields(fields: Dict[str, ft.TextField]) -> Dict[str, floa
 
 def build_thermo_alert(status: ThermoStatus) -> ft.Container:
     tier_config = {
-        1: {"color": ft.Colors.BLUE, "alert": "Tier 1 - Conservador (Soluções Verdadeiras / Frio)"},
-        2: {"color": ft.Colors.ORANGE, "alert": "Tier 2 - Audacioso (Permite Suspensão / Co-solventes Seguros)"},
-        3: {"color": ft.Colors.PURPLE_ACCENT, "alert": "Tier 3 - Alquimia Industrial (Reator com Aquecimento / Alto Torque)"}
+        1: {"color": ft.Colors.BLUE, "alert": "Tier 1 - Conservador (regras duras e rotas ortodoxas)"},
+        2: {"color": ft.Colors.ORANGE, "alert": "Tier 2 - Audacioso (pode usar rotas menos ortodoxas)"},
+        3: {"color": ft.Colors.PURPLE_ACCENT, "alert": "Tier 3 - Alquimia Industrial (rotas não ortodoxas + processo avançado)"}
     }
     config = tier_config.get(status.tech_tier, tier_config[1])
     main_color = ft.Colors.RED if status.is_supersaturado else config["color"]
     alert_text = f"⚠️ ALERTA DE PROCESSO: {config['alert']}"
+    if status.tech_tier <= 1:
+        detail = "Aplicando restrições técnicas conservadoras (split/compatibilidade quando aplicável)."
+    else:
+        detail = "Modo exploratório: a partir da 5ª forma o motor pode relaxar regras de split e buscar rotas menos ortodoxas."
 
     return ft.Container(
         content=ft.Row([
@@ -59,7 +63,7 @@ def build_thermo_alert(status: ThermoStatus) -> ft.Container:
             ft.VerticalDivider(width=10, color=ft.Colors.TRANSPARENT),
             ft.Column([
                 ft.Text(alert_text, weight=ft.FontWeight.BOLD, color=main_color, size=14),
-                ft.Text(status.tech_instruction, color=ft.Colors.with_opacity(0.8, main_color), size=12, italic=True),
+                ft.Text(f"{status.tech_instruction} | {detail}", color=ft.Colors.with_opacity(0.8, main_color), size=12, italic=True),
             ], spacing=2, expand=True)
         ], alignment=ft.MainAxisAlignment.START),
         bgcolor=ft.Colors.with_opacity(0.1, main_color),
@@ -277,6 +281,18 @@ def _main_impl(page: ft.Page) -> None:
     numpy_switch = ft.Switch(label="numpy (cálculo base)", value=True, scale=0.8)
     scipy_switch = ft.Switch(label="scipy (otimização)", value=False, scale=0.8)
 
+    reactor_dd = ft.Dropdown(
+        label="Reator disponível",
+        width=360,
+        dense=True,
+        value="3",
+        options=[
+            ft.dropdown.Option("1", "Tanque PEAD/Fibra (frio)"),
+            ft.dropdown.Option("2", "Tanque Inox (agitação mecânica)"),
+            ft.dropdown.Option("3", "Reator Encamisado (alto torque/aquec.)"),
+        ],
+    )
+
     # Alvos Nutricionais
     targets_fields = {k: ft.TextField(label=f"{label} (%)", width=100, dense=True, text_size=12) for k, label in NUTRIENT_COLUMNS}
     
@@ -313,6 +329,7 @@ def _main_impl(page: ft.Page) -> None:
         ft.Text("Alvos, Condições e Motor", size=18, weight=ft.FontWeight.BOLD),
         data_status_text,
         ft.Row([temp_field, volume_field], spacing=5),
+        reactor_dd,
         ft.Text("Nutrientes-alvo (%)", weight=ft.FontWeight.BOLD, size=14),
         nutrient_grid,
         ft.Text("Flags de bibliotecas", weight=ft.FontWeight.BOLD, size=14),
@@ -336,6 +353,7 @@ def _main_impl(page: ft.Page) -> None:
 
     def get_volume() -> float: return _safe_float(volume_field.value) or DEFAULT_VOLUME_L
     def get_temp_c() -> float: return _safe_float(temp_field.value) or 25.0
+    def get_reactor_level() -> int: return int(_safe_float(reactor_dd.value) or 3)
 
     def reload_data() -> None:
         nonlocal insumos_cache, aditivos_cache
@@ -404,7 +422,8 @@ def _main_impl(page: ft.Page) -> None:
         
         steps, ad_sug = recommend_process_and_aditivos(
             {k: sum(l.contrib_pct.get(k, 0.0) for l in merged) for k, _ in NUTRIENT_COLUMNS},
-            merged, aditivos_cache, insumos_cache, get_volume(), get_temp_c()
+            merged, aditivos_cache, insumos_cache, get_volume(), get_temp_c(),
+            reactor_level_available=get_reactor_level()
         )
         manual_reco_container.content = build_recommendations_view(steps, ad_sug, merged)
         page.update()
@@ -440,7 +459,10 @@ def _main_impl(page: ft.Page) -> None:
             principal_viability_container.content = build_viability_card(best, v, status.tech_tier, aditivos_cache, status)
             principal_table_container.content = build_data_table(best, insumos_cache, v, targets, bool(supply_chain_switch.value))
             
-            steps, ad_sug = recommend_process_and_aditivos(targets, best, aditivos_cache, insumos_cache, v, get_temp_c())
+            steps, ad_sug = recommend_process_and_aditivos(
+                targets, best, aditivos_cache, insumos_cache, v, get_temp_c(),
+                reactor_level_available=get_reactor_level()
+            )
             principal_reco_container.content = build_recommendations_view(steps, ad_sug, best)
             
             # Atualiza Abas Top 12
@@ -526,7 +548,10 @@ def _main_impl(page: ft.Page) -> None:
             v = get_volume()
             targets = parse_targets_from_fields(targets_fields)
             status = verificar_viabilidade_termodinamica(v, lines, insumos_cache, idx)
-            steps, ad_sug = recommend_process_and_aditivos(targets, lines, aditivos_cache, insumos_cache, v, get_temp_c())
+            steps, ad_sug = recommend_process_and_aditivos(
+                targets, lines, aditivos_cache, insumos_cache, v, get_temp_c(),
+                reactor_level_available=get_reactor_level()
+            )
             
             # Geração dos Componentes Individuais
             alerta_ui = build_thermo_alert(status)
@@ -580,10 +605,10 @@ def _main_impl(page: ft.Page) -> None:
                 label = f"F{idx} (Tier 1 - Conservador)"
                 color = ft.Colors.BLUE_400
             elif idx <= 8:
-                label = f"F{idx} (Tier 2 - Audacioso)"
+                label = f"F{idx} (Tier 2 - Audacioso / exploratório)"
                 color = ft.Colors.ORANGE_400
             else:
-                label = f"F{idx} (Tier 3 - Alquimia Industrial)"
+                label = f"F{idx} (Tier 3 - Alquimia / não ortodoxo)"
                 color = ft.Colors.PURPLE_ACCENT
             
             labels.append(label)
