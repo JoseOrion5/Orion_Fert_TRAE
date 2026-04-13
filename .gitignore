@@ -1,0 +1,15 @@
+*.exe
+*.zip
+*.7z
+*.pkg
+Zipados/
+.1git/
+build/
+dist/
+.1src/build/
+.1src/dist/
+__pycache__/
+.1src/__pycache__/
+.1src/1.__pycache__/
+*.pyc
+*.log
