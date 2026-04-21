@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import flet as ft
 from motor import (
-    Insumo, FormulaLine, Aditivo, AditivoSuggestion, ThermoStatus, RelatorioOP,
+    Insumo, FormulaLine, Aditivo, AditivoSuggestion, ThermoStatus, RelatorioOP, FormulaOutput,
     NUTRIENT_COLUMNS, DEFAULT_VOLUME_L,
     BLOCKED_INSUMO_PATTERNS, BLOCKED_OBS_LABELS,
     _safe_float,
@@ -16,7 +16,7 @@ from motor import (
     load_insumos, load_aditivos, verificar_viabilidade_termodinamica,
     calcular_custo_industrial, gerar_relatorio_op, format_num,
     build_line_for_target, merge_lines, calcular_agua_qsp,
-    recommend_process_and_aditivos, build_top12_forms, candidates_for
+    recommend_process_and_aditivos, build_top12_outputs, diagnosticar_operacoes_unitarias, candidates_for
 )
 
 def _runtime_dir() -> Path:
@@ -73,7 +73,7 @@ def build_thermo_alert(status: ThermoStatus) -> ft.Container:
         margin=ft.margin.only(bottom=10)
     )
 
-def build_data_table(lines: Sequence[FormulaLine], insumos_bd: Sequence[Insumo], volume_l: float, targets: Dict[str, float], supply_chain_mode: bool = False) -> ft.Control:
+def build_data_table(lines: Sequence[FormulaLine], insumos_bd: Sequence[Insumo], volume_l: float, targets: Dict[str, float], supply_chain_mode: bool = False, *, page: Optional[ft.Page] = None) -> ft.Control:
     if not lines:
         return ft.Container(content=ft.Text("Sem linhas na formulação.", size=12), padding=10)
 
@@ -128,16 +128,63 @@ def build_data_table(lines: Sequence[FormulaLine], insumos_bd: Sequence[Insumo],
     
     rows.append(ft.DataRow(cells=agua_cells))
 
+    datatable = ft.DataTable(
+        columns=columns,
+        rows=rows,
+        vertical_lines=ft.border.BorderSide(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
+        horizontal_lines=ft.border.BorderSide(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
+        heading_row_color=ft.Colors.with_opacity(0.15, ft.Colors.WHITE),
+        border=ft.border.all(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
+        border_radius=8,
+    )
+
+    zoom_label = ft.Text("Zoom da grade: 100%", size=12, color=ft.Colors.with_opacity(0.8, ft.Colors.WHITE))
+    zoom_slider = ft.Slider(min=50, max=150, divisions=100, value=100)
+    table_wrapper = ft.Container(content=datatable, padding=5, scale=1.0)
+
+    def set_zoom(value: float) -> None:
+        v = float(value or 100.0)
+        v = max(50.0, min(150.0, v))
+        zoom_slider.value = v
+        zoom_label.value = f"Zoom da grade: {int(round(v))}%"
+        table_wrapper.scale = v / 100.0
+        if page:
+            page.update()
+
+    def on_zoom_slider_change(e):
+        set_zoom(e.control.value)
+
+    def on_zoom_in(_):
+        set_zoom((zoom_slider.value or 100.0) + 10.0)
+
+    def on_zoom_out(_):
+        set_zoom((zoom_slider.value or 100.0) - 10.0)
+
+    zoom_slider.on_change = on_zoom_slider_change
+
+    zoom_bar = ft.Row(
+        [
+            ft.Icon(ft.Icons.SEARCH, size=18, color=ft.Colors.with_opacity(0.8, ft.Colors.WHITE)),
+            zoom_label,
+            ft.IconButton(ft.Icons.ZOOM_OUT, on_click=on_zoom_out),
+            zoom_slider,
+            ft.IconButton(ft.Icons.ZOOM_IN, on_click=on_zoom_in),
+        ],
+        alignment=ft.MainAxisAlignment.START,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+    scroll_row = ft.Row([table_wrapper], scroll=ft.ScrollMode.ALWAYS, expand=True)
+
     return ft.Container(
-        content=ft.DataTable(
-            columns=columns, rows=rows,
-            vertical_lines=ft.border.BorderSide(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
-            horizontal_lines=ft.border.BorderSide(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
-            heading_row_color=ft.Colors.with_opacity(0.15, ft.Colors.WHITE),
-            border=ft.border.all(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
-            border_radius=8,
+        content=ft.Column(
+            [
+                zoom_bar,
+                ft.Container(content=scroll_row, expand=True),
+            ],
+            spacing=6,
         ),
-        margin=ft.Margin.only(top=10, bottom=10), padding=5,
+        margin=ft.Margin.only(top=10, bottom=10),
     )
 
 def build_viability_card(lines: Sequence[FormulaLine], volume_l: float, tech_tier: int = 1, aditivos_cache: List[Aditivo] = [], status: Optional[ThermoStatus] = None) -> ft.Control:
@@ -200,7 +247,7 @@ def build_formula_header(lines: Sequence[FormulaLine], volume_l: float, tech_tie
         padding=ft.padding.symmetric(horizontal=6, vertical=8),
     )
 
-def build_recommendations_view(process_steps: Sequence[str], aditivos: Sequence[AditivoSuggestion], lines: Sequence[FormulaLine] = []) -> ft.Control:
+def build_recommendations_view(process_steps: Sequence[str], aditivos: Sequence[AditivoSuggestion], lines: Sequence[FormulaLine] = [], instrucoes_producao: Sequence[str] = ()) -> ft.Control:
     process_controls = [ft.Text("Processo e mitigadores", size=14, weight=ft.FontWeight.BOLD)]
     for step in process_steps:
         step_control = ft.Row([ft.Text(f"- {step}", size=12, color=ft.Colors.with_opacity(0.8, ft.Colors.WHITE), expand=True)], spacing=5)
@@ -209,6 +256,10 @@ def build_recommendations_view(process_steps: Sequence[str], aditivos: Sequence[
                 step_control.controls.insert(0, ft.Icon("location_on" if l.is_local else "directions_boat", color=ft.Colors.GREEN_400 if l.is_local else ft.Colors.ORANGE_400, size=14))
                 break
         process_controls.append(step_control)
+
+    prod_controls = [ft.Text("Roteiro de produção", size=14, weight=ft.FontWeight.BOLD)]
+    for line in instrucoes_producao:
+        prod_controls.append(ft.Text(f"- {line}", size=12, color=ft.Colors.with_opacity(0.8, ft.Colors.WHITE)))
 
     cards = []
     for s in aditivos:
@@ -226,7 +277,7 @@ def build_recommendations_view(process_steps: Sequence[str], aditivos: Sequence[
     obs_chips = [ft.Container(content=ft.Text(label, size=12), padding=ft.padding.symmetric(horizontal=10, vertical=6), border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)), border_radius=14) for label in BLOCKED_OBS_LABELS]
 
     return ft.Container(
-        content=ft.Column(process_controls + [ft.Divider()] + [ft.Column(cards)] + [ft.Divider()] + [ft.Row(obs_chips, wrap=True)]),
+        content=ft.Column(process_controls + [ft.Divider()] + prod_controls + [ft.Divider()] + [ft.Column(cards)] + [ft.Divider()] + [ft.Row(obs_chips, wrap=True)]),
         padding=10, border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)), border_radius=12,
     )
 
@@ -280,6 +331,22 @@ def _main_impl(page: ft.Page) -> None:
     # Flags de bibliotecas
     numpy_switch = ft.Switch(label="numpy (cálculo base)", value=True, scale=0.8)
     scipy_switch = ft.Switch(label="scipy (otimização)", value=False, scale=0.8)
+    limite_diversificacao = 75.0
+    limite_diversificacao_text = ft.Text("Limite de Concentração por Fonte (%): 75", size=12)
+
+    def on_limite_diversificacao_change(e):
+        nonlocal limite_diversificacao
+        limite_diversificacao = float(e.control.value or 75.0)
+        limite_diversificacao_text.value = f"Limite de Concentração por Fonte (%): {int(round(limite_diversificacao))}"
+        page.update()
+
+    limite_diversificacao_slider = ft.Slider(
+        min=50,
+        max=100,
+        divisions=50,
+        value=75,
+        on_change=on_limite_diversificacao_change,
+    )
 
     reactor_dd = ft.Dropdown(
         label="Reator disponível",
@@ -334,6 +401,8 @@ def _main_impl(page: ft.Page) -> None:
         nutrient_grid,
         ft.Text("Flags de bibliotecas", weight=ft.FontWeight.BOLD, size=14),
         ft.Column([numpy_switch, scipy_switch], spacing=0),
+        limite_diversificacao_text,
+        limite_diversificacao_slider,
         ft.Container(calc_button, margin=ft.Margin(0, 10, 0, 0)),
     ], spacing=10, scroll=ft.ScrollMode.AUTO)
 
@@ -413,7 +482,7 @@ def _main_impl(page: ft.Page) -> None:
     def update_manual_table() -> None:
         merged = merge_lines(manual_lines)
         targets = {k: 1.0 for k, v in manual_selected_nutrients.items() if v}
-        manual_table_container.content = build_data_table(merged, insumos_cache, get_volume(), targets, bool(supply_chain_switch.value))
+        manual_table_container.content = build_data_table(merged, insumos_cache, get_volume(), targets, bool(supply_chain_switch.value), page=page)
         status = verificar_viabilidade_termodinamica(get_volume(), merged, insumos_cache)
         manual_thermo_alert.content = ft.Column([
             build_viability_card(merged, get_volume(), status.tech_tier, aditivos_cache, status),
@@ -425,7 +494,8 @@ def _main_impl(page: ft.Page) -> None:
             merged, aditivos_cache, insumos_cache, get_volume(), get_temp_c(),
             reactor_level_available=get_reactor_level()
         )
-        manual_reco_container.content = build_recommendations_view(steps, ad_sug, merged)
+        instr = diagnosticar_operacoes_unitarias(merged, insumos_cache, ad_sug, get_volume(), get_temp_c())
+        manual_reco_container.content = build_recommendations_view(steps, ad_sug, merged, instrucoes_producao=instr)
         page.update()
 
     def on_calculate_principal(e):
@@ -441,32 +511,36 @@ def _main_impl(page: ft.Page) -> None:
             v = get_volume()
             # Conecta as flags da UI ao Motor
             use_opt = bool(scipy_switch.value)
-            forms = build_top12_forms(v, targets, insumos_cache, use_optimization=use_opt)
+            outputs = build_top12_outputs(
+                v,
+                targets,
+                insumos_cache,
+                aditivos_cache,
+                get_temp_c(),
+                use_optimization=use_opt,
+                reactor_level_available=get_reactor_level(),
+                limite_diversificacao=limite_diversificacao,
+            )
             
-            if not forms or all(not f for f in forms):
+            if not outputs or all(not o.lines for o in outputs):
                 page.snack_bar = ft.SnackBar(ft.Text("Nenhuma formulação viável encontrada para os alvos informados!"))
                 page.snack_bar.open = True
                 page.update()
                 return
                 
             # Atualiza View Principal (Formulação 1)
-            best = forms[0] if forms else []
-            status = verificar_viabilidade_termodinamica(v, best, insumos_cache, 1)
+            best = outputs[0] if outputs else FormulaOutput([], [], [], [], [], 0.0)
+            status = verificar_viabilidade_termodinamica(v, best.lines, insumos_cache, 1)
             
             principal_thermo_alert.content = build_thermo_alert(status)
             principal_title_text.value = f"Formulação 1 (Tier {status.tech_tier})"
             principal_subtitle_text.value = f"Viabilizada em: {status.tech_instruction}"
-            principal_viability_container.content = build_viability_card(best, v, status.tech_tier, aditivos_cache, status)
-            principal_table_container.content = build_data_table(best, insumos_cache, v, targets, bool(supply_chain_switch.value))
-            
-            steps, ad_sug = recommend_process_and_aditivos(
-                targets, best, aditivos_cache, insumos_cache, v, get_temp_c(),
-                reactor_level_available=get_reactor_level()
-            )
-            principal_reco_container.content = build_recommendations_view(steps, ad_sug, best)
+            principal_viability_container.content = build_viability_card(best.lines, v, status.tech_tier, aditivos_cache, status)
+            principal_table_container.content = build_data_table(best.lines, insumos_cache, v, targets, bool(supply_chain_switch.value), page=page)
+            principal_reco_container.content = build_recommendations_view(best.process_steps, best.aditivos_sugeridos, best.lines, instrucoes_producao=best.instrucoes_producao)
             
             # Atualiza Abas Top 12
-            build_top12_tabs(forms)
+            build_top12_tabs(outputs)
             page.update()
         except Exception:
             import traceback
@@ -543,19 +617,16 @@ def _main_impl(page: ft.Page) -> None:
 
     # --- AUXILIARES DE RENDERIZAÇÃO ---
 
-    def build_top12_formula_view(idx: int, lines: List[FormulaLine]) -> ft.Control:
+    def build_top12_formula_view(idx: int, output: FormulaOutput) -> ft.Control:
         try:
             v = get_volume()
             targets = parse_targets_from_fields(targets_fields)
+            lines = output.lines
             status = verificar_viabilidade_termodinamica(v, lines, insumos_cache, idx)
-            steps, ad_sug = recommend_process_and_aditivos(
-                targets, lines, aditivos_cache, insumos_cache, v, get_temp_c(),
-                reactor_level_available=get_reactor_level()
-            )
             
             # Geração dos Componentes Individuais
             alerta_ui = build_thermo_alert(status)
-            tabela_ui = build_data_table(lines, insumos_cache, v, targets, bool(supply_chain_switch.value))
+            tabela_ui = build_data_table(lines, insumos_cache, v, targets, bool(supply_chain_switch.value), page=page)
             
             botao_laudo = ft.ElevatedButton(
                 "ENVIAR PARA LAUDO / OP", 
@@ -564,7 +635,7 @@ def _main_impl(page: ft.Page) -> None:
                 style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_900, color=ft.Colors.WHITE)
             )
             
-            recomendacoes_ui = build_recommendations_view(steps, ad_sug, lines)
+            recomendacoes_ui = build_recommendations_view(output.process_steps, output.aditivos_sugeridos, lines, instrucoes_producao=output.instrucoes_producao)
             
             # Agrupamento na Coluna Rolável
             conteudo_aba = ft.Container(
@@ -594,7 +665,7 @@ def _main_impl(page: ft.Page) -> None:
                 padding=20
             )
 
-    def build_top12_tabs(forms: List[List[FormulaLine]]) -> None:
+    def build_top12_tabs(forms: List[FormulaOutput]) -> None:
         labels = []
         views = []
         
