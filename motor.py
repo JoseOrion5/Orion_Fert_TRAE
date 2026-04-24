@@ -219,15 +219,15 @@ def _solubility_limit_mass_kg_from_text(solubilidade: str, volume_l: float) -> O
         return None
 
     if ("muito alta" in sn) or ("muit" in sn and "alta" in sn) or ("alt" in sn and "solu" in sn):
-        return 0.40 * volume_l
+        return 1.20 * volume_l
     if "alta" in sn:
-        return 0.33 * volume_l
+        return 0.60 * volume_l
     if "media" in sn or "média" in sn:
-        return 0.22 * volume_l
+        return 0.40 * volume_l
     if "baixa" in sn:
-        return 0.12 * volume_l
+        return 0.25 * volume_l
     if "insolu" in sn or ("pouco" in sn and "solu" in sn):
-        return 0.08 * volume_l
+        return 0.15 * volume_l
 
     return None
 
@@ -1040,14 +1040,16 @@ def _build_optimized_forms(
                 target_pct = float(targets.get(nk, 0.0) or 0.0)
                 if target_pct <= 0:
                     continue
+                cand_js = [j for j, ins in enumerate(valid_insumos) if _effective_teor_pct(ins, nk) > 0]
+                if len(cand_js) < 2:
+                    continue
                 cap_pct = target_pct * cap_share
                 cap_mass = (cap_pct * volume_l) / 100.0
                 if cap_mass <= 0:
                     continue
-                for j, ins in enumerate(valid_insumos):
+                for j in cand_js:
+                    ins = valid_insumos[j]
                     teor = _effective_teor_pct(ins, nk)
-                    if teor <= 0:
-                        continue
                     row = [0.0 for _ in range(num_insumos)]
                     row[j] = float(teor) / 100.0
                     A_ub.append(row)
