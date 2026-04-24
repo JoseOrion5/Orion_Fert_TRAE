@@ -1,5 +1,4 @@
 from __future__ import annotations
-from dataclasses import dataclass
 from pathlib import Path
 import sys
 import math
@@ -12,52 +11,9 @@ from scipy.optimize import linprog
 from datetime import datetime
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
-# --- CONFIGURAÇÃO DE DADOS CENTRALIZADA ---
-COMPLETAO_DIR = Path(__file__).parent / "COMPLETAO"
-COMPLETAO_XLSX = COMPLETAO_DIR / "COMPLETAO.xlsx"
-BASE_UNICA_FILE = COMPLETAO_DIR / "DATABASE_MESTRE_ORION.xlsx"
-DB_PATH = Path(__file__).parent / "orion_agroquim.db"  # Mantido para aditivos e segurança
-
-DEFAULT_VOLUME_L = 100.0
-
-NUTRIENT_COLUMNS: List[Tuple[str, str]] = [
-    ("N", "N"), ("P2O5", "P2O5"), ("K2O", "K2O"), ("Ca", "Ca+"),
-    ("Mg", "Mg"), ("SO4", "SO4"), ("S", "S"), ("B", "B"),
-    ("Zn", "Zn"), ("Cu", "Cu"), ("Mn", "Mn"), ("Mo", "Mo"),
-    ("Fe", "Fe"), ("Co", "Co"), ("Ni", "Ni"), ("Se", "Se"), ("Si", "Si"),
-]
-
-S_FROM_SO4_MASS_RATIO = 32.065 / 96.06
-
-SOLUBILITY_NUTRIENT_PCT_CAPS: Dict[str, Dict[str, float]] = {
-    "acido borico": {"B": 1.2},
-    "ácido bórico": {"B": 1.2},
-}
-
-FAMILY_KEYWORDS: Dict[str, Tuple[str, ...]] = {
-    "ureia": ("ureia", "uréia"),
-    "nitrato_amonio": ("nitrato de amonio", "nitrato de amônio"),
-    "acido_borico": ("acido borico", "ácido bórico"),
-    "borato_sodio": (
-        "borato de sodio", "borato de sódio",
-        "tetraborato de sodio", "tetraborato de sódio",
-        "borax", "bórax",
-        "octaborato de sodio", "octaborato de sódio",
-        "pentaborato de sodio", "pentaborato de sódio",
-    ),
-}
-
-SPLIT_RULES: List[Dict[str, Any]] = [
-    {"tier": 1, "nutrient": "N", "threshold_pct": 28.0, "min_family_shares": {"nitrato_amonio": 0.30, "ureia": 0.30}},
-    {"tier": 1, "nutrient": "B", "threshold_pct": 1.5, "min_family_shares": {"acido_borico": 0.40, "borato_sodio": 0.40}},
-]
-
-KPS_ALERT_TEXT = "Risco de precipitação detectado: Requer complexação química"
-
-KPS_PARES_PROIBIDOS: Dict[Tuple[str, str], Dict[str, Any]] = {
-    ("Ca", "SO4"): {"risco": "Gesso (CaSO4)", "agente_quelante": "EDTA", "dose_pct": 0.05},
-    ("Mg", "P2O5"): {"risco": "Fosfatos de magnésio", "agente_quelante": "EDTA", "dose_pct": 0.05},
-}
+from orionagroquim.models import *
+from orionagroquim.config import *
+from orionagroquim.sqlite_repo import load_aditivos, load_dados_seguranca, load_insumos
 
 def _kps_triggered_pairs(totals: Dict[str, float], targets: Optional[Dict[str, float]] = None) -> List[Tuple[str, str]]:
     def present(k: str) -> bool:
@@ -96,100 +52,6 @@ def _insumo_is_family(ins: Insumo, family: str) -> bool:
     keys = FAMILY_KEYWORDS.get(family, ())
     return _name_has_any(ins.nome, keys)
 
-BLOCKED_INSUMO_PATTERNS: List[str] = [
-    "acetato", "alga marinha", "amonia anidra", "amônia anidra", "aquamonio", "aquamônio",
-    "bicarbonato", "borato de monoetanolamina", "carbonato", "composto natural de folhelho carbonoso",
-    "farinha de osso calcinado", "farinha de osso autoclavado", "formiato", "kieserita",
-    "oxido", "óxido", "quelato", "termo fosfato magnesiano", "termofosfato magnesiano potassico",
-    "termofosfato magnesiano potássico", "termo-superfosfato", "tetrapotassio difosfato",
-    "tetrapotássio difosfato", "trioxido de molibdenio", "trióxido de molibdênio",
-    "ureia-formaldeido", "uréia-formaldeído",
-]
-
-BLOCKED_OBS_LABELS: List[str] = [
-    "Acetatos", "Alga marinha", "Amônia anidra", "Aquamônio", "Bicarbonatos",
-    "Borato de Monoetanolamina", "Carbonatos em geral", "Composto natural de folhelho carbonoso",
-    "Farinha de Osso Calcinado", "Farinha de Osso Autoclavado", "Formiatos em geral",
-    "Kieserita", "Óxidos em geral", "Quelatos em geral", "Termo fosfato Magnesiano",
-    "Termofosfato Magnesiano Potássico", "Termo-Superfosfato", "Tetrapotássio difosfato",
-    "Trióxido de Molibdênio", "Uréia-Formaldeído",
-]
-
-@dataclass
-class ThermoStatus:
-    """Status Termodinâmico da Formulação"""
-    agua_negativa: bool
-    densidade_critica: bool
-    agua_balanco_kg: float
-    densidade_calculada: float
-    is_supersaturado: bool
-    tech_tier: int = 1  # 1: Base, 2: Avançada, 3: Experimental
-    tech_instruction: str = ""
-
-@dataclass(frozen=True)
-class Insumo:
-    id: str
-    nome: str
-    solubilidade: str
-    natureza_fisica: str
-    teor_por_nutriente_pct: Dict[str, float]
-    rank_solubilidade: int
-    rank_custo: int
-    solubilidade_quente: str = ""
-    fator_v: float = 0.5
-    preco_unit: float = 0.0
-    fornecedor: str = "N/A"
-    lead_time: str = "N/A"
-    is_local: bool = True
-    local_origem: str = "N/A"
-
-@dataclass(frozen=True)
-class FormulaLine:
-    insumo_nome: str
-    massa_kg: float
-    contrib_pct: Dict[str, float]
-    preco_unit: float = 0.0
-    custo_linha: float = 0.0
-    fornecedor: str = "N/A"
-    lead_time: str = "N/A"
-    is_local: bool = True
-
-@dataclass(frozen=True)
-class Aditivo:
-    id: str
-    grupo: str
-    nome: str
-    abreviatura: str
-    funcao_principal: str
-    nutrientes_compativeis: str
-    faixa_ph_ideal: str
-    dose_maxima_legal_pct: str
-    dose_maxima_tecnica_pct: str
-    modo_aplicacao: str
-    alerta_incompatibilidade: str
-    observacoes: str
-    preco_unit: float = 0.0
-
-@dataclass(frozen=True)
-class AditivoSuggestion:
-    aditivo: Aditivo
-    dose_recomendada_pct_texto: str
-    dose_maxima_in39_pct_texto: str
-    dose_recomendada_massa_texto: str
-    motivo: str
-
-@dataclass
-class RelatorioOP:
-    data_hora: str
-    titulo: str
-    bom_lines: List[FormulaLine]
-    total_massa: float
-    pop_etapas: List[Dict[str, str]]
-    pcc_pontos: List[Dict[str, str]]
-    tier: int
-    densidade: float
-    agua_balanco: float
-
 # --- UTILITÁRIOS ---
 
 def _norm_text(value: str) -> str:
@@ -206,127 +68,6 @@ def _canonical_key(value: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
-def _nutrient_key_aliases() -> Dict[str, str]:
-    out: Dict[str, str] = {}
-    for k_id, label in NUTRIENT_COLUMNS:
-        out[_norm_text(k_id)] = k_id
-        out[_norm_text(label)] = k_id
-    out[_norm_text("CA+")] = "Ca"
-    return out
-
-def _sqlite_table_exists(conn: sqlite3.Connection, table: str) -> bool:
-    cur = conn.cursor()
-    cur.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=? LIMIT 1", (table,))
-    return cur.fetchone() is not None
-
-def _load_insumos_from_sqlite() -> List[Insumo]:
-    if not DB_PATH.exists():
-        return []
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        if not _sqlite_table_exists(conn, "insumos") or not _sqlite_table_exists(conn, "teores"):
-            conn.close()
-            return []
-
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT
-                i.id,
-                i.nome,
-                i.solubilidade,
-                i.natureza_fisica,
-                i.preco_unit,
-                i.fornecedor,
-                i.fator_v,
-                i.rank_solubilidade,
-                i.rank_custo,
-                t.nutriente,
-                t.valor
-            FROM insumos i
-            LEFT JOIN teores t ON t.insumo_id = i.id
-            ORDER BY i.nome
-        """)
-        rows = cur.fetchall()
-        conn.close()
-
-        if not rows:
-            return []
-
-        alias_map = _nutrient_key_aliases()
-        by_id: Dict[str, Dict[str, Any]] = {}
-        for (
-            ins_id,
-            nome,
-            solub,
-            natureza,
-            preco_unit,
-            fornecedor,
-            fator_v,
-            rank_sol,
-            rank_custo,
-            nutriente,
-            valor,
-        ) in rows:
-            key = "" if ins_id is None else str(ins_id).strip()
-            if not key:
-                continue
-            item = by_id.setdefault(key, {
-                "id": key,
-                "nome": "" if nome is None else str(nome).strip(),
-                "solubilidade": "" if solub is None else str(solub).strip(),
-                "natureza_fisica": "" if natureza is None else str(natureza).strip(),
-                "preco_unit": float(preco_unit or 0.0),
-                "fornecedor": "" if fornecedor is None else str(fornecedor).strip(),
-                "fator_v": float(fator_v or 0.5),
-                "rank_solubilidade": int(rank_sol or 3),
-                "rank_custo": int(rank_custo or 3),
-                "teores": {},
-            })
-
-            nut_raw = "" if nutriente is None else str(nutriente).strip()
-            if not nut_raw:
-                continue
-            nk = alias_map.get(_norm_text(nut_raw))
-            if not nk:
-                continue
-            v = _safe_float(valor)
-            if v is None or v <= 0:
-                continue
-            item["teores"][nk] = float(v)
-
-        insumos: List[Insumo] = []
-        for item in by_id.values():
-            teor_map = item.get("teores") or {}
-            if not teor_map:
-                continue
-
-            rank_c = int(item.get("rank_custo") or 3)
-            preco = float(item.get("preco_unit") or 0.0)
-            if preco <= 0:
-                fallback = {1: 3.50, 2: 5.50, 3: 8.50, 4: 12.50, 5: 18.00}
-                preco = fallback.get(rank_c, 8.50)
-
-            nm = str(item.get("nome") or "").strip()
-            if not nm:
-                nm = str(item.get("id") or "").strip()
-
-            insumos.append(Insumo(
-                id=str(item.get("id")),
-                nome=nm,
-                solubilidade=str(item.get("solubilidade") or "Média") or "Média",
-                solubilidade_quente="",
-                natureza_fisica=str(item.get("natureza_fisica") or "Sólida") or "Sólida",
-                teor_por_nutriente_pct=dict(teor_map),
-                rank_solubilidade=int(item.get("rank_solubilidade") or 3),
-                rank_custo=rank_c,
-                fator_v=float(item.get("fator_v") or 0.5),
-                preco_unit=preco,
-                fornecedor=str(item.get("fornecedor") or "N/A") or "N/A",
-            ))
-        return insumos
-    except Exception as e:
-        _write_error_log(f"Erro em _load_insumos_from_sqlite: {str(e)}\n{traceback.format_exc()}")
-        return []
 
 def _safe_float(value: Any) -> Optional[float]:
     if value is None: return None
@@ -559,63 +300,6 @@ def _solubility_cap_mass_kg(insumo: Insumo, volume_l: float, targets: Dict[str, 
     if not mass_caps:
         return None
     return min(mass_caps) * multiplier
-
-def load_insumos(use_pandas: bool = True, usd_brl_rate: float = 5.50) -> List[Insumo]:
-    insumos_sql = _load_insumos_from_sqlite()
-    if insumos_sql:
-        return insumos_sql
-    _write_error_log(
-        "ERRO: SQLite é a fonte única de Insumos, mas não foi possível carregar dados.\n"
-        f"- DB_PATH: {DB_PATH}\n"
-        "Ação sugerida: popular as tabelas 'insumos' e 'teores' (ex.: via migrate_data.py) e tentar novamente.\n"
-    )
-    return []
-
-def load_aditivos() -> List[Aditivo]:
-    if not DB_PATH.exists(): return []
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, nome, abreviatura, categoria, funcao, nutrientes_compativeis, ph_ideal, dose_legal, dose_tecnica, setup, alerta, observacoes, preco_unit FROM aditivos")
-        rows = cursor.fetchall()
-        
-        aditivos = []
-        for r in rows:
-            aditivos.append(Aditivo(
-                id=r[0], nome=r[1], abreviatura=r[2], grupo=r[3], funcao_principal=r[4],
-                nutrientes_compativeis=r[5], faixa_ph_ideal=r[6],
-                dose_maxima_legal_pct=r[7], dose_maxima_tecnica_pct=r[8], 
-                modo_aplicacao=r[9], alerta_incompatibilidade=r[10], 
-                observacoes=r[11], preco_unit=r[12]
-            ))
-        conn.close()
-        return aditivos
-    except Exception as e:
-        _write_error_log(f"Erro em load_aditivos (SQL): {str(e)}\n{traceback.format_exc()}")
-        return []
-
-def load_dados_seguranca() -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
-    """Lê dados de segurança e processos do banco de dados unificado"""
-    if not DB_PATH.exists(): return [], []
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        # POP Operações
-        cursor.execute("SELECT etapa, procedimento, notas FROM processos_pop")
-        pop_rows = cursor.fetchall()
-        pop = [{"etapa": r[0], "procedimento": r[1], "notas": r[2]} for r in pop_rows]
-        
-        # PCC Pontos Críticos
-        cursor.execute("SELECT id, parametro, limite, acao FROM processos_pcc")
-        pcc_rows = cursor.fetchall()
-        pcc = [{"id": r[0], "parametro": r[1], "limite": r[2], "acao": r[3]} for r in pcc_rows]
-        
-        conn.close()
-        return pop, pcc
-    except Exception as e:
-        _write_error_log(f"Erro em load_dados_seguranca (SQL): {str(e)}")
-        return [], []
 
 # --- CÁLCULOS E LÓGICA ---
 
@@ -1127,15 +811,6 @@ def build_top12_forms(volume_l: float, targets: Dict[str, float], insumos: Seque
             ))
             
     return forms
-
-@dataclass(frozen=True)
-class FormulaOutput:
-    lines: List[FormulaLine]
-    process_steps: List[str]
-    aditivos_sugeridos: List[AditivoSuggestion]
-    instrucoes_producao: List[str]
-    aditivos: List[Dict[str, float]]
-    indice_saturacao: float
 
 def diagnosticar_operacoes_unitarias(
     lines: Sequence[FormulaLine],

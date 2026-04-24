@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1750" viewBox="0 0 1400 1750">
+  <defs>
+    <style>
+      .title { font: 700 22px Arial, sans-serif; fill: #111; }
+      .h2 { font: 700 16px Arial, sans-serif; fill: #111; }
+      .txt { font: 12px Arial, sans-serif; fill: #111; }
+      .muted { font: 12px Arial, sans-serif; fill: #555; }
+      .box { fill: #fff; stroke: #111; stroke-width: 2; }
+      .soft { fill: #f7f7f7; stroke: #111; stroke-width: 2; }
+      .btn { fill: #eaeaea; stroke: #111; stroke-width: 2; }
+      .sep { stroke: #999; stroke-width: 1; stroke-dasharray: 6 6; }
+    </style>
+  </defs>
+
+  <rect x="20" y="20" width="1360" height="1710" class="soft"/>
+  <text x="40" y="58" class="title">OrionAgroquim — Wireframes (ESTABILIDADE) v1</text>
+  <text x="40" y="82" class="muted">Aba “ESTABILIDADE”: registro automático de runs + painel de risco (precipitação/cristalização/caking)</text>
+
+  <line x1="40" y1="110" x2="1360" y2="110" class="sep"/>
+
+  <text x="40" y="150" class="h2">Tela 1 — Dashboard (Histórico + Detalhes)</text>
+  <rect x="40" y="170" width="1320" height="850" class="box"/>
+
+  <rect x="60" y="190" width="1280" height="70" class="soft"/>
+  <text x="80" y="220" class="txt">Header interno: ícone + “Estabilidade”</text>
+  <text x="80" y="242" class="muted">Status: Última recepção OK/ERRO + id + timestamp (confirmação automática)</text>
+
+  <rect x="60" y="275" width="1280" height="170" class="box"/>
+  <text x="80" y="305" class="txt">Resumo do Protocolo (colapsável)</text>
+  <text x="80" y="328" class="muted">- Caracterizar água (pH, EC, dureza Ca/Mg, alcalinidade, turbidez)</text>
+  <text x="80" y="350" class="muted">- T0 (triplicata água real + triplicata DI): foto, pH/EC, escoamento, filtrabilidade, redispersão 24h</text>
+  <text x="80" y="372" class="muted">- Acelerados: 25°C; 25°C+vibração; ciclo 15↔35°C+vibração (D0/D1/D3/D7/D14/D28)</text>
+  <text x="80" y="394" class="muted">- Se houver sólido: microscopia + solubilidade + XRD/FTIR (se disponível)</text>
+
+  <rect x="60" y="460" width="460" height="540" class="soft"/>
+  <text x="80" y="490" class="txt">Lista de execuções (runs)</text>
+  <rect x="80" y="510" width="420" height="44" class="box"/><text x="92" y="538" class="muted">Run: data | volume | temp | F1 | alertas</text>
+  <rect x="80" y="565" width="420" height="44" class="box"/><text x="92" y="593" class="muted">Run: data | volume | temp | F1 | alertas</text>
+  <rect x="80" y="620" width="420" height="44" class="box"/><text x="92" y="648" class="muted">Run: data | volume | temp | F1 | alertas</text>
+  <rect x="80" y="675" width="420" height="44" class="box"/><text x="92" y="703" class="muted">Run: data | volume | temp | F1 | alertas</text>
+  <rect x="80" y="730" width="420" height="44" class="box"/><text x="92" y="758" class="muted">Run: data | volume | temp | F1 | alertas</text>
+  <rect x="80" y="785" width="420" height="44" class="box"/><text x="92" y="813" class="muted">Run: data | volume | temp | F1 | alertas</text>
+
+  <rect x="540" y="460" width="800" height="540" class="box"/>
+  <text x="560" y="490" class="txt">Detalhes do run selecionado</text>
+
+  <rect x="560" y="510" width="760" height="70" class="soft"/>
+  <text x="580" y="540" class="txt">Métricas rápidas</text>
+  <text x="580" y="562" class="muted">Sal (m/v), N (% m/v), P2O5, Ca, SO4, Índice de saturação</text>
+
+  <rect x="560" y="595" width="760" height="150" class="box"/>
+  <text x="580" y="625" class="txt">Alertas automáticos</text>
+  <text x="580" y="647" class="muted">- Carga salina alta</text>
+  <text x="580" y="669" class="muted">- N alto (supersaturação)</text>
+  <text x="580" y="691" class="muted">- Pares críticos (Ca×SO4, Mg×P2O5)</text>
+
+  <rect x="560" y="760" width="760" height="220" class="box"/>
+  <text x="580" y="790" class="txt">BOM / Linhas da melhor fórmula</text>
+  <text x="580" y="812" class="muted">Lista de insumos e massas (kg), com scroll</text>
+
+  <line x1="40" y1="1060" x2="1360" y2="1060" class="sep"/>
+
+  <text x="40" y="1100" class="h2">Tela 2 — Registro de testes (campo/lab) (futuro)</text>
+  <rect x="40" y="1120" width="1320" height="580" class="box"/>
+  <text x="60" y="1150" class="txt">Objetivo: registrar manualmente resultados de protocolo (T0 e acelerados) vinculados a um run automático</text>
+
+  <rect x="60" y="1175" width="1280" height="70" class="soft"/>
+  <text x="80" y="1205" class="txt">Seleção do run</text>
+  <rect x="260" y="1188" width="360" height="44" class="box"/><text x="272" y="1216" class="muted">dropdown: run_id</text>
+  <rect x="640" y="1188" width="200" height="44" class="btn"/><text x="660" y="1216" class="txt">Vincular</text>
+
+  <rect x="60" y="1265" width="620" height="390" class="box"/>
+  <text x="80" y="1295" class="txt">Formulário de medição (exemplos)</text>
+  <text x="80" y="1320" class="muted">pH, EC, turbidez, densidade, viscosidade, massa retida em malha, foto</text>
+  <rect x="80" y="1340" width="560" height="38" class="box"/><text x="92" y="1365" class="muted">pH</text>
+  <rect x="80" y="1385" width="560" height="38" class="box"/><text x="92" y="1410" class="muted">EC (mS/cm)</text>
+  <rect x="80" y="1430" width="560" height="38" class="box"/><text x="92" y="1455" class="muted">Turbidez (NTU) / Abs 600nm</text>
+  <rect x="80" y="1475" width="560" height="38" class="box"/><text x="92" y="1500" class="muted">Sedimento/caking (texto)</text>
+  <rect x="80" y="1520" width="560" height="44" class="btn"/><text x="92" y="1548" class="txt">Anexar foto</text>
+  <rect x="80" y="1570" width="560" height="44" class="btn"/><text x="92" y="1598" class="txt">Salvar medição</text>
+
+  <rect x="700" y="1265" width="640" height="390" class="soft"/>
+  <text x="720" y="1295" class="txt">Histórico de medições</text>
+  <rect x="720" y="1320" width="600" height="44" class="box"/><text x="732" y="1348" class="muted">D0 | 25°C | OK | link foto</text>
+  <rect x="720" y="1375" width="600" height="44" class="box"/><text x="732" y="1403" class="muted">D7 | ciclo 15↔35 | alerta: cristal</text>
+  <rect x="720" y="1430" width="600" height="44" class="box"/><text x="732" y="1458" class="muted">D14 | vibração | alerta: caking</text>
+
+</svg>

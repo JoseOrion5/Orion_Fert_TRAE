@@ -1,12 +1,14 @@
 from __future__ import annotations
 from pathlib import Path
 import sys
+from datetime import datetime
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 # Adiciona o diretório pai ao sys.path para importar o motor.py
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import flet as ft
+import estabilidade
 from motor import (
     Insumo, FormulaLine, Aditivo, AditivoSuggestion, ThermoStatus, RelatorioOP, FormulaOutput,
     NUTRIENT_COLUMNS, DEFAULT_VOLUME_L,
@@ -311,6 +313,7 @@ def _main_impl(page: ft.Page) -> None:
     aditivos_cache: List[Aditivo] = []
     manual_lines: List[FormulaLine] = []
     manual_selected_nutrients = {k: False for k, _ in NUTRIENT_COLUMNS}
+    stability_module = estabilidade.StabilityModule(page=page)
 
     # --- COMPONENTES DE INTERFACE ---
     
@@ -541,6 +544,45 @@ def _main_impl(page: ft.Page) -> None:
             
             # Atualiza Abas Top 12
             build_top12_tabs(outputs)
+
+            payload = {
+                "kind": "calc_run",
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "volume_l": float(v),
+                "temp_c": float(_safe_float(temp_field.value) or 0.0),
+                "targets": dict(targets),
+                "outputs": [
+                    {
+                        "idx": i + 1,
+                        "indice_saturacao": float(o.indice_saturacao or 0.0),
+                        "lines": [
+                            {"insumo_nome": l.insumo_nome, "massa_kg": float(l.massa_kg), "contrib_pct": dict(l.contrib_pct)}
+                            for l in (o.lines or [])
+                        ],
+                        "process_steps": list(o.process_steps or []),
+                        "instrucoes_producao": list(o.instrucoes_producao or []),
+                        "aditivos_sugeridos": [
+                            {
+                                "nome": s.aditivo.nome,
+                                "abreviatura": s.aditivo.abreviatura,
+                                "grupo": s.aditivo.grupo,
+                                "funcao_principal": s.aditivo.funcao_principal,
+                                "dose_recomendada_pct_texto": s.dose_recomendada_pct_texto,
+                                "dose_maxima_in39_pct_texto": s.dose_maxima_in39_pct_texto,
+                                "dose_recomendada_massa_texto": s.dose_recomendada_massa_texto,
+                                "motivo": s.motivo,
+                            }
+                            for s in (o.aditivos_sugeridos or [])
+                        ],
+                    }
+                    for i, o in enumerate(outputs)
+                ],
+            }
+            ack = stability_module.ingest_calc_results(payload)
+            if not ack.ok:
+                page.snack_bar = ft.SnackBar(ft.Text(f"Estabilidade: falha ao receber resultados ({ack.message})"))
+                page.snack_bar.open = True
+
             page.update()
         except Exception:
             import traceback
@@ -603,7 +645,7 @@ def _main_impl(page: ft.Page) -> None:
     # Aba 4: Laudo (A4)
     laudo_content = ft.Column(scroll=ft.ScrollMode.AUTO, expand=True)
 
-    app_tabs = make_tabs(
+    calc_tabs = make_tabs(
         ["PRINCIPAL", "TOP 5 FORMULAÇÕES", "FORMULAÇÃO MANUAL", "LAUDO"],
         [
             ft.Container(padding=20, content=tab_principal),
@@ -613,6 +655,16 @@ def _main_impl(page: ft.Page) -> None:
         ],
         selected_index=0,
         expand=True
+    )
+
+    main_tabs = make_tabs(
+        ["CÁLCULOS", "ESTABILIDADE"],
+        [
+            ft.Container(padding=0, content=calc_tabs, expand=True),
+            ft.Container(padding=20, content=stability_module.view, expand=True),
+        ],
+        selected_index=0,
+        expand=True,
     )
 
     # --- AUXILIARES DE RENDERIZAÇÃO ---
@@ -692,7 +744,8 @@ def _main_impl(page: ft.Page) -> None:
         status = verificar_viabilidade_termodinamica(get_volume(), lines, insumos_cache, idx)
         rel = gerar_relatorio_op(lines, get_volume(), status)
         update_laudo_document(rel)
-        app_tabs.selected_index = 3
+        main_tabs.selected_index = 0
+        calc_tabs.selected_index = 3
         page.update()
 
     def update_laudo_document(rel: RelatorioOP):
@@ -725,7 +778,7 @@ def _main_impl(page: ft.Page) -> None:
         laudo_content.controls.append(ft.Row([a4], alignment=ft.MainAxisAlignment.CENTER))
         page.update()
 
-    page.add(header, app_tabs)
+    page.add(header, main_tabs)
     reload_data()
 
 def main(page: ft.Page) -> None:
