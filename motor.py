@@ -206,6 +206,128 @@ def _canonical_key(value: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
+def _nutrient_key_aliases() -> Dict[str, str]:
+    out: Dict[str, str] = {}
+    for k_id, label in NUTRIENT_COLUMNS:
+        out[_norm_text(k_id)] = k_id
+        out[_norm_text(label)] = k_id
+    out[_norm_text("CA+")] = "Ca"
+    return out
+
+def _sqlite_table_exists(conn: sqlite3.Connection, table: str) -> bool:
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=? LIMIT 1", (table,))
+    return cur.fetchone() is not None
+
+def _load_insumos_from_sqlite() -> List[Insumo]:
+    if not DB_PATH.exists():
+        return []
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        if not _sqlite_table_exists(conn, "insumos") or not _sqlite_table_exists(conn, "teores"):
+            conn.close()
+            return []
+
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT
+                i.id,
+                i.nome,
+                i.solubilidade,
+                i.natureza_fisica,
+                i.preco_unit,
+                i.fornecedor,
+                i.fator_v,
+                i.rank_solubilidade,
+                i.rank_custo,
+                t.nutriente,
+                t.valor
+            FROM insumos i
+            LEFT JOIN teores t ON t.insumo_id = i.id
+            ORDER BY i.nome
+        """)
+        rows = cur.fetchall()
+        conn.close()
+
+        if not rows:
+            return []
+
+        alias_map = _nutrient_key_aliases()
+        by_id: Dict[str, Dict[str, Any]] = {}
+        for (
+            ins_id,
+            nome,
+            solub,
+            natureza,
+            preco_unit,
+            fornecedor,
+            fator_v,
+            rank_sol,
+            rank_custo,
+            nutriente,
+            valor,
+        ) in rows:
+            key = "" if ins_id is None else str(ins_id).strip()
+            if not key:
+                continue
+            item = by_id.setdefault(key, {
+                "id": key,
+                "nome": "" if nome is None else str(nome).strip(),
+                "solubilidade": "" if solub is None else str(solub).strip(),
+                "natureza_fisica": "" if natureza is None else str(natureza).strip(),
+                "preco_unit": float(preco_unit or 0.0),
+                "fornecedor": "" if fornecedor is None else str(fornecedor).strip(),
+                "fator_v": float(fator_v or 0.5),
+                "rank_solubilidade": int(rank_sol or 3),
+                "rank_custo": int(rank_custo or 3),
+                "teores": {},
+            })
+
+            nut_raw = "" if nutriente is None else str(nutriente).strip()
+            if not nut_raw:
+                continue
+            nk = alias_map.get(_norm_text(nut_raw))
+            if not nk:
+                continue
+            v = _safe_float(valor)
+            if v is None or v <= 0:
+                continue
+            item["teores"][nk] = float(v)
+
+        insumos: List[Insumo] = []
+        for item in by_id.values():
+            teor_map = item.get("teores") or {}
+            if not teor_map:
+                continue
+
+            rank_c = int(item.get("rank_custo") or 3)
+            preco = float(item.get("preco_unit") or 0.0)
+            if preco <= 0:
+                fallback = {1: 3.50, 2: 5.50, 3: 8.50, 4: 12.50, 5: 18.00}
+                preco = fallback.get(rank_c, 8.50)
+
+            nm = str(item.get("nome") or "").strip()
+            if not nm:
+                nm = str(item.get("id") or "").strip()
+
+            insumos.append(Insumo(
+                id=str(item.get("id")),
+                nome=nm,
+                solubilidade=str(item.get("solubilidade") or "Média") or "Média",
+                solubilidade_quente="",
+                natureza_fisica=str(item.get("natureza_fisica") or "Sólida") or "Sólida",
+                teor_por_nutriente_pct=dict(teor_map),
+                rank_solubilidade=int(item.get("rank_solubilidade") or 3),
+                rank_custo=rank_c,
+                fator_v=float(item.get("fator_v") or 0.5),
+                preco_unit=preco,
+                fornecedor=str(item.get("fornecedor") or "N/A") or "N/A",
+            ))
+        return insumos
+    except Exception as e:
+        _write_error_log(f"Erro em _load_insumos_from_sqlite: {str(e)}\n{traceback.format_exc()}")
+        return []
+
 def _safe_float(value: Any) -> Optional[float]:
     if value is None: return None
     s = str(value).strip().replace("%", "").replace(",", ".")
@@ -439,78 +561,15 @@ def _solubility_cap_mass_kg(insumo: Insumo, volume_l: float, targets: Dict[str, 
     return min(mass_caps) * multiplier
 
 def load_insumos(use_pandas: bool = True, usd_brl_rate: float = 5.50) -> List[Insumo]:
-    # Tenta ler a sua nova fonte de verdade consolidada
-    if not BASE_UNICA_FILE.exists():
-        _write_error_log(f"ERRO: Planilha unificada {BASE_UNICA_FILE} não encontrada.")
-        return []
-    
-    try:
-        import pandas as pd
-        if BASE_UNICA_FILE.suffix.lower() == ".csv":
-            df = pd.read_csv(BASE_UNICA_FILE, dtype=str, encoding="utf-8")
-        else:
-            df = pd.read_excel(BASE_UNICA_FILE, dtype=str, sheet_name="Insumos")
-            
-        df.columns = [_clean_csv_header_name(c).lower() for c in df.columns]
-        rows = df.to_dict(orient="records")
-        
-        insumos = []
-        for r in rows:
-            nome = str(r.get("nome", r.get("insumo", r.get("nome do insumo", "")))).strip()
-            if not nome or nome.lower() == "nan": continue
-            
-            # BUSCA OTIMIZADA: Tenta todas as formas possíveis de coluna de preço
-            preco_brl = _clean_price(r.get("estimativa de preço médio (r$)") or r.get("preco_unitario") or r.get("preco base") or r.get("preço") or r.get("r$/kg"))
-            preco_usd = _clean_price(r.get("estimativa de preço médio (u$)") or r.get("preco_usd") or r.get("preco_dolar") or r.get("us$/kg"))
-            currency = str(r.get("brl", r.get("unnamed: 21", ""))).strip().upper()
-            
-            # Ajuste de moeda baseado no que fundimos
-            preco = preco_brl
-            if currency == "USD" and preco_usd > 0:
-                preco = preco_usd * usd_brl_rate
-            elif preco <= 0 and preco_usd > 0:
-                preco = preco_usd * usd_brl_rate
-            
-            rank_s = int(_safe_float(r.get("rank_solubilidade", r.get("solubilidade"))) or 3)
-            rank_c = int(_safe_float(r.get("rank_custo")) or 3)
-            
-            if preco <= 0:
-                fallback = {1: 3.50, 2: 5.50, 3: 8.50, 4: 12.50, 5: 18.00}
-                preco = fallback.get(rank_c, 8.50)
-
-            teor_map = {}
-            # Busca flexível por colunas de nutrientes diretas
-            for k_id, label in NUTRIENT_COLUMNS:
-                val = _safe_float(r.get(k_id.lower()) or r.get(label.lower()) or r.get(f"{label.lower()} (%)"))
-                if val is not None and val > 0:
-                    teor_map[k_id] = val
-
-            # O excel consolidado aglutina num campo de 'Teor(es) / Garantia (%)' 
-            # Vamos usar a função parse nativa para extrair os dados.
-            if not teor_map:
-                nut_str = str(r.get("nutriente(s)", ""))
-                teor_str = str(r.get("teor(es) / garantia (%)", ""))
-                parsed_teor = _parse_nutrientes_teores(nut_str, teor_str)
-                for pk, pv in parsed_teor.items():
-                    # Match case-insensitive com Nutrient Columns
-                    found_k = next((nk for nk, nl in NUTRIENT_COLUMNS if nk.lower() == pk.lower() or nl.lower() == pk.lower()), None)
-                    if found_k:
-                        teor_map[found_k] = pv
-
-            if not teor_map: continue
-            
-            insumos.append(Insumo(
-                id=nome, nome=nome, 
-                solubilidade=str(r.get("solubilidade", "Média")),
-                solubilidade_quente=str(r.get("solubilidade_quente") or r.get("solubilidade quente") or r.get("solubilidade a quente") or r.get("solubilidade (quente)") or ""),
-                natureza_fisica=str(r.get("natureza física", "Sólida")),
-                teor_por_nutriente_pct=teor_map, rank_solubilidade=rank_s, rank_custo=rank_c,
-                preco_unit=preco, fornecedor=str(r.get("fonte/fornecedor (preço)", "N/A"))
-            ))
-        return insumos
-    except Exception as e:
-        _write_error_log(f"Erro em load_insumos (Pandas): {str(e)}\n{traceback.format_exc()}")
-        return []
+    insumos_sql = _load_insumos_from_sqlite()
+    if insumos_sql:
+        return insumos_sql
+    _write_error_log(
+        "ERRO: SQLite é a fonte única de Insumos, mas não foi possível carregar dados.\n"
+        f"- DB_PATH: {DB_PATH}\n"
+        "Ação sugerida: popular as tabelas 'insumos' e 'teores' (ex.: via migrate_data.py) e tentar novamente.\n"
+    )
+    return []
 
 def load_aditivos() -> List[Aditivo]:
     if not DB_PATH.exists(): return []
