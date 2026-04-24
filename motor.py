@@ -204,8 +204,6 @@ def _extract_solubility_mass_cap_kg(solubilidade: str, volume_l: float) -> Optio
             return kgm3 * (volume_l / 1000.0)
     if "baixa" in sn and "suspens" in sn:
         return 0.25 * volume_l
-    if "teor total" in sn:
-        return 0.12 * volume_l
     return None
 
 def _solubility_limit_mass_kg_from_text(solubilidade: str, volume_l: float) -> Optional[float]:
@@ -234,6 +232,9 @@ def _solubility_limit_mass_kg_from_text(solubilidade: str, volume_l: float) -> O
     return None
 
 def _solubility_limit_mass_kg(insumo: Insumo, volume_l: float, *, use_hot_solubility: bool = False) -> Optional[float]:
+    nm = _norm_text(insumo.nome or "")
+    if "cloreto de magnesio" in nm and volume_l > 0:
+        return 1.6 * float(volume_l)
     txt = insumo.solubilidade_quente if (use_hot_solubility and (insumo.solubilidade_quente or "").strip()) else insumo.solubilidade
     return _solubility_limit_mass_kg_from_text(txt, volume_l)
 
