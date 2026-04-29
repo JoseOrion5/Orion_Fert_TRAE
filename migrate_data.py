@@ -1,14 +1,22 @@
+import argparse
+import os
 import sqlite3
 import pandas as pd
 import re
 import math
 from pathlib import Path
 
-# Configurações
-BASE_DIR = Path(r"T:\GitHub\Nova pasta\0.novo sabado 1737h\DO TRAE- Trabalho 31.03.26 - Copia")
-EXCEL_PATH_BASE = BASE_DIR / "COMPLETAO" / "2-BASE_UNICA_COM_PRECOS_E_MAX_INFO_COM_FONTES.xlsx"
-EXCEL_PATH_COMPLETAO = BASE_DIR / "COMPLETAO" / "COMPLETAO.xlsx"
-DB_PATH = BASE_DIR / "orion_agroquim.db"
+def _default_base_dir() -> Path:
+    env = (os.getenv("ORION_BASE_DIR") or "").strip()
+    if env:
+        return Path(env).expanduser().resolve()
+    return Path(__file__).resolve().parent
+
+
+BASE_DIR = _default_base_dir()
+EXCEL_PATH_BASE = Path(os.getenv("ORION_EXCEL_BASE") or (BASE_DIR / "COMPLETAO" / "2-BASE_UNICA_COM_PRECOS_E_MAX_INFO_COM_FONTES.xlsx"))
+EXCEL_PATH_COMPLETAO = Path(os.getenv("ORION_EXCEL_COMPLETAO") or (BASE_DIR / "COMPLETAO" / "COMPLETAO.xlsx"))
+DB_PATH = Path(os.getenv("ORION_DB_PATH") or (BASE_DIR / "orion_agroquim.db"))
 
 def _safe_float(value):
     if value is None: return 0.0
@@ -143,7 +151,8 @@ def migrate_insumos(conn):
                             val = _safe_float(val_s.strip())
                             if val > 0:
                                 cursor.execute('INSERT OR REPLACE INTO teores (insumo_id, nutriente, valor) VALUES (?, ?, ?)', (nome, nut_key, val))
-                        except: continue
+                        except Exception:
+                            continue
         conn.commit()
     except Exception as e:
         print(f"Erro ao migrar insumos: {e}")
@@ -198,16 +207,37 @@ def migrate_processos(conn):
     except Exception as e:
         print(f"Erro ao migrar processos: {e}")
 
-if __name__ == "__main__":
+def main() -> int:
+    global BASE_DIR, EXCEL_PATH_BASE, EXCEL_PATH_COMPLETAO, DB_PATH
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--base-dir", default=str(BASE_DIR))
+    ap.add_argument("--excel-base", default=str(EXCEL_PATH_BASE))
+    ap.add_argument("--excel-completao", default=str(EXCEL_PATH_COMPLETAO))
+    ap.add_argument("--db-path", default=str(DB_PATH))
+    args = ap.parse_args()
+
+    BASE_DIR = Path(str(args.base_dir)).expanduser().resolve()
+    EXCEL_PATH_BASE = Path(str(args.excel_base)).expanduser().resolve()
+    EXCEL_PATH_COMPLETAO = Path(str(args.excel_completao)).expanduser().resolve()
+    DB_PATH = Path(str(args.db_path)).expanduser().resolve()
+
     if not EXCEL_PATH_BASE.exists():
         print(f"Arquivo Excel BASE não encontrado em {EXCEL_PATH_BASE}")
-    elif not EXCEL_PATH_COMPLETAO.exists():
+        return 2
+    if not EXCEL_PATH_COMPLETAO.exists():
         print(f"Arquivo Excel COMPLETAO não encontrado em {EXCEL_PATH_COMPLETAO}")
-    else:
-        conn = sqlite3.connect(DB_PATH)
-        create_schema(conn)
-        migrate_insumos(conn)
-        migrate_aditivos(conn)
-        migrate_processos(conn)
-        conn.close()
-        print(f"Banco de dados unificado criado e populado em: {DB_PATH}")
+        return 2
+
+    conn = sqlite3.connect(DB_PATH)
+    create_schema(conn)
+    migrate_insumos(conn)
+    migrate_aditivos(conn)
+    migrate_processos(conn)
+    conn.close()
+    print(f"Banco de dados unificado criado e populado em: {DB_PATH}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

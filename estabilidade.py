@@ -93,6 +93,12 @@ class StabilityModule:
         self._page = page
         self._records: List[StabilityRecord] = []
         self._status_text = ft.Text("Aguardando resultados do motor…", size=12, italic=True)
+        self._risk_bar = ft.Container(
+            content=ft.Text("Sem dados para avaliar risco.", size=12, italic=True),
+            padding=10,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+            border_radius=10,
+        )
         self._list = ft.ListView(expand=True, spacing=4, auto_scroll=False)
         self._details = ft.Container(
             content=ft.Text("Selecione um item para ver detalhes.", size=12),
@@ -112,6 +118,7 @@ class StabilityModule:
                     alignment=ft.MainAxisAlignment.START,
                 ),
                 self._status_text,
+                self._risk_bar,
                 _protocol_plan_controls(),
                 ft.Divider(),
                 ft.Row(
@@ -136,10 +143,13 @@ class StabilityModule:
 
             summary = self._summarize_payload(payload)
             rec_id = str(uuid.uuid4())
+            payload.setdefault("lab", {"ph": None, "ec": None, "turbidez": None, "observacoes": ""})
             rec = StabilityRecord(rec_id, _now_iso(), payload, summary)
             self._records.insert(0, rec)
             ack = StabilityAck(True, "Recebido e processado.", rec_id, rec.received_at)
             self._render_list()
+            self._render_details(rec_id)
+            self._update_risk_bar(rec.summary)
             self._set_status(ack)
             return ack
         except Exception as e:
@@ -210,6 +220,31 @@ class StabilityModule:
         if sat is not None and sat >= 1.0:
             alerts.append(f"Índice de saturação >= 1.0 ({sat:.3f}) → risco de cristalização.")
 
+        aditivos = best.get("aditivos_sugeridos") or []
+        has_quelante = False
+        preferred = {"EDTA", "HEDTA", "DTPA", "NTA"}
+        for a in aditivos:
+            abbr = str((a or {}).get("abreviatura") or "").strip().upper()
+            grp = str((a or {}).get("grupo") or "").strip().lower()
+            func = str((a or {}).get("funcao_principal") or "").strip().lower()
+            if abbr in preferred or "quelant" in grp or "quelant" in func:
+                has_quelante = True
+                break
+        if not has_quelante:
+            for l in best_lines:
+                nm = str((l or {}).get("insumo_nome") or "").strip().lower()
+                if any(x.lower() in nm for x in ("edta", "hedta", "dtpa", "nta", "quelant")):
+                    has_quelante = True
+                    break
+
+        risk, risk_reasons = self._risk_from_metrics(
+            carga_sais_pct_mv=carga_sais_pct_mv,
+            indice_saturacao=sat,
+            triggered_pairs=triggered_pairs,
+            totals=totals,
+            has_quelante=has_quelante,
+        )
+
         return {
             "received_at": payload.get("timestamp") or "",
             "volume_l": volume_l,
@@ -221,7 +256,102 @@ class StabilityModule:
             "best_carga_sais_pct_mv": carga_sais_pct_mv,
             "best_indice_saturacao": sat,
             "best_alerts": alerts,
+            "best_triggered_pairs": triggered_pairs,
+            "best_has_quelante": bool(has_quelante),
+            "risk_level": risk,
+            "risk_reasons": list(risk_reasons),
         }
+
+    def _risk_from_metrics(
+        self,
+        *,
+        carga_sais_pct_mv: float,
+        indice_saturacao: Optional[float],
+        triggered_pairs: Sequence[Tuple[str, str]],
+        totals: Dict[str, float],
+        has_quelante: bool,
+    ) -> Tuple[str, List[str]]:
+        reasons: List[str] = []
+
+        sat = float(indice_saturacao) if indice_saturacao is not None else None
+        sal = float(carga_sais_pct_mv or 0.0)
+        ca = float(totals.get("Ca", 0.0) or 0.0)
+        so4 = float(totals.get("SO4", 0.0) or 0.0)
+
+        if triggered_pairs:
+            reasons.append(f"Pares críticos: {list(triggered_pairs)}")
+        if sat is not None and sat >= 1.0:
+            reasons.append(f"Índice de saturação >= 1.0 ({sat:.3f})")
+        if sal >= 40.0:
+            reasons.append(f"Carga salina alta ({sal:.1f}% m/v)")
+
+        hard = bool(triggered_pairs) or (sat is not None and sat >= 1.0) or (sal >= 40.0)
+        if hard:
+            return "vermelho", reasons
+
+        if sat is not None and sat >= 0.85:
+            reasons.append(f"Índice de saturação alto ({sat:.3f})")
+        if sal >= 30.0:
+            reasons.append(f"Carga salina elevada ({sal:.1f}% m/v)")
+        if ca > 0 and so4 > 0 and (not has_quelante):
+            reasons.append("Ca + SO4 presentes sem quelante detectado")
+
+        if reasons:
+            return "amarelo", reasons
+        return "verde", []
+
+    def last_has_alerts(self) -> bool:
+        if not self._records:
+            return False
+        s = self._records[0].summary or {}
+        if (s.get("best_alerts") or []) or (s.get("best_triggered_pairs") or []):
+            return True
+        return str(s.get("risk_level") or "").strip().lower() in {"amarelo", "vermelho"}
+
+    def _update_risk_bar(self, summary: Dict[str, Any]) -> None:
+        level = str(summary.get("risk_level") or "").strip().lower()
+        reasons = summary.get("risk_reasons") or []
+
+        if level == "vermelho":
+            color = ft.Colors.RED_400
+            title = "Risco: ALTO"
+        elif level == "amarelo":
+            color = ft.Colors.AMBER_400
+            title = "Risco: ATENÇÃO"
+        elif level == "verde":
+            color = ft.Colors.GREEN_400
+            title = "Risco: OK"
+        else:
+            color = ft.Colors.BLUE_400
+            title = "Risco: N/D"
+
+        dots = ft.Row(
+            [
+                ft.Container(width=14, height=14, border_radius=7, bgcolor=(ft.Colors.GREEN_400 if level == "verde" else ft.Colors.with_opacity(0.15, ft.Colors.WHITE))),
+                ft.Container(width=14, height=14, border_radius=7, bgcolor=(ft.Colors.AMBER_400 if level == "amarelo" else ft.Colors.with_opacity(0.15, ft.Colors.WHITE))),
+                ft.Container(width=14, height=14, border_radius=7, bgcolor=(ft.Colors.RED_400 if level == "vermelho" else ft.Colors.with_opacity(0.15, ft.Colors.WHITE))),
+            ],
+            spacing=6,
+        )
+
+        reason_text = " | ".join([str(r) for r in reasons[:3]]) if reasons else "Sem alertas automáticos."
+        self._risk_bar.content = ft.Row(
+            [
+                dots,
+                ft.VerticalDivider(width=10, color=ft.Colors.TRANSPARENT),
+                ft.Column(
+                    [
+                        ft.Text(title, size=13, weight=ft.FontWeight.BOLD, color=color),
+                        ft.Text(reason_text, size=12, color=ft.Colors.with_opacity(0.85, ft.Colors.WHITE)),
+                    ],
+                    spacing=2,
+                    expand=True,
+                ),
+            ],
+            alignment=ft.MainAxisAlignment.START,
+        )
+        self._risk_bar.border = ft.border.all(1, ft.Colors.with_opacity(0.5, color))
+        self._risk_bar.bgcolor = ft.Colors.with_opacity(0.08, color)
 
     def _render_list(self) -> None:
         self._list.controls.clear()
@@ -256,6 +386,9 @@ class StabilityModule:
         s = rec.summary
         totals: Dict[str, float] = s.get("best_totals") or {}
         alerts: List[str] = s.get("best_alerts") or []
+        risk_level = str(s.get("risk_level") or "").strip().lower()
+        risk_reasons: List[str] = s.get("risk_reasons") or []
+        self._update_risk_bar(s)
 
         def tot(k: str) -> str:
             v = float(totals.get(k, 0.0) or 0.0)
@@ -272,6 +405,51 @@ class StabilityModule:
             wrap=True,
         )
 
+        diag_cards: List[ft.Control] = []
+        def add_card(title: str, body: str, color: str) -> None:
+            diag_cards.append(
+                ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.Text(title, size=12, weight=ft.FontWeight.BOLD, color=color),
+                            ft.Text(body, size=12),
+                        ],
+                        spacing=4,
+                    ),
+                    padding=10,
+                    border=ft.border.all(1, ft.Colors.with_opacity(0.35, color)),
+                    border_radius=10,
+                    bgcolor=ft.Colors.with_opacity(0.06, color),
+                )
+            )
+
+        if risk_level == "vermelho":
+            add_card("Semáforo", "Risco iminente de precipitação / instabilidade.", ft.Colors.RED_400)
+        elif risk_level == "amarelo":
+            add_card("Semáforo", "Limite de estabilidade próximo. Requer atenção.", ft.Colors.AMBER_400)
+        elif risk_level == "verde":
+            add_card("Semáforo", "Sem alertas automáticos relevantes.", ft.Colors.GREEN_400)
+
+        if risk_reasons:
+            add_card("Diagnóstico", " | ".join([str(r) for r in risk_reasons]), ft.Colors.AMBER_400 if risk_level != "vermelho" else ft.Colors.RED_400)
+
+        triggered_pairs = s.get("best_triggered_pairs") or []
+        if triggered_pairs:
+            add_card("Pares críticos", str(list(triggered_pairs)), ft.Colors.RED_400)
+
+        sat = _safe_float(s.get("best_indice_saturacao"))
+        if sat is not None:
+            if sat >= 1.0:
+                add_card("Saturação", f"Índice {sat:.3f} (>= 1.0)", ft.Colors.RED_400)
+            elif sat >= 0.85:
+                add_card("Saturação", f"Índice {sat:.3f} (>= 0.85)", ft.Colors.AMBER_400)
+
+        sal = float(s.get("best_carga_sais_pct_mv") or 0.0)
+        if sal >= 40.0:
+            add_card("Carga salina", f"{sal:.1f}% (m/v) (>= 40%)", ft.Colors.RED_400)
+        elif sal >= 30.0:
+            add_card("Carga salina", f"{sal:.1f}% (m/v) (>= 30%)", ft.Colors.AMBER_400)
+
         alert_controls = [ft.Text("Alertas", size=13, weight=ft.FontWeight.BOLD)]
         if alerts:
             alert_controls.extend([ft.Text(f"- {a}", size=12) for a in alerts])
@@ -279,6 +457,25 @@ class StabilityModule:
             alert_controls.append(ft.Text("Sem alertas automáticos.", size=12, italic=True))
 
         payload = rec.payload
+        lab = payload.get("lab") or {}
+        ph_tf = ft.TextField(label="pH (bancada)", width=160, dense=True, value="" if lab.get("ph") is None else str(lab.get("ph")))
+        ec_tf = ft.TextField(label="Condutividade (mS/cm)", width=220, dense=True, value="" if lab.get("ec") is None else str(lab.get("ec")))
+        turb_tf = ft.TextField(label="Turbidez (NTU)", width=180, dense=True, value="" if lab.get("turbidez") is None else str(lab.get("turbidez")))
+        obs_tf = ft.TextField(label="Observações (bancada)", dense=True, multiline=True, min_lines=2, max_lines=4, value=str(lab.get("observacoes") or ""))
+
+        def on_save_lab(_e) -> None:
+            new_lab = {
+                "ph": _safe_float(ph_tf.value),
+                "ec": _safe_float(ec_tf.value),
+                "turbidez": _safe_float(turb_tf.value),
+                "observacoes": str(obs_tf.value or ""),
+            }
+            rec.payload["lab"] = dict(new_lab)
+            if self._page:
+                self._page.snack_bar = ft.SnackBar(ft.Text("Dados de bancada salvos neste registro."))
+                self._page.snack_bar.open = True
+                self._page.update()
+
         outputs = payload.get("outputs") or []
         best = outputs[0] if outputs else {}
         lines = best.get("lines") or []
@@ -292,6 +489,14 @@ class StabilityModule:
             [
                 ft.Text(f"Recebido em: {rec.received_at} | id={rec.id}", size=12),
                 metrics,
+                ft.Divider(),
+                ft.Text("Indicadores de Risco", size=13, weight=ft.FontWeight.BOLD),
+                ft.Row(diag_cards, wrap=True, spacing=10),
+                ft.Divider(),
+                ft.Text("Entrada de Dados de Bancada", size=13, weight=ft.FontWeight.BOLD),
+                ft.Row([ph_tf, ec_tf, turb_tf], wrap=True, spacing=10),
+                obs_tf,
+                ft.Row([ft.ElevatedButton("SALVAR DADOS DE BANCADA", icon=ft.Icons.SAVE, on_click=on_save_lab)], wrap=True),
                 ft.Divider(),
                 ft.Column(alert_controls, spacing=4),
                 ft.Divider(),

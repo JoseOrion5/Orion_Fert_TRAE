@@ -1,10 +1,14 @@
 import pandas as pd
 import sys
+from pathlib import Path
+
+base_dir = Path(__file__).resolve().parent.parent
+completao_dir = base_dir / "COMPLETAO"
 
 files = [
-    (r"T:\GitHub\Nova pasta\0.novo sabado 1737h\DO TRAE- Continuação Antigravity - Trabalho 31.03.26 - Copia - Copia\COMPLETAO\2.2 Claude-fertilizantes_precos_kg.xlsx", 0),
-    (r"T:\GitHub\Nova pasta\0.novo sabado 1737h\DO TRAE- Continuação Antigravity - Trabalho 31.03.26 - Copia - Copia\COMPLETAO\2.2-Fertilizantes_solidos_BR_AZ_com_precos_alibaba.xlsx", 1),
-    (r"T:\GitHub\Nova pasta\0.novo sabado 1737h\DO TRAE- Continuação Antigravity - Trabalho 31.03.26 - Copia - Copia\COMPLETAO\2-BASE_UNICA_COM_PRECOS_E_MAX_INFO_COM_FONTES.xlsx", 1)
+    (str(completao_dir / "BACKUP" / "2.2 Claude-fertilizantes_precos_kg.xlsx"), 0),
+    (str(completao_dir / "BACKUP" / "2.2-Fertilizantes_solidos_BR_AZ_com_precos_alibaba.xlsx"), 1),
+    (str(completao_dir / "2-BASE_UNICA_COM_PRECOS_E_MAX_INFO_COM_FONTES.xlsx"), 1),
 ]
 
 for f,h in files:

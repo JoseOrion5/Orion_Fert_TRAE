@@ -1,3 +1,5 @@
+import argparse
+import os
 import pandas as pd
 import sqlite3
 from pathlib import Path
@@ -325,15 +327,22 @@ def _merge_list_maps(maps: list[dict[str, list[tuple[str, float]]]]) -> dict[str
             out.setdefault(k, []).extend(vals)
     return out
 
-def create_unified_db():
-    base_dir = Path(r"C:\Users\orion\Documents\GitHub\DO TRAE- Continuação Antigravity - Trabalho 31.03.26 - Copia - Copia\DO TRAE- Continuação Antigravity - Trabalho 31.03.26 - Copia - Copia")
+def _default_base_dir() -> Path:
+    env = (os.getenv("ORION_BASE_DIR") or "").strip()
+    if env:
+        return Path(env).expanduser().resolve()
+    return Path(__file__).resolve().parent
+
+
+def create_unified_db(*, base_dir: Path | None = None):
+    base_dir = (base_dir or _default_base_dir()).expanduser().resolve()
     completao_dir = base_dir / "COMPLETAO"
-    
-    excel_path = completao_dir / "BACKUP" / "2-BASE_UNICA_ATUALIZADA.xlsx"
-    manus_path = completao_dir / "Manus--COMPLETAO_COM_PRECOS.xlsx"
-    claude_path = completao_dir / "Claude-COMPLETAO_com_precos.xlsx"
-    db_path = base_dir / "orion_agroquim.db"
-    out_path = completao_dir / "DATABASE_MESTRE_ORION.xlsx"
+
+    excel_path = Path(os.getenv("ORION_EXCEL_BASE_UNICA") or (completao_dir / "BACKUP" / "2-BASE_UNICA_ATUALIZADA.xlsx"))
+    manus_path = Path(os.getenv("ORION_EXCEL_MANUS") or (completao_dir / "Manus--COMPLETAO_COM_PRECOS.xlsx"))
+    claude_path = Path(os.getenv("ORION_EXCEL_CLAUDE") or (completao_dir / "Claude-COMPLETAO_com_precos.xlsx"))
+    db_path = Path(os.getenv("ORION_DB_PATH") or (base_dir / "orion_agroquim.db"))
+    out_path = Path(os.getenv("ORION_OUT_XLSX") or (completao_dir / "DATABASE_MESTRE_ORION.xlsx"))
 
     with pd.ExcelWriter(out_path, engine='openpyxl') as writer:
         print(f"Lendo {excel_path.name}...")
@@ -490,4 +499,7 @@ def create_unified_db():
     print(f"\nArquivo unificado criado com sucesso em:\n{out_path}")
 
 if __name__ == "__main__":
-    create_unified_db()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--base-dir", default=str(_default_base_dir()))
+    args = ap.parse_args()
+    create_unified_db(base_dir=Path(str(args.base_dir)))

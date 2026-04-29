@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 import sys
+import json
 from datetime import datetime
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -383,7 +384,7 @@ def _main_impl(page: ft.Page) -> None:
     principal_reco_container = ft.Container()
 
     calc_button = ft.ElevatedButton(
-        "CALCULAR",
+        "CALCULAR E VALIDAR",
         style=ft.ButtonStyle(
             color=ft.Colors.BLACK,
             bgcolor=ft.Colors.CYAN_400,
@@ -582,6 +583,9 @@ def _main_impl(page: ft.Page) -> None:
             if not ack.ok:
                 page.snack_bar = ft.SnackBar(ft.Text(f"Estabilidade: falha ao receber resultados ({ack.message})"))
                 page.snack_bar.open = True
+            else:
+                if stability_module.last_has_alerts():
+                    main_tabs.selected_index = 1
 
             page.update()
         except Exception:
@@ -646,22 +650,183 @@ def _main_impl(page: ft.Page) -> None:
     laudo_content = ft.Column(scroll=ft.ScrollMode.AUTO, expand=True)
 
     calc_tabs = make_tabs(
-        ["PRINCIPAL", "TOP 5 FORMULAÇÕES", "FORMULAÇÃO MANUAL", "LAUDO"],
+        ["PRINCIPAL", "TOP 5 FORMULAÇÕES", "FORMULAÇÃO MANUAL"],
         [
             ft.Container(padding=20, content=tab_principal),
             ft.Container(padding=20, content=top12_tabs),
             ft.Container(padding=20, content=tab_manual),
-            ft.Container(padding=20, content=laudo_content)
         ],
         selected_index=0,
         expand=True
     )
 
+    current_relatorio: Optional[RelatorioOP] = None
+    report_history: List[Dict[str, Any]] = []
+
+    report_history_list = ft.ListView(expand=True, spacing=4, auto_scroll=False)
+
+    def _refresh_history_list() -> None:
+        report_history_list.controls.clear()
+        for item in reversed(report_history[-50:]):
+            title = f"{item.get('data_hora','')} | {item.get('titulo','')}"
+            subtitle = f"Tier {item.get('tier','')} | Volume {item.get('volume_l','')} L"
+            report_history_list.controls.append(ft.ListTile(
+                title=ft.Text(title, size=12, weight=ft.FontWeight.BOLD),
+                subtitle=ft.Text(subtitle, size=11),
+            ))
+        page.update()
+
+    def _serialize_relatorio(rel: RelatorioOP) -> Dict[str, Any]:
+        return {
+            "data_hora": rel.data_hora,
+            "tier": rel.tier,
+            "titulo": rel.titulo,
+            "densidade": float(rel.densidade or 0.0),
+            "agua_balanco": float(rel.agua_balanco or 0.0),
+            "volume_l": float(get_volume()),
+            "bom_lines": [{"insumo_nome": l.insumo_nome, "massa_kg": float(l.massa_kg)} for l in (rel.bom_lines or [])],
+            "pop_etapas": list(rel.pop_etapas or []),
+            "pcc_pontos": list(rel.pcc_pontos or []),
+        }
+
+    def _write_history_file() -> Path:
+        p = _runtime_dir() / "orion_relatorios_historico.json"
+        p.write_text(json.dumps(report_history, ensure_ascii=False, indent=2), encoding="utf-8", errors="replace")
+        return p
+
+    def _render_pdf(rel: RelatorioOP, out_path: Path) -> None:
+        from reportlab.lib.pagesizes import A4
+        from reportlab.pdfgen import canvas
+
+        c = canvas.Canvas(str(out_path), pagesize=A4)
+        width, height = A4
+        x = 50
+        y = height - 50
+
+        def draw_line(txt: str, dy: int = 14) -> None:
+            nonlocal y
+            c.drawString(x, y, txt)
+            y -= dy
+            if y < 80:
+                c.showPage()
+                y = height - 50
+
+        draw_line("ORION AGROQUIM", dy=18)
+        draw_line(f"DATA: {rel.data_hora}")
+        draw_line(f"TIER: {rel.tier}")
+        draw_line("")
+        draw_line(str(rel.titulo), dy=18)
+        draw_line(f"Volume Final: {get_volume()} L")
+        draw_line(f"Densidade: {format_num(rel.densidade, 3)} kg/L")
+        draw_line(f"Balanço Hídrico: {format_num(rel.agua_balanco, 2)} kg")
+        draw_line("")
+        draw_line("COMPOSIÇÃO DE CARGA (BOM)", dy=16)
+        for l in (rel.bom_lines or []):
+            draw_line(f"- {l.insumo_nome}: {format_num(l.massa_kg, 3)} kg")
+        draw_line("")
+        draw_line("PROCEDIMENTO OPERACIONAL (POP)", dy=16)
+        for e in (rel.pop_etapas or []):
+            draw_line(f"• {e.get('etapa','')}: {e.get('procedimento','')} ({e.get('notas','')})")
+        draw_line("")
+        draw_line("PONTOS CRÍTICOS DE CONTROLE (PCC)", dy=16)
+        for p in (rel.pcc_pontos or []):
+            draw_line(f"! {p.get('parametro','')}: {p.get('limite','')} -> {p.get('acao','')}")
+        c.save()
+
+    pdf_picker = ft.FilePicker()
+    page.overlay.append(pdf_picker)
+
+    def on_generate_pdf(_e):
+        nonlocal current_relatorio
+        if not current_relatorio:
+            page.snack_bar = ft.SnackBar(ft.Text("Nenhum laudo carregado. Use ENVIAR PARA LAUDO / OP em uma fórmula."))
+            page.snack_bar.open = True
+            page.update()
+            return
+
+        def handle_result(e: ft.FilePickerResultEvent):
+            if not e.path:
+                return
+            out_path = Path(str(e.path))
+            try:
+                try:
+                    _render_pdf(current_relatorio, out_path)
+                except ModuleNotFoundError:
+                    page.snack_bar = ft.SnackBar(ft.Text("Dependência ausente: reportlab. Instale para gerar PDF."))
+                    page.snack_bar.open = True
+                    page.update()
+                    return
+                page.snack_bar = ft.SnackBar(ft.Text(f"PDF gerado: {out_path}"))
+                page.snack_bar.open = True
+                page.update()
+            except Exception as ex:
+                page.snack_bar = ft.SnackBar(ft.Text(f"Falha ao gerar PDF: {str(ex)}"))
+                page.snack_bar.open = True
+                page.update()
+
+        pdf_picker.on_result = handle_result
+        pdf_picker.save_file(file_name="laudo_orion.pdf", allowed_extensions=["pdf"])
+
+    def on_save_history(_e):
+        nonlocal current_relatorio
+        if not current_relatorio:
+            page.snack_bar = ft.SnackBar(ft.Text("Nenhum laudo carregado para salvar no histórico."))
+            page.snack_bar.open = True
+            page.update()
+            return
+
+        report_history.append(_serialize_relatorio(current_relatorio))
+        try:
+            p = _write_history_file()
+            page.snack_bar = ft.SnackBar(ft.Text(f"Histórico salvo: {p}"))
+            page.snack_bar.open = True
+        except Exception as ex:
+            page.snack_bar = ft.SnackBar(ft.Text(f"Falha ao salvar histórico: {str(ex)}"))
+            page.snack_bar.open = True
+        _refresh_history_list()
+
+    reports_view = ft.Row(
+        [
+            ft.Container(
+                width=420,
+                padding=15,
+                border=ft.Border.all(1, ft.Colors.GREY_800),
+                border_radius=10,
+                content=ft.Column(
+                    [
+                        ft.Text("Relatório e POP", size=18, weight=ft.FontWeight.BOLD),
+                        ft.Row(
+                            [
+                                ft.ElevatedButton("GERAR PDF", icon=ft.Icons.PICTURE_AS_PDF, on_click=on_generate_pdf),
+                                ft.ElevatedButton("SALVAR NO HISTÓRICO", icon=ft.Icons.SAVE, on_click=on_save_history),
+                            ],
+                            wrap=True,
+                        ),
+                        ft.Divider(),
+                        ft.Text("Histórico", size=14, weight=ft.FontWeight.BOLD),
+                        report_history_list,
+                    ],
+                    spacing=10,
+                    expand=True,
+                ),
+            ),
+            ft.Container(
+                expand=True,
+                padding=0,
+                content=ft.Container(padding=20, content=laudo_content, expand=True),
+            ),
+        ],
+        expand=True,
+        spacing=20,
+        vertical_alignment=ft.CrossAxisAlignment.START,
+    )
+
     main_tabs = make_tabs(
-        ["CÁLCULOS", "ESTABILIDADE"],
+        ["⚗️ FORMULAÇÃO", "⚖️ ESTABILIDADE", "📋 RELATÓRIO & POP"],
         [
             ft.Container(padding=0, content=calc_tabs, expand=True),
             ft.Container(padding=20, content=stability_module.view, expand=True),
+            ft.Container(padding=20, content=reports_view, expand=True),
         ],
         selected_index=0,
         expand=True,
@@ -741,11 +906,12 @@ def _main_impl(page: ft.Page) -> None:
         page.update()
 
     def on_send_to_laudo(lines, idx):
+        nonlocal current_relatorio
         status = verificar_viabilidade_termodinamica(get_volume(), lines, insumos_cache, idx)
         rel = gerar_relatorio_op(lines, get_volume(), status)
+        current_relatorio = rel
         update_laudo_document(rel)
-        main_tabs.selected_index = 0
-        calc_tabs.selected_index = 3
+        main_tabs.selected_index = 2
         page.update()
 
     def update_laudo_document(rel: RelatorioOP):
