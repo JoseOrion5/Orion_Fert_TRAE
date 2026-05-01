@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .tab { fill: #1a2130; stroke: #2a3142; stroke-width: 1; }
+      .tab_on { fill: #16c6d4; }
+      .btn { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 11px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 800 26px "Segoe UI", Arial, sans-serif; }
+      .pill_ok { fill: #143426; stroke: #2b6b4a; stroke-width: 1; }
+      .pill_warn { fill: #3a2c12; stroke: #8b6a2b; stroke-width: 1; }
+      .ok { fill: #41d18a; font: 800 12px "Segoe UI", Arial, sans-serif; }
+      .warn { fill: #ffb020; font: 800 12px "Segoe UI", Arial, sans-serif; }
+      .chk { fill: #0e1320; stroke: #2a3142; stroke-width: 1; }
+      .chk_on { fill: #0d2b2e; stroke: #16c6d4; stroke-width: 1; }
+      .chk_mark { fill: none; stroke: #d7dde8; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="62">OrionAgroquim</text>
+  <text class="subtitle" x="242" y="60">Formulação manual — tabela dinâmica + processo + aditivos</text>
+
+  <rect class="panel" x="24" y="104" width="1392" height="772" rx="12"/>
+
+  <rect class="panel2" x="44" y="124" width="1352" height="54" rx="12"/>
+  <rect class="tab" x="60" y="136" width="220" height="30" rx="15"/>
+  <text class="label" x="110" y="157">PRINCIPAL</text>
+  <rect class="tab" x="288" y="136" width="260" height="30" rx="15"/>
+  <text class="label" x="330" y="157">TOP 5 FORMULAÇÕES</text>
+  <rect class="tab_on" x="556" y="136" width="290" height="30" rx="15"/>
+  <text class="label" x="592" y="157" fill="#071014">FORMULAÇÃO MANUAL</text>
+  <rect class="tab" x="854" y="136" width="160" height="30" rx="15"/>
+  <text class="label" x="906" y="157">LAUDO</text>
+
+  <rect class="panel" x="44" y="192" width="480" height="664" rx="12"/>
+  <text class="title" x="68" y="232">Entrada</text>
+  <text class="subtitle" x="68" y="256">Selecione nutrientes, escolha insumos e adicione metas (%).</text>
+
+  <rect class="panel2" x="64" y="276" width="440" height="166" rx="10"/>
+  <text class="label" x="80" y="306">Nutrientes (flags)</text>
+  <rect class="chip" x="80" y="324" width="200" height="30" rx="10"/>
+  <rect class="chk_on" x="90" y="331" width="16" height="16" rx="3"/>
+  <path class="chk_mark" d="M94 339 L97 343 L104 334"/>
+  <text class="text" x="116" y="345">P2O5</text>
+  <rect class="chip" x="304" y="324" width="200" height="30" rx="10"/>
+  <rect class="chk_on" x="314" y="331" width="16" height="16" rx="3"/>
+  <path class="chk_mark" d="M318 339 L321 343 L328 334"/>
+  <text class="text" x="340" y="345">B</text>
+  <rect class="chip" x="80" y="362" width="200" height="30" rx="10"/>
+  <rect class="chk" x="90" y="369" width="16" height="16" rx="3"/>
+  <text class="text" x="116" y="383">N</text>
+  <rect class="chip" x="304" y="362" width="200" height="30" rx="10"/>
+  <rect class="chk" x="314" y="369" width="16" height="16" rx="3"/>
+  <text class="text" x="340" y="383">Ca+</text>
+  <text class="muted" x="80" y="420">Ao marcar Ca+ com P2O5/SO4, habilitar alertas de processo.</text>
+
+  <rect class="panel2" x="64" y="456" width="440" height="166" rx="10"/>
+  <text class="label" x="80" y="486">Nutriente ativo e insumo</text>
+  <rect class="chip" x="80" y="504" width="420" height="34" rx="10"/>
+  <text class="label" x="96" y="526">Nutriente ativo:</text>
+  <text class="text" x="212" y="526">B</text>
+  <rect class="chip" x="80" y="546" width="420" height="34" rx="10"/>
+  <text class="label" x="96" y="568">Insumo:</text>
+  <text class="text" x="170" y="568">Octaborato de Sódio</text>
+  <text class="muted" x="80" y="610">Alternativas: Ácido Bórico, Bórax, Borato de Monoetanolamina...</text>
+
+  <rect class="panel2" x="64" y="636" width="440" height="220" rx="10"/>
+  <text class="label" x="80" y="666">Meta (%) e inclusão</text>
+  <rect class="chip" x="80" y="684" width="420" height="40" rx="10"/>
+  <text class="label" x="96" y="710">Meta do nutriente (B %)</text>
+  <rect class="panel2" x="308" y="692" width="92" height="24" rx="6"/>
+  <text class="mono" x="320" y="710">2.00</text>
+  <text class="muted" x="406" y="710">%</text>
+  <rect class="btn2" x="80" y="734" width="200" height="44" rx="12"/>
+  <text class="label" x="118" y="762">ADICIONAR LINHA</text>
+  <rect class="btn" x="300" y="734" width="200" height="44" rx="12"/>
+  <text class="label" x="336" y="762" fill="#071014">RECALCULAR</text>
+  <text class="muted" x="80" y="804">Ao atingir B alto: sugerir divisão em 2 fontes + anticristalizante.</text>
+  <text class="muted" x="80" y="826">A cada linha: atualiza “atingido”, “faltam” e processo.</text>
+
+  <rect class="panel" x="544" y="192" width="852" height="664" rx="12"/>
+  <text class="title" x="568" y="232">Tabela dinâmica + processo</text>
+  <text class="subtitle" x="568" y="256">A cada adição: recalcula massas e mostra mitigadores e aditivos sugeridos.</text>
+
+  <rect class="panel2" x="564" y="276" width="548" height="580" rx="12"/>
+  <text class="label" x="584" y="306">Tabela — insumo x nutrientes</text>
+  <rect class="chip" x="584" y="324" width="508" height="34" rx="10"/>
+  <text class="label" x="600" y="346">Insumo</text>
+  <text class="label" x="840" y="346">Massa</text>
+  <text class="label" x="920" y="346">P2O5</text>
+  <text class="label" x="990" y="346">B</text>
+  <rect class="panel2" x="584" y="366" width="508" height="248" rx="10"/>
+  <text class="mono" x="600" y="394">MAP Cristal</text>
+  <text class="mono" x="840" y="394">10.484</text>
+  <text class="mono" x="920" y="394">5.02</text>
+  <text class="mono" x="600" y="424">Octaborato de Sódio</text>
+  <text class="mono" x="840" y="424">10.000</text>
+  <text class="mono" x="990" y="424">2.00</text>
+  <text class="mono" x="600" y="454">Água</text>
+  <text class="mono" x="840" y="454">79.516</text>
+
+  <rect class="chip" x="584" y="630" width="508" height="86" rx="10"/>
+  <text class="label" x="600" y="658">Atingido / faltam</text>
+  <text class="muted" x="600" y="680">Atingido: P2O5 5.0241% | B 2.00%</text>
+  <text class="muted" x="600" y="702">Faltam: P2O5 0.0000% | B 0.00%</text>
+
+  <rect class="panel2" x="1128" y="276" width="268" height="580" rx="12"/>
+  <text class="label" x="1148" y="306">Processo e aditivos</text>
+  <rect class="pill_warn" x="1148" y="322" width="196" height="26" rx="13"/>
+  <text class="warn" x="1174" y="340">B ALTO (2.00%)</text>
+  <text class="muted" x="1148" y="366">Meandros do processo:</text>
+  <text class="muted" x="1148" y="388">- dissolver B com água morna</text>
+  <text class="muted" x="1148" y="410">- evitar choque térmico</text>
+  <text class="muted" x="1148" y="432">- checar cristalização a 20°C</text>
+  <text class="muted" x="1148" y="454">- dividir em 2 fontes (se preciso)</text>
+
+  <rect class="chip" x="1148" y="476" width="228" height="1" rx="0"/>
+
+  <text class="label" x="1148" y="504">Aditivos sugeridos (IN39)</text>
+  <rect class="chip" x="1148" y="520" width="228" height="34" rx="10"/>
+  <text class="text" x="1164" y="542">Polióis / Glicerina</text>
+  <rect class="chip" x="1148" y="560" width="228" height="34" rx="10"/>
+  <text class="text" x="1164" y="582">Sorbitol / Manitol</text>
+  <rect class="chip" x="1148" y="600" width="228" height="34" rx="10"/>
+  <text class="text" x="1164" y="622">Ácido Cítrico (pH/estab.)</text>
+  <rect class="chip" x="1148" y="640" width="228" height="34" rx="10"/>
+  <text class="text" x="1164" y="662">EDTA (se houver micros)</text>
+  <text class="muted" x="1148" y="706">Se ureia entrar:</text>
+  <text class="muted" x="1148" y="728">- sugerir NBPT</text>
+  <text class="muted" x="1148" y="750">Se Ca+ entrar com P/SO4:</text>
+  <text class="muted" x="1148" y="772">- ordem de preparo e quelantes</text>
+</svg>

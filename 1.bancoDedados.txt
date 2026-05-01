@@ -1,0 +1,41 @@
+BASE DO PROJETO
+T:\GitHub\1.Simulador_Fertilizante_App\Fertilizante corrigida\novo sabado 1737h
+
+BANCOS DE DADOS / FONTES DE DADOS (ARQUIVOS)
+1) INSUMOS_IN39_2018.csv
+   Caminho: .\INSUMOS_IN39_2018.csv
+   Uso: base principal de insumos/fertilizantes.
+
+2) ADITIVOS_IN39_2018.csv
+   Caminho: .\ADITIVOS_IN39_2018.csv
+   Uso: base de aditivos.
+
+MÓDULO QUE CARREGA OS DADOS
+1) src\data\database.py
+   Lê os CSVs acima e expõe estruturas em memória:
+   - FERTILIZERS
+   - PRODUTOS
+   - ADITIVOS
+   - INCOMPATIBILITIES
+   - ELEMENT_NAMES
+   - CONVERSIONS
+
+BIBLIOTECAS (DEPENDÊNCIAS DO PROJETO)
+Arquivo de referência: .\requirements.txt
+- flet
+- flet-desktop
+- numpy
+- scipy
+- pandas
+- pyinstaller
+
+BIBLIOTECAS USADAS NO CÓDIGO (IMPORTS DIRETOS)
+- flet (src\main.py, src\ui\app.py)
+- flet_desktop (src\main.py)
+- numpy (src\core\calculator.py)
+- scipy (src\core\calculator.py)
+
+BIBLIOTECAS DA BIBLIOTECA PADRÃO DO PYTHON (IMPORTS DIRETOS)
+- csv, os, re (src\data\database.py)
+- sys, os (src\main.py, src\ui\app.py)
+- unicodedata (src\core\physical_chem.py)

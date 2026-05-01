@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .tab { fill: #1a2130; stroke: #2a3142; stroke-width: 1; }
+      .tab_on { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 11px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 800 26px "Segoe UI", Arial, sans-serif; }
+      .pill_ok { fill: #143426; stroke: #2b6b4a; stroke-width: 1; }
+      .pill_warn { fill: #3a2c12; stroke: #8b6a2b; stroke-width: 1; }
+      .pill_bad { fill: #3b171d; stroke: #8b2b3c; stroke-width: 1; }
+      .ok { fill: #41d18a; font: 800 12px "Segoe UI", Arial, sans-serif; }
+      .warn { fill: #ffb020; font: 800 12px "Segoe UI", Arial, sans-serif; }
+      .danger { fill: #ff5a70; font: 800 12px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="62">OrionAgroquim</text>
+  <text class="subtitle" x="242" y="60">Top 5 formas — cada aba contém a tabela de insumos e os nutrientes que cada insumo gera</text>
+
+  <rect class="panel" x="24" y="104" width="420" height="772" rx="12"/>
+  <text class="title" x="48" y="146">Alvos e Condições</text>
+  <text class="subtitle" x="48" y="170">Entradas fixas. Trocar aba muda apenas a proposta de insumos e a tabela.</text>
+
+  <rect class="panel2" x="44" y="192" width="380" height="92" rx="10"/>
+  <text class="label" x="60" y="220">Temperatura (°C)</text>
+  <rect class="chip" x="60" y="232" width="130" height="34" rx="8"/>
+  <text class="mono" x="74" y="254">25</text>
+  <text class="label" x="212" y="220">Volume Q.S.P (L)</text>
+  <rect class="chip" x="212" y="232" width="130" height="34" rx="8"/>
+  <text class="mono" x="226" y="254">100</text>
+
+  <rect class="panel2" x="44" y="300" width="380" height="246" rx="10"/>
+  <text class="label" x="60" y="328">Nutrientes-alvo (%)</text>
+  <rect class="chip" x="60" y="352" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="376">N</text>
+  <rect class="panel2" x="105" y="360" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="376">10.00</text>
+  <rect class="chip" x="60" y="398" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="422">P2O5</text>
+  <rect class="panel2" x="105" y="406" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="422">5.0241</text>
+  <rect class="chip" x="60" y="444" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="468">B</text>
+  <rect class="panel2" x="105" y="452" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="468">1.50</text>
+
+  <rect class="panel2" x="44" y="566" width="380" height="290" rx="10"/>
+  <text class="label" x="60" y="594">Guia “FORMA MANUAL”</text>
+  <text class="muted" x="60" y="618">Quando você quiser forçar um insumo, monte manualmente.</text>
+  <text class="muted" x="60" y="640">O sistema calcula a tabela a cada inclusão (linha a linha).</text>
+  <rect class="chip" x="60" y="668" width="340" height="32" rx="10"/>
+  <text class="muted" x="76" y="689">Atalho: abrir FORM. MANUAL</text>
+  <rect class="chip" x="60" y="710" width="340" height="58" rx="10"/>
+  <text class="muted" x="76" y="736">Na manual, a tabela mostra:</text>
+  <text class="muted" x="76" y="756">Insumo | Massa | contribuições por nutriente</text>
+  <rect class="chip" x="60" y="782" width="340" height="58" rx="10"/>
+  <text class="muted" x="76" y="808">E também:</text>
+  <text class="muted" x="76" y="828">Totais atingidos e “faltam” por alvo</text>
+
+  <rect class="panel" x="464" y="104" width="952" height="772" rx="12"/>
+  <text class="title" x="488" y="146">Formas de Atingir (Top 5)</text>
+  <text class="subtitle" x="488" y="170">Cada aba contém uma receita + a tabela detalhada (insumo x nutrientes) daquela forma.</text>
+
+  <rect class="panel2" x="484" y="192" width="912" height="52" rx="12"/>
+  <rect class="tab_on" x="500" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="534" y="224" fill="#071014">FORMA 1</text>
+  <rect class="tab" x="648" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="682" y="224">FORMA 2</text>
+  <rect class="tab" x="796" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="830" y="224">FORMA 3</text>
+  <rect class="tab" x="944" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="978" y="224">FORMA 4</text>
+  <rect class="tab" x="1092" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="1126" y="224">FORMA 5</text>
+  <rect class="tab" x="1240" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="1252" y="224">FORM. MANUAL</text>
+
+  <rect class="panel2" x="484" y="258" width="912" height="134" rx="12"/>
+  <rect class="pill_ok" x="500" y="278" width="132" height="28" rx="14"/>
+  <text class="ok" x="536" y="298">SIMPLES</text>
+  <text class="label" x="648" y="296">Forma 1 — mais direta (menos controles)</text>
+  <text class="muted" x="648" y="318">Trocar para Forma 2..5 altera a tabela e adiciona mitigadores conforme risco.</text>
+  <text class="mono" x="500" y="352">Resumo: status ok | densidade estimada 1.18 kg/L | T ≥ 20°C</text>
+  <rect class="btn2" x="1230" y="284" width="146" height="36" rx="10"/>
+  <text class="label" x="1250" y="308">GERAR LAUDO</text>
+
+  <rect class="panel2" x="484" y="406" width="912" height="470" rx="12"/>
+  <text class="label" x="504" y="434">Tabela — Insumos e nutrientes gerados (FORMA 1)</text>
+  <text class="muted" x="504" y="456">Colunas: Insumo | Massa | N | P2O5 | K2O | Ca+ | Mg | SO4 | B | Zn | Cu | Mn | Mo</text>
+
+  <rect class="chip" x="504" y="474" width="872" height="34" rx="10"/>
+  <text class="label" x="520" y="496">Insumo</text>
+  <text class="label" x="820" y="496">Massa</text>
+  <text class="label" x="900" y="496">N</text>
+  <text class="label" x="950" y="496">P2O5</text>
+  <text class="label" x="1014" y="496">K2O</text>
+  <text class="label" x="1064" y="496">Ca+</text>
+  <text class="label" x="1110" y="496">Mg</text>
+  <text class="label" x="1148" y="496">SO4</text>
+  <text class="label" x="1202" y="496">B</text>
+  <text class="label" x="1240" y="496">Zn</text>
+  <text class="label" x="1278" y="496">Cu</text>
+  <text class="label" x="1316" y="496">Mn</text>
+  <text class="label" x="1356" y="496">Mo</text>
+
+  <rect class="panel2" x="504" y="518" width="872" height="278" rx="10"/>
+  <text class="mono" x="520" y="544">MAP Cristal</text>
+  <text class="mono" x="820" y="544">10.484</text>
+  <text class="mono" x="900" y="544">0.92</text>
+  <text class="mono" x="950" y="544">5.02</text>
+  <text class="mono" x="1202" y="544">0.00</text>
+  <text class="mono" x="520" y="574">Uréia</text>
+  <text class="mono" x="820" y="574">25.260</text>
+  <text class="mono" x="900" y="574">9.08</text>
+  <text class="mono" x="520" y="604">Ácido Bórico</text>
+  <text class="mono" x="820" y="604">0.000</text>
+  <text class="mono" x="1202" y="604">0.00</text>
+  <text class="mono" x="520" y="634">Água</text>
+  <text class="mono" x="820" y="634">64.256</text>
+
+  <rect class="chip" x="504" y="812" width="872" height="54" rx="10"/>
+  <text class="label" x="520" y="836">Notas da Forma 1</text>
+  <text class="muted" x="520" y="858">- Cada aba (Forma 1..5) troca a tabela e explica riscos/mitigadores conforme necessário</text>
+</svg>

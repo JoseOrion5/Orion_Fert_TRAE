@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .overlay { fill: #000000; opacity: 0.62; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .btn { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .btn3 { fill: #1d2433; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 12px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 700 18px "Segoe UI", Arial, sans-serif; }
+      .ok { fill: #41d18a; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .warn { fill: #ffb020; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .danger { fill: #ff5a70; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .toggle_track_off { fill: #0e1320; stroke: #2a3142; stroke-width: 1; }
+      .toggle_track_on { fill: #0d2b2e; stroke: #16c6d4; stroke-width: 1; }
+      .toggle_knob { fill: #d7dde8; }
+      .disabled { fill: #0e1320; stroke: #20273a; stroke-width: 1; opacity: 0.6; }
+      .disabled_text { fill: #707a90; font: 400 13px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="60">OrionAgroquim</text>
+  <text class="subtitle" x="192" y="60">Simulador de Formulação IN39 (Q.S.P 100 L)</text>
+  <rect class="chip" x="1212" y="34" width="184" height="40" rx="10"/>
+  <text class="label" x="1230" y="59">Configurações</text>
+
+  <rect class="panel" x="24" y="104" width="1392" height="772" rx="12"/>
+  <rect class="panel2" x="44" y="132" width="420" height="724" rx="12"/>
+  <text class="title" x="68" y="176">Alvos e Condições</text>
+  <text class="muted" x="68" y="200">Entrada de nutrientes + parâmetros.</text>
+  <rect class="panel2" x="484" y="132" width="912" height="724" rx="12"/>
+  <text class="title" x="508" y="176">Formas de Atingir os Alvos</text>
+  <text class="muted" x="508" y="200">Ranking, riscos e mitigadores.</text>
+
+  <rect class="overlay" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="280" y="120" width="880" height="660" rx="14"/>
+  <text class="title" x="312" y="164">Bibliotecas consideradas no cálculo</text>
+  <text class="subtitle" x="312" y="190">Escolha o que o motor pode usar. Se não estiver instalado, fica indisponível.</text>
+
+  <rect class="panel2" x="304" y="212" width="832" height="72" rx="12"/>
+  <text class="label" x="328" y="242">Perfil</text>
+  <rect class="chip" x="388" y="226" width="152" height="44" rx="12"/>
+  <text class="label" x="418" y="253">Básico</text>
+  <rect class="btn2" x="548" y="226" width="172" height="44" rx="12"/>
+  <text class="label" x="588" y="253">Avançado</text>
+  <rect class="chip" x="728" y="226" width="388" height="44" rx="12"/>
+  <text class="muted" x="750" y="253">Básico: rápido e robusto. Avançado: mais modelos.</text>
+
+  <rect class="panel2" x="304" y="300" width="404" height="340" rx="12"/>
+  <text class="label" x="328" y="332">Núcleo (recomendado)</text>
+
+  <rect class="chip" x="324" y="352" width="364" height="54" rx="12"/>
+  <text class="label" x="344" y="376">numpy</text>
+  <text class="muted" x="344" y="396">Cálculo numérico base</text>
+  <rect class="toggle_track_on" x="616" y="366" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="660" cy="378" r="9"/>
+
+  <rect class="chip" x="324" y="414" width="364" height="54" rx="12"/>
+  <text class="label" x="344" y="438">pandas</text>
+  <text class="muted" x="344" y="458">Leitura/manipulação de CSV</text>
+  <rect class="toggle_track_on" x="616" y="428" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="660" cy="440" r="9"/>
+
+  <rect class="chip" x="324" y="476" width="364" height="54" rx="12"/>
+  <text class="label" x="344" y="500">scipy</text>
+  <text class="muted" x="344" y="520">Otimização/solvers (opcional)</text>
+  <rect class="toggle_track_off" x="616" y="490" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="628" cy="502" r="9"/>
+
+  <rect class="chip" x="324" y="538" width="364" height="82" rx="12"/>
+  <text class="label" x="344" y="562">pydantic</text>
+  <text class="muted" x="344" y="582">Validação de dados do cálculo</text>
+  <text class="muted" x="344" y="602">Ajuda a evitar erro de entrada</text>
+  <rect class="toggle_track_off" x="616" y="560" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="628" cy="572" r="9"/>
+
+  <rect class="panel2" x="732" y="300" width="404" height="340" rx="12"/>
+  <text class="label" x="756" y="332">Química / Propriedades (avançado)</text>
+
+  <rect class="chip" x="752" y="352" width="364" height="54" rx="12"/>
+  <text class="label" x="772" y="376">pint</text>
+  <text class="muted" x="772" y="396">Unidades (kg, g/L, %, etc.)</text>
+  <rect class="toggle_track_off" x="1044" y="366" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="1056" cy="378" r="9"/>
+
+  <rect class="chip" x="752" y="414" width="364" height="54" rx="12"/>
+  <text class="label" x="772" y="438">thermo</text>
+  <text class="muted" x="772" y="458">Modelos termodinâmicos</text>
+  <rect class="toggle_track_off" x="1044" y="428" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="1056" cy="440" r="9"/>
+
+  <rect class="chip" x="752" y="476" width="364" height="54" rx="12"/>
+  <text class="label" x="772" y="500">chemicals</text>
+  <text class="muted" x="772" y="520">Propriedades e correlações</text>
+  <rect class="toggle_track_off" x="1044" y="490" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="1056" cy="502" r="9"/>
+
+  <rect class="chip" x="752" y="538" width="364" height="82" rx="12"/>
+  <text class="label" x="772" y="562">chempy</text>
+  <text class="muted" x="772" y="582">Cálculos químicos (regras/reação)</text>
+  <text class="muted" x="772" y="602">Use só se precisar</text>
+  <rect class="toggle_track_off" x="1044" y="560" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="1056" cy="572" r="9"/>
+
+  <rect class="panel2" x="304" y="652" width="832" height="86" rx="12"/>
+  <text class="label" x="328" y="684">Saídas e Diagnóstico</text>
+  <rect class="chip" x="324" y="698" width="262" height="40" rx="12"/>
+  <text class="label" x="342" y="723">fpdf2</text>
+  <text class="muted" x="404" y="723">Laudo PDF</text>
+  <rect class="toggle_track_on" x="520" y="706" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="564" cy="718" r="9"/>
+
+  <rect class="chip" x="596" y="698" width="262" height="40" rx="12"/>
+  <text class="label" x="614" y="723">loguru</text>
+  <text class="muted" x="676" y="723">Logs</text>
+  <rect class="toggle_track_off" x="792" y="706" width="56" height="24" rx="12"/>
+  <circle class="toggle_knob" cx="804" cy="718" r="9"/>
+
+  <rect class="disabled" x="868" y="698" width="268" height="40" rx="12"/>
+  <text class="disabled_text" x="886" y="723">requests / pythonnet</text>
+  <text class="muted" x="1040" y="723">não instalado</text>
+
+  <rect class="btn3" x="304" y="756" width="220" height="44" rx="12"/>
+  <text class="label" x="342" y="784">Restaurar padrão</text>
+
+  <rect class="btn2" x="742" y="756" width="170" height="44" rx="12"/>
+  <text class="label" x="796" y="784">Cancelar</text>
+
+  <rect class="btn" x="918" y="756" width="218" height="44" rx="12"/>
+  <text class="label" x="990" y="784" fill="#071014">Aplicar</text>
+</svg>

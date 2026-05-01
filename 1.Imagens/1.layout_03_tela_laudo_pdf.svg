@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .modal { fill: #0b0d12; opacity: 0.78; }
+      .card { fill: #141a26; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .btn { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 12px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 700 18px "Segoe UI", Arial, sans-serif; }
+      .ok { fill: #41d18a; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .warn { fill: #ffb020; font: 700 12px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+  <rect class="panel" x="24" y="20" width="1392" height="856" rx="12"/>
+  <text class="accent" x="48" y="60">OrionAgroquim</text>
+  <text class="subtitle" x="192" y="60">Laudo pericial (PDF) — fpdf2</text>
+
+  <rect class="panel2" x="44" y="92" width="1352" height="784" rx="12"/>
+  <text class="title" x="68" y="134">Tela de Resultados</text>
+  <text class="subtitle" x="68" y="158">Após calcular, o usuário gera um laudo técnico com justificativas.</text>
+  <rect class="btn2" x="1180" y="118" width="192" height="40" rx="12"/>
+  <text class="label" x="1218" y="144">GERAR LAUDO PDF</text>
+
+  <rect class="chip" x="68" y="186" width="580" height="40" rx="12"/>
+  <text class="label" x="84" y="212">Status</text>
+  <text class="ok" x="150" y="212">SOLUÇÃO</text>
+  <text class="text" x="260" y="212">Densidade 1.18 kg/L</text>
+  <text class="text" x="430" y="212">T 25°C</text>
+
+  <rect class="chip" x="68" y="242" width="580" height="260" rx="12"/>
+  <text class="label" x="84" y="270">Receita (100 L)</text>
+  <text class="mono" x="84" y="298">MAP 12.43 kg</text>
+  <text class="mono" x="84" y="322">Nitrato de Potássio 14.20 kg</text>
+  <text class="mono" x="84" y="346">Sulfato de Zinco 0.18 kg</text>
+  <text class="mono" x="84" y="370">Água 88.95 kg</text>
+  <text class="muted" x="84" y="402">Inclui: ordem de dissolução e mitigadores sugeridos.</text>
+
+  <rect class="chip" x="68" y="520" width="580" height="324" rx="12"/>
+  <text class="label" x="84" y="548">Justificativa Técnica (resumo)</text>
+  <text class="text" x="84" y="576">- Compatibilidade química avaliada (Ca+P, Ca+S, etc.)</text>
+  <text class="text" x="84" y="600">- Saturação dependente de temperatura e risco de cristalização</text>
+  <text class="text" x="84" y="624">- Sugestões IN39: quelante/estabilizante e faixa de pH</text>
+  <text class="text" x="84" y="648">- Observações operacionais (pré-mix, ordem de adição)</text>
+
+  <rect class="chip" x="684" y="186" width="688" height="658" rx="12"/>
+  <text class="label" x="704" y="214">Pré-visualização do Laudo (PDF)</text>
+  <rect class="panel2" x="704" y="234" width="648" height="590" rx="12"/>
+  <text class="mono" x="732" y="266">Laudo Técnico - OrionAgroquim (IN39)</text>
+  <text class="muted" x="732" y="294">Tabela de composição | densidade | saturação | justificativas</text>
+  <rect class="chip" x="732" y="312" width="592" height="90" rx="10"/>
+  <text class="muted" x="748" y="340">Tabela (insumo x massa) + composição final</text>
+  <rect class="chip" x="732" y="418" width="592" height="90" rx="10"/>
+  <text class="muted" x="748" y="446">Status de Saturação + alertas</text>
+  <rect class="chip" x="732" y="524" width="592" height="220" rx="10"/>
+  <text class="muted" x="748" y="552">Justificativa Técnica: por que sugeriu EDTA, T, trocas de fonte</text>
+
+  <rect class="modal" x="0" y="0" width="1440" height="900"/>
+  <rect class="card" x="420" y="270" width="600" height="300" rx="16"/>
+  <text class="title" x="456" y="320">Gerar Laudo PDF</text>
+  <text class="subtitle" x="456" y="348">Escolha o destino do arquivo e confirme.</text>
+  <rect class="chip" x="456" y="380" width="528" height="44" rx="12"/>
+  <text class="mono" x="472" y="408">...\laudo_orionagroquim_YYYYMMDD_HHMMSS.pdf</text>
+  <rect class="btn2" x="456" y="450" width="180" height="46" rx="12"/>
+  <text class="label" x="502" y="479">CANCELAR</text>
+  <rect class="btn" x="804" y="450" width="180" height="46" rx="12"/>
+  <text class="label" x="848" y="479" fill="#071014">GERAR</text>
+</svg>
