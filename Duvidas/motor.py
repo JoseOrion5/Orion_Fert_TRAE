@@ -985,9 +985,7 @@ def diagnosticar_operacoes_unitarias(
     aditivos_sugeridos: Sequence[AditivoSuggestion],
     volume_l: float,
     temp_c: float,
-    *,
-    formula_index: int = 1,
-) -> List[Dict[str, Any]]:
+) -> List[str]:
     sat = _saturation_index_total(lines, insumos, volume_l)
 
     def has_suspensor() -> bool:
@@ -997,196 +995,25 @@ def diagnosticar_operacoes_unitarias(
                 return True
         return any("susp" in _norm_text(l.insumo_nome or "") for l in lines)
 
+    if sat < 0.6:
+        regime = "Agitação Laminar (Simples)"
+    elif (sat > 0.8) or has_suspensor():
+        regime = "Agitação Turbulenta/High Shear"
+    else:
+        regime = "Agitação Moderada"
+
     nm_lines = [(_norm_text(l.insumo_nome or ""), float(l.massa_kg)) for l in lines]
     ureia_kg = sum(m for n, m in nm_lines if "ureia" in n or "uréia" in n)
     borico_kg = sum(m for n, m in nm_lines if "acido borico" in n or "ácido bórico" in n or ("boric" in n and "acid" in n))
 
     needs_heat = (volume_l > 0) and ((ureia_kg / volume_l) >= 0.12 or (borico_kg / volume_l) >= 0.04)
 
-    tier = 1 if 1 <= int(formula_index) <= 4 else (2 if 5 <= int(formula_index) <= 8 else 3)
-    if sat >= 1.0 or has_suspensor():
-        tier = max(tier, 3)
-    elif sat >= 0.85:
-        tier = max(tier, 2)
+    def has_strong_acid() -> bool:
+        acids = ("acido fosforico", "ácido fosfórico", "acido sulfurico", "ácido sulfúrico", "acido nitrico", "ácido nítrico")
+        return any(a in (l.insumo_nome or "").casefold() for a in acids for l in lines)
 
-    pop, pcc = [], []
-    if tier == 3:
-        pop, pcc = load_dados_seguranca()
-    else:
-        pop = [
-            {"etapa": "Preparação da Matriz", "procedimento": "Adicionar 70% da água Q.S.P.", "notas": "Agitação média"},
-            {"etapa": "Dissolução", "procedimento": "Adicionar sais por ordem de solubilidade.", "notas": "Evitar grumos"},
-            {"etapa": "Finalização", "procedimento": "Completar volume e ajustar pH.", "notas": "Homogeneização e estabilização"},
-        ]
-        pcc = [{"id": "PCC-STD", "parametro": "pH", "limite": "Conforme TDS", "acao": "Ajustar ou Rejeitar"}]
-
-    def _map_pcc(stage_name: str) -> List[Dict[str, str]]:
-        sn = _norm_text(stage_name)
-        keys = set()
-        if "matriz" in sn or "prepar" in sn:
-            keys.update(["agua", "agita", "rpm", "temper", "dens"])
-        if "complex" in sn:
-            keys.update(["ph", "quel", "micro", "metal"])
-        if "dissol" in sn:
-            keys.update(["temper", "rpm", "agita", "visco"])
-        if "final" in sn:
-            keys.update(["ph", "filtr", "visco", "dens", "estab"])
-        mapped: List[Dict[str, str]] = []
-        for item in (pcc or []):
-            pr = _norm_text(str(item.get("parametro") or ""))
-            if not pr:
-                continue
-            if any(k in pr for k in keys) or ("ph" in pr and "ph" in keys):
-                mapped.append(dict(item))
-        return mapped
-
-    def _map_pop(stage_name: str) -> List[str]:
-        sn = _norm_text(stage_name)
-        out: List[str] = []
-        for it in (pop or []):
-            et = _norm_text(str(it.get("etapa") or ""))
-            pr = _norm_text(str(it.get("procedimento") or ""))
-            if not et and not pr:
-                continue
-            if ("matriz" in sn and ("agua" in pr or "matriz" in et)) or ("complex" in sn and ("quel" in pr or "aditiv" in pr)) or ("dissol" in sn and ("sal" in pr or "dissol" in et)) or ("final" in sn and ("ph" in pr or "final" in et)):
-                txt = str(it.get("procedimento") or "").strip()
-                notas = str(it.get("notas") or "").strip()
-                out.append(f"{txt}" + (f" ({notas})" if notas else ""))
-        return out
-
-    micros = {"B", "Zn", "Cu", "Mn", "Mo", "Fe", "Co", "Ni", "Se"}
-
-    def _has_micros() -> bool:
-        return any(any((l.contrib_pct.get(k, 0.0) or 0.0) > 0 for k in micros) for l in lines)
-
-    def _has_ca() -> bool:
-        return any((l.contrib_pct.get("Ca", 0.0) or 0.0) > 0 for l in lines)
-
-    def _rpm_for_regime() -> int:
-        if sat < 0.6:
-            return 40
-        if sat >= 1.0 or has_suspensor():
-            return 120
-        return 80
-
-    def _target_temp() -> float:
-        if needs_heat:
-            return 60.0
-        return float(temp_c or 25.0)
-
-    def _time_for_stage(stage_name: str) -> str:
-        sn = _norm_text(stage_name)
-        if tier == 3 and ("dissol" in sn or "complex" in sn):
-            return "Agitar por 30–45 min"
-        if "matriz" in sn:
-            return "Agitar por 10 min"
-        if "complex" in sn:
-            return "Agitar por 15–20 min"
-        if "dissol" in sn:
-            return "Agitar por 20–30 min"
-        if "final" in sn:
-            return "Repouso 10 min (desaeração)"
-        return "Agitar por 10–15 min"
-
-    by_name = {i.nome: i for i in insumos}
-    stage2: List[FormulaLine] = []
-    stage3: List[FormulaLine] = []
-    stage4: List[FormulaLine] = []
-
-    def is_stage2(l: FormulaLine) -> bool:
-        if _norm_text(l.fornecedor or "") == "aditivo":
-            return True
-        nm = _norm_text(l.insumo_nome or "")
-        return ("co solvente" in nm) or ("edta" in nm) or ("hbed" in nm) or ("eddha" in nm) or ("quelant" in nm) or ("umect" in nm) or ("anticrist" in nm)
-
-    def is_micro(l: FormulaLine) -> bool:
-        if any((l.contrib_pct.get(k, 0.0) or 0.0) > 0 for k in micros):
-            return True
-        nm = _norm_text(l.insumo_nome or "")
-        return "micro" in nm and "nutr" in nm
-
-    for l in lines:
-        if is_stage2(l):
-            stage2.append(l)
-        elif is_micro(l):
-            stage3.append(l)
-        else:
-            stage4.append(l)
-
-    def sort_rank(ls: List[FormulaLine]) -> List[FormulaLine]:
-        def rk(l: FormulaLine) -> int:
-            ins = by_name.get(l.insumo_nome)
-            return int(ins.rank_solubilidade) if ins else 3
-        return sorted(ls, key=rk, reverse=True)
-
-    stage3 = sort_rank(stage3)
-    stage4 = sort_rank(stage4)
-
-    def list_names(ls: Sequence[FormulaLine]) -> str:
-        return ", ".join(f"{l.insumo_nome} ({format_num(float(l.massa_kg), 3)} kg)" for l in ls) if ls else "-"
-
-    etapas: List[Dict[str, Any]] = []
-
-    setup = "Tanque simples de PEAD/Fibra (frio)"
-    if tier == 2:
-        setup = "Tanque inox com agitação mecânica"
-    if tier == 3:
-        setup = "Reator encamisado (alto torque) com controle térmico"
-
-    etapas.append({
-        "nome_etapa": "Preparação da Matriz",
-        "instrucao_processo": f"Iniciar com 70% da água Q.S.P e agitar até vórtice estável. Setup: {setup}.",
-        "parametros_maquina": {"rpm": 40 if tier == 1 else 60, "temp_c": _target_temp()},
-        "gate_ph": {"medir": False, "alvo": None, "texto": ""},
-        "tempo": _time_for_stage("Preparação da Matriz"),
-        "pccs": _map_pcc("Preparação da Matriz"),
-        "pop": _map_pop("Preparação da Matriz"),
-    })
-
-    gate_txt = ""
-    if _has_micros() or _has_ca():
-        gate_txt = "NÃO INICIAR A ETAPA DE MICRONUTRIENTES SE pH > 5.5. Medir pH e ajustar antes de adicionar metais."
-    etapas.append({
-        "nome_etapa": "Complexação",
-        "instrucao_processo": f"Adicionar condicionadores/quelantes/co-solventes lentamente: {list_names(stage2)}.",
-        "parametros_maquina": {"rpm": _rpm_for_regime(), "temp_c": _target_temp()},
-        "gate_ph": {"medir": bool(gate_txt), "alvo": "<= 5.5", "texto": gate_txt},
-        "tempo": _time_for_stage("Complexação"),
-        "pccs": _map_pcc("Complexação"),
-        "pop": _map_pop("Complexação"),
-    })
-
-    etapas.append({
-        "nome_etapa": "Dissolução / Saturação",
-        "instrucao_processo": f"Adicionar sais por ordem de solubilidade, em pequenas frações: {list_names(stage4)}.",
-        "parametros_maquina": {"rpm": _rpm_for_regime(), "temp_c": _target_temp()},
-        "gate_ph": {"medir": False, "alvo": None, "texto": ""},
-        "tempo": _time_for_stage("Dissolução"),
-        "pccs": _map_pcc("Dissolução"),
-        "pop": _map_pop("Dissolução"),
-    })
-
-    etapas.append({
-        "nome_etapa": "Micronutrientes",
-        "instrucao_processo": f"Adicionar micronutrientes sob agitação constante: {list_names(stage3)}.",
-        "parametros_maquina": {"rpm": 80 if tier < 3 else 120, "temp_c": _target_temp()},
-        "gate_ph": {"medir": bool(gate_txt), "alvo": "<= 5.5", "texto": gate_txt},
-        "tempo": _time_for_stage("Micronutrientes"),
-        "pccs": _map_pcc("Complexação"),
-        "pop": _map_pop("Complexação"),
-    })
-
-    etapas.append({
-        "nome_etapa": "Finalização",
-        "instrucao_processo": "Completar volume (Q.S.P), homogeneizar, ajustar pH final e filtrar se necessário.",
-        "parametros_maquina": {"rpm": 60, "temp_c": float(temp_c or 25.0)},
-        "gate_ph": {"medir": True, "alvo": "Conforme TDS", "texto": "Medir pH final e registrar antes de liberar envase."},
-        "tempo": _time_for_stage("Finalização"),
-        "pccs": _map_pcc("Finalização"),
-        "pop": _map_pop("Finalização"),
-    })
-
-    return etapas
+    instr: List[str] = []
+    instr.append(f"Regime de Agitação: {regime} (índice de saturação={format_num(sat, 3)}; T={format_num(temp_c, 1)}°C).")
 
     if needs_heat:
         sat_hot = _saturation_index_total(lines, insumos, volume_l, use_hot_solubility=True)
@@ -1290,7 +1117,7 @@ def build_top12_outputs(
             temp_c,
             reactor_level_available=reactor_level_available,
         )
-        instrucoes = diagnosticar_operacoes_unitarias(lines, insumos, ad_sug, volume_l, temp_c, formula_index=idx)
+        instrucoes = diagnosticar_operacoes_unitarias(lines, insumos, ad_sug, volume_l, temp_c)
         aditivos_usados: List[Dict[str, float]] = []
         for l in lines:
             if _norm_text(l.fornecedor or "") == "aditivo":

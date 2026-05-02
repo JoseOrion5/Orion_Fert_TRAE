@@ -76,7 +76,6 @@ BLOCKED_INSUMO_PATTERNS: List[str] = [
     "acetato", "alga marinha", "amonia anidra", "amônia anidra", "aquamonio", "aquamônio",
     "bicarbonato", "borato de monoetanolamina", "carbonato", "composto natural de folhelho carbonoso",
     "farinha de osso calcinado", "farinha de osso autoclavado", "formiato", "kieserita",
-    "fosfato natural reativo",
     "oxido", "óxido", "quelato", "termo fosfato magnesiano", "termofosfato magnesiano potassico",
     "termofosfato magnesiano potássico", "termo-superfosfato", "tetrapotassio difosfato",
     "tetrapotássio difosfato", "trioxido de molibdenio", "trióxido de molibdênio",
@@ -90,5 +89,4 @@ BLOCKED_OBS_LABELS: List[str] = [
     "Kieserita", "Óxidos em geral", "Quelatos em geral", "Termo fosfato Magnesiano",
     "Termofosfato Magnesiano Potássico", "Termo-Superfosfato", "Tetrapotássio difosfato",
     "Trióxido de Molibdênio", "Uréia-Formaldeído",
-    "Fosfato Natural Reativo (FNR)",
 ]
