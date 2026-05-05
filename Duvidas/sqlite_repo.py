@@ -196,8 +196,7 @@ def load_aditivos() -> List[Aditivo]:
                 nutrientes_compativeis=r[5], faixa_ph_ideal=r[6],
                 dose_maxima_legal_pct=r[7], dose_maxima_tecnica_pct=r[8],
                 modo_aplicacao=r[9], alerta_incompatibilidade=r[10],
-                observacoes=r[11], preco_unit=r[12],
-                hlb=0.0, limite_forca_ionica=0.0, tipo_reologia=""
+                observacoes=r[11], preco_unit=r[12]
             ))
         conn.close()
         return aditivos

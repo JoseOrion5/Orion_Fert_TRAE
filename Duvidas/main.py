@@ -1,10 +1,14 @@
 from __future__ import annotations
 from pathlib import Path
-import os
 import sys
-import json
+import os
+import tempfile
+import math
+import base64
 from datetime import datetime
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from tkinter import filedialog
+import tkinter as tk
 
 # Adiciona o diretório pai ao sys.path para importar o motor.py
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -343,6 +347,9 @@ def _main_impl(page: ft.Page) -> None:
     # Flags de bibliotecas
     numpy_switch = ft.Switch(label="numpy (cálculo base)", value=True, scale=0.8)
     scipy_switch = ft.Switch(label="scipy (otimização)", value=False, scale=0.8)
+    anti_crystal_switch = ft.Checkbox(label="Anti-cristalização / Anti-sorvete", value=False)
+    max_saturation_index = 1.0
+    max_saturation_text = ft.Text("Índice de saturação máx: 1.00", size=12)
     limite_diversificacao = 75.0
     limite_diversificacao_text = ft.Text("Limite de Concentração por Fonte (%): 75", size=12)
 
@@ -359,6 +366,14 @@ def _main_impl(page: ft.Page) -> None:
         value=75,
         on_change=on_limite_diversificacao_change,
     )
+
+    def on_anti_crystal_change(e):
+        nonlocal max_saturation_index
+        max_saturation_index = 0.85 if bool(e.control.value) else 1.0
+        max_saturation_text.value = f"Índice de saturação máx: {max_saturation_index:.2f}"
+        page.update()
+
+    anti_crystal_switch.on_change = on_anti_crystal_change
 
     reactor_dd = ft.Dropdown(
         label="Reator disponível",
@@ -402,6 +417,12 @@ def _main_impl(page: ft.Page) -> None:
         on_click=lambda e: on_calculate_principal(e)
     )
 
+    reset_button = ft.OutlinedButton(
+        "RESET",
+        icon=ft.Icons.REFRESH,
+        on_click=lambda e: on_reset_all(e),
+    )
+
     data_status_text = ft.Text("", size=11, italic=True, color=ft.Colors.GREY_400)
 
     config_column = ft.Column([
@@ -413,9 +434,11 @@ def _main_impl(page: ft.Page) -> None:
         nutrient_grid,
         ft.Text("Flags de bibliotecas", weight=ft.FontWeight.BOLD, size=14),
         ft.Column([numpy_switch, scipy_switch], spacing=0),
+        anti_crystal_switch,
+        max_saturation_text,
         limite_diversificacao_text,
         limite_diversificacao_slider,
-        ft.Container(calc_button, margin=ft.Margin(0, 10, 0, 0)),
+        ft.Row([calc_button, reset_button], spacing=10, wrap=True),
     ], spacing=10, scroll=ft.ScrollMode.AUTO)
 
     # Abas do Top 12 (Serão atualizadas dinamicamente)
@@ -495,17 +518,15 @@ def _main_impl(page: ft.Page) -> None:
         merged = merge_lines(manual_lines)
         targets = {k: 1.0 for k, v in manual_selected_nutrients.items() if v}
         manual_table_container.content = build_data_table(merged, insumos_cache, get_volume(), targets, bool(supply_chain_switch.value), page=page)
-        status = verificar_viabilidade_termodinamica(get_volume(), merged, insumos_cache, temp_c=get_temp_c())
+        status = verificar_viabilidade_termodinamica(get_volume(), merged, insumos_cache)
         manual_thermo_alert.content = ft.Column([
             build_viability_card(merged, get_volume(), status.tech_tier, aditivos_cache, status),
             build_thermo_alert(status)
         ])
         
-        ph_est = motor._estimate_ph_theoretical(merged, get_volume())
         steps, ad_sug = recommend_process_and_aditivos(
             {k: sum(l.contrib_pct.get(k, 0.0) for l in merged) for k, _ in NUTRIENT_COLUMNS},
             merged, aditivos_cache, insumos_cache, get_volume(), get_temp_c(),
-            ph_estimated=ph_est,
             reactor_level_available=get_reactor_level()
         )
         instr = diagnosticar_operacoes_unitarias(merged, insumos_cache, ad_sug, get_volume(), get_temp_c())
@@ -524,7 +545,7 @@ def _main_impl(page: ft.Page) -> None:
             targets = parse_targets_from_fields(targets_fields)
             v = get_volume()
             # Conecta as flags da UI ao Motor
-            use_opt = bool(scipy_switch.value)
+            use_opt = bool(scipy_switch.value) or bool(anti_crystal_switch.value)
             outputs = build_top12_outputs(
                 v,
                 targets,
@@ -534,6 +555,7 @@ def _main_impl(page: ft.Page) -> None:
                 use_optimization=use_opt,
                 reactor_level_available=get_reactor_level(),
                 limite_diversificacao=limite_diversificacao,
+                max_saturation_index=max_saturation_index,
             )
             
             if not outputs or all(not o.lines for o in outputs):
@@ -544,7 +566,7 @@ def _main_impl(page: ft.Page) -> None:
                 
             # Atualiza View Principal (Formulação 1)
             best = outputs[0] if outputs else FormulaOutput([], [], [], [], [], 0.0)
-            status = verificar_viabilidade_termodinamica(v, best.lines, insumos_cache, 1, temp_c=get_temp_c())
+            status = verificar_viabilidade_termodinamica(v, best.lines, insumos_cache, 1)
             
             principal_thermo_alert.content = build_thermo_alert(status)
             principal_title_text.value = f"Formulação 1 (Tier {status.tech_tier})"
@@ -699,129 +721,292 @@ def _main_impl(page: ft.Page) -> None:
             "pcc_pontos": list(rel.pcc_pontos or []),
         }
 
-    def _write_history_file() -> Path:
-        p = _runtime_dir() / "orion_relatorios_historico.json"
-        p.write_text(json.dumps(report_history, ensure_ascii=False, indent=2), encoding="utf-8", errors="replace")
-        return p
-
-    def _render_pdf(rel: RelatorioOP, out_path: Path) -> None:
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-
-        def _render_pdf_minimal(lines_txt: List[str]) -> None:
-            def esc(s: str) -> str:
-                return s.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
-
-            content_lines = [esc(str(x)) for x in (lines_txt or []) if str(x).strip()]
-            if not content_lines:
-                content_lines = ["Relatório vazio."]
-
-            content = "BT\n/F1 10 Tf\n72 800 Td\n"
-            for i, ln in enumerate(content_lines[:90]):
-                if i:
-                    content += "0 -14 Td\n"
-                content += f"({ln}) Tj\n"
-            content += "ET\n"
-            stream = content.encode("latin-1", "replace")
-
-            parts: List[bytes] = []
-            offsets: List[int] = []
-
-            def w(b: bytes) -> None:
-                parts.append(b)
-
-            w(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")
-            offsets.append(sum(len(p) for p in parts))
-            w(b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n")
-            offsets.append(sum(len(p) for p in parts))
-            w(b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n")
-            offsets.append(sum(len(p) for p in parts))
-            w(b"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>\nendobj\n")
-            offsets.append(sum(len(p) for p in parts))
-            w(b"4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n")
-            offsets.append(sum(len(p) for p in parts))
-            w(f"5 0 obj\n<< /Length {len(stream)} >>\nstream\n".encode("ascii"))
-            w(stream)
-            w(b"\nendstream\nendobj\n")
-
-            xref_pos = sum(len(p) for p in parts)
-            w(b"xref\n0 6\n0000000000 65535 f \n")
-            for off in offsets:
-                w(f"{off:010d} 00000 n \n".encode("ascii"))
-            w(b"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n")
-            w(f"{xref_pos}\n".encode("ascii"))
-            w(b"%%EOF\n")
-
-            out_path.write_bytes(b"".join(parts))
-
+    def _render_pdf(rel: RelatorioOP, out_path: Path, stability_snapshot: Optional[Dict[str, Any]]) -> None:
         try:
             from reportlab.lib.pagesizes import A4
             from reportlab.pdfgen import canvas
-
-            c = canvas.Canvas(str(out_path), pagesize=A4)
-            _w, height = A4
-            x = 50
-            y = height - 50
-
-            def draw_line(txt: str, dy: int = 14) -> None:
-                nonlocal y
-                c.drawString(x, y, txt)
-                y -= dy
-                if y < 80:
-                    c.showPage()
-                    y = height - 50
-
-            draw_line("ORION AGROQUIM", dy=18)
-            draw_line(f"DATA: {rel.data_hora}")
-            draw_line(f"TIER: {rel.tier}")
-            draw_line("")
-            draw_line(str(rel.titulo), dy=18)
-            draw_line(f"Volume Final: {get_volume()} L")
-            draw_line(f"Densidade: {format_num(rel.densidade, 3)} kg/L")
-            draw_line(f"Balanço Hídrico: {format_num(rel.agua_balanco, 2)} kg")
-            draw_line("")
-            draw_line("COMPOSIÇÃO DE CARGA (BOM)", dy=16)
-            for l in (rel.bom_lines or []):
-                draw_line(f"- {l.insumo_nome}: {format_num(l.massa_kg, 3)} kg")
-            c.save()
-            return
         except ModuleNotFoundError:
-            pass
-
-        try:
             from fpdf import FPDF
 
             pdf = FPDF()
             pdf.set_margins(15, 15, 15)
             pdf.set_auto_page_break(auto=True, margin=15)
             pdf.add_page()
-            pdf.set_font("Helvetica", size=11)
-            pdf.multi_cell(0, 6, text=f"ORION AGROQUIM\nDATA: {rel.data_hora}\nTIER: {rel.tier}\n\n{rel.titulo}\n")
-            pdf.multi_cell(0, 6, text=f"Volume Final: {get_volume()} L\nDensidade: {format_num(rel.densidade, 3)} kg/L\nBalanço Hídrico: {format_num(rel.agua_balanco, 2)} kg\n")
-            pdf.ln(2)
-            pdf.set_font("Helvetica", style="B", size=11)
-            pdf.cell(0, 6, "COMPOSIÇÃO DE CARGA (BOM)", ln=1)
-            pdf.set_font("Helvetica", size=10)
-            for l in (rel.bom_lines or []):
-                pdf.multi_cell(0, 5, text=f"- {l.insumo_nome}: {format_num(l.massa_kg, 3)} kg")
-            pdf.output(str(out_path))
-            return
-        except ModuleNotFoundError:
-            pass
 
-        basic = [
-            "ORION AGROQUIM",
-            f"DATA: {rel.data_hora}",
-            f"TIER: {rel.tier}",
-            str(rel.titulo),
-            f"Volume Final: {get_volume()} L",
-            f"Densidade: {format_num(rel.densidade, 3)} kg/L",
-            f"Balanço Hídrico: {format_num(rel.agua_balanco, 2)} kg",
-            "",
-            "COMPOSIÇÃO DE CARGA (BOM)",
-        ]
-        for l in (rel.bom_lines or []):
-            basic.append(f"- {l.insumo_nome}: {format_num(l.massa_kg, 3)} kg")
-        _render_pdf_minimal(basic)
+            page_width = float(pdf.w) - float(pdf.l_margin) - float(pdf.r_margin)
+
+            def _sanitize_text(v: Any) -> str:
+                s = str(v or "")
+                s = s.replace("\t", " ")
+                s = s.replace("•", "-")
+                s = s.replace("→", "->")
+                s = s.replace("↔", "<->")
+                s = s.replace("⚠️", "")
+                s = s.replace("⚠", "")
+                s = s.replace("\r\n", "\n").replace("\r", "\n")
+                return s
+
+            using_unicode_font = False
+            try:
+                font_candidates = [
+                    r"C:\Windows\Fonts\arial.ttf",
+                    r"C:\Windows\Fonts\segoeui.ttf",
+                    r"C:\Windows\Fonts\calibri.ttf",
+                ]
+                font_path = next((p for p in font_candidates if Path(p).exists()), None)
+                if font_path:
+                    pdf.add_font("OrionFont", "", font_path, uni=True)
+                    pdf.add_font("OrionFont", "B", font_path, uni=True)
+                    using_unicode_font = True
+            except Exception:
+                using_unicode_font = False
+
+            def _safe_fpdf_text(v: Any) -> str:
+                s = _sanitize_text(v)
+                if using_unicode_font:
+                    return s
+                try:
+                    return s.encode("latin-1", "replace").decode("latin-1")
+                except Exception:
+                    return s
+
+            def set_font(size: int, *, bold: bool = False) -> None:
+                if using_unicode_font:
+                    pdf.set_font("OrionFont", style=("B" if bold else ""), size=size)
+                else:
+                    pdf.set_font("Helvetica", style=("B" if bold else ""), size=size)
+
+            def draw_line(txt: Any) -> None:
+                s = _safe_fpdf_text(txt).strip()
+                if s:
+                    pdf.multi_cell(0, 5, text=s, align="L", new_x="LMARGIN", new_y="NEXT")
+                else:
+                    pdf.ln(2)
+
+            snap = stability_snapshot or {}
+            ssum = (snap.get("summary") or {}) if isinstance(snap, dict) else {}
+            lab = (snap.get("lab") or {}) if isinstance(snap, dict) else {}
+
+            set_font(12, bold=True)
+            y0 = pdf.get_y()
+            left_w = page_width * 0.62
+            right_w = page_width - left_w
+            pdf.set_xy(pdf.l_margin, y0)
+            pdf.cell(left_w, 6, _safe_fpdf_text("ORION AGROQUIM"), ln=0, align="L")
+            pdf.cell(right_w, 6, _safe_fpdf_text(f"DATA: {rel.data_hora}"), ln=1, align="R")
+            set_font(10, bold=False)
+            pdf.set_x(pdf.l_margin + left_w)
+            pdf.cell(right_w, 5, _safe_fpdf_text(f"TIER: {rel.tier}"), ln=1, align="R")
+            set_font(9, bold=False)
+            draw_line("")
+            draw_line(str(rel.titulo))
+            draw_line(f"Volume Final: {get_volume()} L")
+            draw_line(f"Densidade: {format_num(rel.densidade, 3)} kg/L")
+            draw_line(f"Balanço Hídrico: {format_num(rel.agua_balanco, 2)} kg")
+            draw_line("")
+            draw_line("COMPOSIÇÃO DE CARGA (BOM)")
+            for l in (rel.bom_lines or []):
+                draw_line(f"- {l.insumo_nome}: {format_num(l.massa_kg, 3)} kg")
+            draw_line("")
+            draw_line("ESTABILIDADE (DIAGNÓSTICO)")
+            if ssum:
+                draw_line(f"Risco: {str(ssum.get('risk_level') or '').upper()}")
+                rr = ssum.get("risk_reasons") or []
+                if rr:
+                    draw_line("Motivos:")
+                    for r in rr:
+                        draw_line(f"- {r}")
+                alerts = ssum.get("best_alerts") or []
+                if alerts:
+                    draw_line("Alertas:")
+                    for a in alerts:
+                        draw_line(f"- {a}")
+                sat = ssum.get("best_indice_saturacao")
+                if sat is not None:
+                    draw_line(f"Índice de saturação: {format_num(float(sat), 3)}")
+                sal = ssum.get("best_carga_sais_pct_mv")
+                if sal is not None:
+                    draw_line(f"Carga salina: {format_num(float(sal), 1)}% (m/v)")
+            else:
+                draw_line("Sem diagnóstico disponível (nenhum cálculo enviado à aba Estabilidade).")
+            if lab:
+                draw_line("")
+                draw_line("BANCADA")
+                draw_line(f"pH: {lab.get('ph')}")
+                draw_line(f"Condutividade (mS/cm): {lab.get('ec')}")
+                draw_line(f"Turbidez (NTU): {lab.get('turbidez')}")
+                obs = str(lab.get("observacoes") or "").strip()
+                if obs:
+                    draw_line(f"Observações: {obs}")
+            draw_line("")
+            draw_line("PROCEDIMENTO OPERACIONAL (POP)")
+            for e in (rel.pop_etapas or []):
+                if isinstance(e, dict):
+                    etapa = e.get("etapa") or ""
+                    proc = e.get("procedimento") or ""
+                    notas = e.get("notas") or ""
+                    tail = f" ({notas})" if str(notas).strip() else ""
+                    draw_line(f"- {etapa}: {proc}{tail}")
+                else:
+                    draw_line(f"- {e}")
+            draw_line("")
+            draw_line("PONTOS CRÍTICOS DE CONTROLE (PCC)")
+            for p in (rel.pcc_pontos or []):
+                if isinstance(p, dict):
+                    parametro = p.get("parametro") or ""
+                    limite = p.get("limite") or ""
+                    acao = p.get("acao") or ""
+                    draw_line(f"! {parametro}: {limite} -> {acao}")
+                else:
+                    draw_line(f"! {p}")
+            try:
+                pdf.output(str(out_path))
+                print(f"PDF salvo com sucesso via fpdf2: {out_path}", flush=True)
+            except Exception as e:
+                print(f"Erro ao salvar PDF com fpdf2: {e}", flush=True)
+                raise
+            return
+
+        try:
+            import html as _html
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib.units import mm
+            from reportlab.lib import colors
+            from reportlab.lib.enums import TA_RIGHT
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+            def _txt(v: Any) -> str:
+                s = str(v or "")
+                s = s.replace("\t", " ")
+                s = s.replace("•", "-")
+                s = s.replace("→", "->")
+                s = s.replace("↔", "<->")
+                s = s.replace("⚠️", "")
+                s = s.replace("⚠", "")
+                s = s.replace("\r\n", "\n").replace("\r", "\n")
+                return s
+
+            def _p(v: Any) -> str:
+                return _html.escape(_txt(v)).replace("\n", "<br/>")
+
+            styles = getSampleStyleSheet()
+            base = ParagraphStyle("orion_base", parent=styles["Normal"], fontName="Helvetica", fontSize=10, leading=12, wordWrap="CJK")
+            h1 = ParagraphStyle("orion_h1", parent=base, fontSize=14, leading=16, spaceAfter=6)
+            h2 = ParagraphStyle("orion_h2", parent=base, fontSize=12, leading=14, spaceBefore=10, spaceAfter=4)
+            right = ParagraphStyle("orion_right", parent=base, alignment=TA_RIGHT)
+
+            doc = SimpleDocTemplate(
+                str(out_path),
+                pagesize=A4,
+                leftMargin=15 * mm,
+                rightMargin=15 * mm,
+                topMargin=15 * mm,
+                bottomMargin=15 * mm,
+                title="OrionAgroquim - Relatório",
+            )
+
+            snap = stability_snapshot or {}
+            ssum = (snap.get("summary") or {}) if isinstance(snap, dict) else {}
+            lab = (snap.get("lab") or {}) if isinstance(snap, dict) else {}
+
+            story: List[Any] = []
+            header_tbl = Table(
+                [
+                    [
+                        Paragraph(_p("ORION AGROQUIM"), h1),
+                        Paragraph(_p(f"DATA: {rel.data_hora}<br/>TIER: {rel.tier}"), right),
+                    ]
+                ],
+                colWidths=[doc.width * 0.62, doc.width * 0.38],
+            )
+            header_tbl.setStyle(TableStyle([
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ]))
+            story.append(header_tbl)
+            story.append(Spacer(1, 6))
+            story.append(Paragraph(_p(str(rel.titulo)), h2))
+            story.append(Paragraph(_p(f"Volume Final: {get_volume()} L"), base))
+            story.append(Paragraph(_p(f"Densidade: {format_num(rel.densidade, 3)} kg/L"), base))
+            story.append(Paragraph(_p(f"Balanço Hídrico: {format_num(rel.agua_balanco, 2)} kg"), base))
+
+            story.append(Spacer(1, 10))
+            story.append(Paragraph(_p("COMPOSIÇÃO DE CARGA (BOM)"), h2))
+            bom_rows: List[List[Any]] = [[Paragraph(_p("Insumo"), base), Paragraph(_p("Massa (kg)"), right)]]
+            for l in (rel.bom_lines or []):
+                bom_rows.append([Paragraph(_p(_txt(l.insumo_nome)), base), Paragraph(_p(f"{float(l.massa_kg):.3f}"), right)])
+            tbl = Table(bom_rows, colWidths=[doc.width * 0.72, doc.width * 0.28])
+            tbl.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#EEEEEE")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, 0), 10),
+                ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                ("FONTSIZE", (0, 1), (-1, -1), 10),
+                ("ALIGN", (1, 1), (1, -1), "RIGHT"),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#CCCCCC")),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAFAFA")]),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ]))
+            story.append(tbl)
+
+            story.append(Spacer(1, 10))
+            story.append(Paragraph(_p("ESTABILIDADE (DIAGNÓSTICO)"), h2))
+            if ssum:
+                story.append(Paragraph(_p(f"Risco: {str(ssum.get('risk_level') or '').upper()}"), base))
+                rr = ssum.get("risk_reasons") or []
+                if rr:
+                    story.append(Spacer(1, 4))
+                    story.append(Paragraph(_p("Motivos:"), base))
+                    for r in rr[:30]:
+                        story.append(Paragraph(_p(f"- {r}"), base))
+                alerts = ssum.get("best_alerts") or []
+                if alerts:
+                    story.append(Spacer(1, 4))
+                    story.append(Paragraph(_p("Alertas:"), base))
+                    for a in alerts[:30]:
+                        story.append(Paragraph(_p(f"- {a}"), base))
+                sat = ssum.get("best_indice_saturacao")
+                if sat is not None:
+                    story.append(Spacer(1, 4))
+                    story.append(Paragraph(_p(f"Índice de saturação: {format_num(float(sat), 3)}"), base))
+                sal = ssum.get("best_carga_sais_pct_mv")
+                if sal is not None:
+                    story.append(Paragraph(_p(f"Carga salina: {format_num(float(sal), 1)}% (m/v)"), base))
+            else:
+                story.append(Paragraph(_p("Sem diagnóstico disponível (nenhum cálculo enviado à aba Estabilidade)."), base))
+            if lab:
+                story.append(Spacer(1, 10))
+                story.append(Paragraph(_p("BANCADA"), h2))
+                story.append(Paragraph(_p(f"pH: {lab.get('ph')}"), base))
+                story.append(Paragraph(_p(f"Condutividade (mS/cm): {lab.get('ec')}"), base))
+                story.append(Paragraph(_p(f"Turbidez (NTU): {lab.get('turbidez')}"), base))
+                obs = str(lab.get("observacoes") or "").strip()
+                if obs:
+                    story.append(Paragraph(_p(f"Observações: {obs}"), base))
+
+            story.append(Spacer(1, 10))
+            story.append(Paragraph(_p("PROCEDIMENTO OPERACIONAL (POP)"), h2))
+            for e in (rel.pop_etapas or []):
+                story.append(Paragraph(_p(f"- {e.get('etapa','')}: {e.get('procedimento','')} ({e.get('notas','')})"), base))
+
+            story.append(Spacer(1, 10))
+            story.append(Paragraph(_p("PONTOS CRÍTICOS DE CONTROLE (PCC)"), h2))
+            for p in (rel.pcc_pontos or []):
+                story.append(Paragraph(_p(f"! {p.get('parametro','')}: {p.get('limite','')} -> {p.get('acao','')}"), base))
+
+            doc.build(story)
+        except Exception as e:
+            print(f"Erro ao renderizar PDF com reportlab: {e}", flush=True)
+            raise
 
     def on_generate_pdf(_e):
         nonlocal current_relatorio
@@ -831,28 +1016,51 @@ def _main_impl(page: ft.Page) -> None:
             page.update()
             return
 
-        try:
-            exports_dir = _exports_dir()
-            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            out_path = exports_dir / f"Relatorio_{stamp}.pdf"
-            if out_path.exists():
-                bump = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                out_path = exports_dir / f"Relatorio_{bump}.pdf"
+        # Abre diálogo de salvamento do Windows
+        root = tk.Tk()
+        root.withdraw()  # Esconde a janela raiz
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_filename = f"Relatorio_{stamp}.pdf"
+        
+        out_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")],
+            initialfile=default_filename,
+            title="Gerar Relatório como PDF"
+        )
+        root.destroy()
+        
+        # Se o usuário cancelou
+        if not out_path:
+            print("Usuário cancelou o salvamento do PDF", flush=True)
+            return
 
-            _render_pdf(current_relatorio, out_path)
-            if (not out_path.exists()) or (out_path.stat().st_size <= 0):
-                raise RuntimeError("Arquivo PDF não foi criado (tamanho zero).")
+        try:
+            print(f"Iniciando geração de PDF em: {out_path}", flush=True)
+            out_path = Path(out_path)
+            os.makedirs(str(out_path.parent), exist_ok=True)
+            print(f"Diretório criado/verificado: {out_path.parent}", flush=True)
+            snap = stability_module.last_snapshot()
+            print("Snapshot de estabilidade obtido", flush=True)
+            _render_pdf(current_relatorio, out_path, snap)
+            print(f"PDF renderizado com sucesso em: {out_path}", flush=True)
 
             try:
                 os.startfile(str(out_path))
-            except Exception:
-                pass
+            except Exception as e:
+                msg = f"Erro ao abrir PDF: {e}"
+                print(msg, flush=True)
+                page.snack_bar = ft.SnackBar(ft.Text(msg))
+                page.snack_bar.open = True
 
             page.snack_bar = ft.SnackBar(ft.Text(f"PDF gerado: {out_path}"))
             page.snack_bar.open = True
             page.update()
         except Exception as ex:
-            page.snack_bar = ft.SnackBar(ft.Text(f"Falha ao gerar PDF: {str(ex)}"))
+            import traceback
+            error_msg = f"Falha ao gerar PDF: {str(ex)}"
+            print(f"{error_msg}\n{traceback.format_exc()}", flush=True)
+            page.snack_bar = ft.SnackBar(ft.Text(error_msg))
             page.snack_bar.open = True
             page.update()
 
@@ -863,34 +1071,58 @@ def _main_impl(page: ft.Page) -> None:
             page.snack_bar.open = True
             page.update()
             return
-
+        
+        # Abre diálogo de salvamento do Windows
+        root = tk.Tk()
+        root.withdraw()  # Esconde a janela raiz
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_filename = f"Relatorio_{stamp}.pdf"
+        
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")],
+            initialfile=default_filename,
+            title="Salvar Relatório como PDF"
+        )
+        root.destroy()
+        
+        # Se o usuário cancelou
+        if not file_path:
+            print("Usuário cancelou o salvamento do PDF", flush=True)
+            return
+        
         try:
-            exports_dir = _exports_dir()
-            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            pdf_path = exports_dir / f"Relatorio_{stamp}.pdf"
-            if pdf_path.exists():
-                bump = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                pdf_path = exports_dir / f"Relatorio_{bump}.pdf"
-
-            _render_pdf(current_relatorio, pdf_path)
-            if (not pdf_path.exists()) or (pdf_path.stat().st_size <= 0):
-                raise RuntimeError("Arquivo PDF não foi criado (tamanho zero).")
-
+            print(f"Iniciando salvamento de PDF em: {file_path}", flush=True)
+            pdf_path = Path(file_path)
+            os.makedirs(str(pdf_path.parent), exist_ok=True)
+            print(f"Diretório criado/verificado: {pdf_path.parent}", flush=True)
+            snap = stability_module.last_snapshot()
+            print("Snapshot de estabilidade obtido", flush=True)
+            _render_pdf(current_relatorio, pdf_path, snap)
+            print(f"PDF renderizado com sucesso em: {pdf_path}", flush=True)
+            
             try:
                 os.startfile(str(pdf_path))
-            except Exception:
-                pass
+            except Exception as e:
+                msg = f"Erro ao abrir PDF: {e}"
+                print(msg, flush=True)
+                page.snack_bar = ft.SnackBar(ft.Text(msg))
+                page.snack_bar.open = True
 
             entry = _serialize_relatorio(current_relatorio)
             entry["pdf_path"] = str(pdf_path)
             report_history.append(entry)
-
-            page.snack_bar = ft.SnackBar(ft.Text(f"PDF salvo no histórico: {pdf_path}"))
+            page.snack_bar = ft.SnackBar(ft.Text(f"PDF salvo: {pdf_path}"))
             page.snack_bar.open = True
         except Exception as ex:
-            page.snack_bar = ft.SnackBar(ft.Text(f"Falha ao salvar: {str(ex)}"))
+            import traceback
+            error_msg = f"Falha ao salvar: {str(ex)}"
+            print(f"{error_msg}\n{traceback.format_exc()}", flush=True)
+            page.snack_bar = ft.SnackBar(ft.Text(error_msg))
             page.snack_bar.open = True
         _refresh_history_list()
+
+
 
     reports_view = ft.Row(
         [
@@ -939,6 +1171,59 @@ def _main_impl(page: ft.Page) -> None:
         expand=True,
     )
 
+    def on_reset_all(_e) -> None:
+        nonlocal limite_diversificacao, max_saturation_index, current_relatorio, report_history
+
+        volume_field.value = str(int(DEFAULT_VOLUME_L))
+        temp_field.value = "25"
+        reactor_dd.value = "3"
+        supply_chain_switch.value = False
+
+        numpy_switch.value = True
+        scipy_switch.value = False
+        anti_crystal_switch.value = False
+        max_saturation_index = 1.0
+        max_saturation_text.value = "Índice de saturação máx: 1.00"
+
+        limite_diversificacao = 75.0
+        limite_diversificacao_slider.value = 75.0
+        limite_diversificacao_text.value = "Limite de Concentração por Fonte (%): 75"
+
+        for tf in targets_fields.values():
+            tf.value = ""
+
+        principal_thermo_alert.content = ft.Container()
+        principal_viability_container.content = ft.Container()
+        principal_table_container.content = ft.Container()
+        principal_reco_container.content = ft.Container()
+        principal_title_text.value = "Formulação 1"
+        principal_subtitle_text.value = "Aguardando cálculo."
+
+        set_tabs(top12_tabs, ["Opção 1"], [ft.Container()], selected_index=0)
+
+        manual_lines.clear()
+        for k in list(manual_selected_nutrients.keys()):
+            manual_selected_nutrients[k] = False
+        manual_active_nutrient_dd.value = None
+        manual_insumo_dd.value = None
+        manual_target_tf.value = ""
+        update_manual_ui()
+        manual_table_container.content = ft.Container()
+        manual_thermo_alert.content = ft.Container()
+        manual_reco_container.content = ft.Container()
+
+        stability_module.reset()
+
+        current_relatorio = None
+        laudo_content.controls.clear()
+        report_history.clear()
+        _refresh_history_list()
+
+        main_tabs.selected_index = 0
+        calc_tabs.selected_index = 0
+        reload_data()
+        page.update()
+
     # --- AUXILIARES DE RENDERIZAÇÃO ---
 
     def build_top12_formula_view(idx: int, output: FormulaOutput) -> ft.Control:
@@ -946,150 +1231,135 @@ def _main_impl(page: ft.Page) -> None:
             v = get_volume()
             targets = parse_targets_from_fields(targets_fields)
             lines = output.lines
-            status = verificar_viabilidade_termodinamica(v, lines, insumos_cache, idx, temp_c=get_temp_c())
-            
-            # Geração dos Componentes Individuais
-            alerta_ui = build_thermo_alert(status)
-            tabela_ui = build_data_table(lines, insumos_cache, v, targets, bool(supply_chain_switch.value), page=page)
+            status = verificar_viabilidade_termodinamica(v, lines, insumos_cache, idx)
 
-            pred = {}
-            try:
-                if output.instrucoes_producao and isinstance(output.instrucoes_producao[0], dict):
-                    p = output.instrucoes_producao[0].get("predicoes")
-                    if isinstance(p, dict):
-                        pred = p
-            except Exception:
-                pred = {}
+            def build_risk_chart(output: FormulaOutput, volume_l: float) -> ft.Control:
+                color_kps = "#EF5350"
+                color_sat = "#FFA726"
+                color_sal = "#42A5F5"
+                color_ok = "#66BB6A"
 
-            if not pred:
-                ph_est = motor._estimate_ph_theoretical(lines, v)
-                thermal = motor._thermal_balance_estimate(lines, insumos_cache, v, float(get_temp_c() or 25.0))
-                mix_min = motor._estimate_mix_time_min(lines, insumos_cache, v)
-                ionic = motor._estimate_ionic_strength(lines, v, ph_est=ph_est)
-                sat_local = float(output.indice_saturacao or 0.0)
-                sc_mode = sat_local > 1.10
-                dens = float((thermal or {}).get("densidade") or (motor._estimated_density(lines, insumos_cache, v) or 1.0))
-                evap = motor._estimate_evap_loss_kg(v, dens, float(60.0 if idx >= 9 else get_temp_c()), float(mix_min or 30.0))
-                pred = {
-                    "ph_est": ph_est,
-                    "temp_out_c": None if not thermal else thermal.get("temp_out_c"),
-                    "delta_t_c": None if not thermal else thermal.get("delta_t_c"),
-                    "mix_time_min": float(mix_min or 0.0),
-                    "evap_loss_kg": float(evap or 0.0),
-                    "ionic_strength": float(ionic or 0.0),
-                    "reologia": ("Não-Newtoniano" if sc_mode else "Newtoniano"),
-                    "sc_mode": bool(sc_mode),
-                }
+                totals: Dict[str, float] = {}
+                for l in output.lines:
+                    for k, val in (l.contrib_pct or {}).items():
+                        try:
+                            fv = float(val or 0.0)
+                        except Exception:
+                            fv = 0.0
+                        totals[str(k)] = float(totals.get(str(k), 0.0) or 0.0) + float(fv)
 
-            phv = pred.get("ph_est")
-            tout = pred.get("temp_out_c")
-            dt = pred.get("delta_t_c")
-            mixm = pred.get("mix_time_min")
-            evapk = pred.get("evap_loss_kg")
-            ionic = pred.get("ionic_strength")
-            rheo = pred.get("reologia")
-            ok_ph = (phv is None) or (float(phv) >= 3.0 and float(phv) <= 7.0)
-            ok_t = (tout is None) or (float(tout) >= 15.0)
-            ok = bool(ok_ph and ok_t)
-            icon = ft.Icons.CHECK_CIRCLE if ok else ft.Icons.WARNING_AMBER
-            color = ft.Colors.GREEN_400 if ok else ft.Colors.AMBER_400
+                # Punição Máxima para incompatibilidade química (Gesso/Empedramento)
+                triggered_pairs = motor._kps_triggered_pairs(totals, targets=None)
+                pts_kps = 60 if triggered_pairs else 0
 
-            def _fmt(vv: Any, fmt: str) -> str:
-                if vv is None:
-                    return "-"
-                try:
-                    return fmt.format(float(vv))
-                except Exception:
-                    return str(vv)
+                # Rigor extremo com Shelf-life (Risco de cristalização no inverno)
+                sat = float(output.indice_saturacao or 0.0)
+                pts_sat = 50 if sat >= 1.0 else (30 if sat >= 0.85 else 0)
 
-            lab_panel = ft.Container(
-                padding=12,
-                border=ft.border.all(1, ft.Colors.with_opacity(0.22, ft.Colors.WHITE)),
-                border_radius=12,
-                bgcolor=ft.Colors.with_opacity(0.08, ft.Colors.BLUE_GREY_900),
-                content=ft.Column(
-                    [
-                        ft.Row(
-                            [
-                                ft.Icon(icon, color=color, size=18),
-                                ft.Text("Painel de Predição Físico-Química", size=12, weight=ft.FontWeight.BOLD),
-                            ],
-                            spacing=8,
-                        ),
-                        ft.Row(
-                            [
-                                ft.Text(f"pH teórico: {_fmt(phv, '{:.1f}')}", size=11),
-                                ft.Text(f"T final: {_fmt(tout, '{:.1f}')}°C", size=11),
-                                ft.Text(f"ΔT: {_fmt(dt, '{:+.1f}')}°C", size=11),
-                            ],
-                            wrap=True,
-                            spacing=14,
-                        ),
-                        ft.Row(
-                            [
-                                ft.Text(f"Tempo de mistura: {_fmt(mixm, '{:.0f}')} min", size=11),
-                                ft.Text(f"Evaporação estimada: {_fmt(evapk, '{:.2f}')} kg", size=11),
-                                ft.Text(f"Força iônica I: {_fmt(ionic, '{:.3f}')} mol/L", size=11),
-                            ],
-                            wrap=True,
-                            spacing=14,
-                        ),
-                        ft.Row(
-                            [
-                                ft.Text(f"Perfil reológico: {str(rheo or '-')}", size=11),
-                            ],
-                            wrap=True,
-                            spacing=14,
-                        ),
-                    ],
-                    spacing=6,
-                ),
-            )
-            
-            botao_laudo = ft.ElevatedButton(
-                "ENVIAR PARA LAUDO / OP", 
-                icon=ft.Icons.FILE_DOWNLOAD, 
-                on_click=lambda _, l=lines, i=idx: on_send_to_laudo(l, i),
-                style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_900, color=ft.Colors.WHITE)
+                # Rigor com Viscosidade (Dificuldade de envase e bombeamento)
+                total_mass_kg = sum(float(getattr(l, "massa_kg", 0.0) or 0.0) for l in output.lines)
+                carga_sais_pct_mv = (total_mass_kg / float(volume_l)) * 100.0 if volume_l > 0 else 0.0
+                pts_sal = 20 if carga_sais_pct_mv >= 45.0 else (10 if carga_sais_pct_mv >= 35.0 else 0)
+
+                total_pts = int(pts_kps + pts_sat + pts_sal)
+
+                if total_pts <= 0:
+                    radar = {"Seguro": 100.0, "KPS": 0.0, "Saturação": 0.0, "Salinidade": 0.0}
+                else:
+                    radar = {
+                        "Seguro": 0.0,
+                        "KPS": (float(pts_kps) / float(total_pts)) * 100.0,
+                        "Saturação": (float(pts_sat) / float(total_pts)) * 100.0,
+                        "Salinidade": (float(pts_sal) / float(total_pts)) * 100.0,
+                    }
+
+                parts: List[Tuple[str, float, str]] = [
+                    ("KPS", float(radar.get("KPS") or 0.0), color_kps),
+                    ("Saturação", float(radar.get("Saturação") or 0.0), color_sat),
+                    ("Salinidade", float(radar.get("Salinidade") or 0.0), color_sal),
+                    ("Seguro", float(radar.get("Seguro") or 0.0), color_ok),
+                ]
+                parts = [(n, v, c) for (n, v, c) in parts if v > 0.0]
+
+                def _pct_to_flex(v: float) -> int:
+                    return max(0, int(round(float(v) * 10.0)))
+
+                bar_segments: List[ft.Control] = []
+                for name, pct, color in parts:
+                    bar_segments.append(
+                        ft.Container(
+                            expand=_pct_to_flex(pct),
+                            height=18,
+                            bgcolor=color,
+                            border_radius=6,
+                            alignment=ft.Alignment.CENTER,
+                            content=ft.Text(f"{pct:.1f}%", size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                        )
+                    )
+
+                bar = ft.Container(
+                    width=260,
+                    content=ft.Row(bar_segments, spacing=2),
+                    padding=6,
+                    border=ft.border.all(1, ft.Colors.with_opacity(0.15, ft.Colors.WHITE)),
+                    border_radius=10,
+                )
+
+                def _legend_item(label: str, pct: float, color: str) -> ft.Control:
+                    return ft.Row(
+                        [
+                            ft.Container(width=10, height=10, bgcolor=color, border_radius=2),
+                            ft.Text(f"{label} ({pct:.1f}%)", size=10, weight=ft.FontWeight.W_500),
+                        ],
+                        spacing=6,
+                    )
+
+                legend = ft.Column([_legend_item(n, p, c) for (n, p, c) in parts], spacing=2, tight=True)
+
+                return ft.Container(
+                    content=ft.Row([bar, legend], spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                    bgcolor=ft.Colors.with_opacity(0.8, "#1A1C1E"),
+                    padding=15,
+                    border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+                    border_radius=15,
+                    blur=ft.Blur(10, 10),
+                )
+
+            recomendacoes_ui = build_recommendations_view(
+                output.process_steps,
+                output.aditivos_sugeridos,
+                lines,
+                instrucoes_producao=output.instrucoes_producao,
             )
 
-            botao_select = ft.ElevatedButton(
-                "SELECIONAR P/ PDF",
-                icon=ft.Icons.CHECK_CIRCLE_OUTLINE,
-                on_click=lambda _, l=lines, i=idx: _select_formula_for_report(l, i, open_report_tab=False),
+            return ft.Stack(
+                [
+                    ft.Column(
+                        controls=[
+                            build_thermo_alert(status),
+                            build_data_table(lines, insumos_cache, v, targets, bool(supply_chain_switch.value), page=page),
+                            ft.ElevatedButton(
+                                "ENVIAR PARA LAUDO / OP",
+                                icon=ft.Icons.FILE_DOWNLOAD,
+                                on_click=lambda _, l=lines, i=idx: on_send_to_laudo(l, i),
+                            ),
+                            recomendacoes_ui,
+                            ft.Container(height=100),
+                        ],
+                        scroll=ft.ScrollMode.AUTO,
+                        expand=True,
+                    ),
+                    ft.Container(
+                        content=build_risk_chart(output, v),
+                        right=20,
+                        bottom=20,
+                    ),
+                ],
+                expand=True,
             )
-            
-            recomendacoes_ui = build_recommendations_view(output.process_steps, output.aditivos_sugeridos, lines, instrucoes_producao=output.instrucoes_producao)
-            
-            # Agrupamento na Coluna Rolável
-            conteudo_aba = ft.Container(
-                content=ft.Column(
-                    controls=[
-                        alerta_ui, 
-                        tabela_ui,
-                        lab_panel,
-                        botao_select,
-                        botao_laudo,
-                        recomendacoes_ui
-                    ],
-                    scroll=ft.ScrollMode.AUTO,
-                    expand=True,
-                    spacing=5
-                ),
-                padding=10,
-                expand=True
-            )
-            
-            return conteudo_aba
-            
+
         except Exception as e:
-            import traceback
-            print(f"Erro ao renderizar a fórmula {idx}: {e}")
-            traceback.print_exc()
-            return ft.Container(
-                content=ft.Text(f"Erro na fórmula {idx}: {str(e)}", color=ft.Colors.RED_400, weight=ft.FontWeight.BOLD),
-                padding=20
-            )
+            return ft.Container(content=ft.Text(f"Erro: {str(e)}", color=ft.Colors.RED_400))
 
     def build_top12_tabs(forms: List[FormulaOutput]) -> None:
         labels = []
@@ -1114,22 +1384,14 @@ def _main_impl(page: ft.Page) -> None:
         set_tabs(top12_tabs, labels, views)
         page.update()
 
-    def _select_formula_for_report(lines, idx, *, open_report_tab: bool) -> None:
+    def on_send_to_laudo(lines, idx):
         nonlocal current_relatorio
-        status = verificar_viabilidade_termodinamica(get_volume(), lines, insumos_cache, idx, temp_c=get_temp_c())
+        status = verificar_viabilidade_termodinamica(get_volume(), lines, insumos_cache, idx)
         rel = gerar_relatorio_op(lines, get_volume(), status)
         current_relatorio = rel
         update_laudo_document(rel)
-        if open_report_tab:
-            main_tabs.selected_index = 2
-            page.snack_bar = ft.SnackBar(ft.Text(f"F{idx} carregada em Relatório & POP."))
-        else:
-            page.snack_bar = ft.SnackBar(ft.Text(f"F{idx} selecionada para PDF (Relatório & POP)."))
-        page.snack_bar.open = True
+        main_tabs.selected_index = 2
         page.update()
-
-    def on_send_to_laudo(lines, idx):
-        _select_formula_for_report(lines, idx, open_report_tab=True)
 
     def update_laudo_document(rel: RelatorioOP):
         laudo_content.controls.clear()

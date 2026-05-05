@@ -18,12 +18,6 @@ __all__ = [
     "KPS_PARES_PROIBIDOS",
     "BLOCKED_INSUMO_PATTERNS",
     "BLOCKED_OBS_LABELS",
-    "CP_CALDA_KJ_PER_KG_C",
-    "DELTA_H_SOL_KJ_PER_KG",
-    "PKA_BY_ACID_KEY",
-    "DEFAULT_ACID_MASS_FRACTION",
-    "EVAP_START_TEMP_C",
-    "EVAP_LOSS_FRAC_PER_HOUR_AT_70C",
 ]
 
 
@@ -82,7 +76,6 @@ BLOCKED_INSUMO_PATTERNS: List[str] = [
     "acetato", "alga marinha", "amonia anidra", "amônia anidra", "aquamonio", "aquamônio",
     "bicarbonato", "borato de monoetanolamina", "carbonato", "composto natural de folhelho carbonoso",
     "farinha de osso calcinado", "farinha de osso autoclavado", "formiato", "kieserita",
-    "fosfato natural reativo",
     "oxido", "óxido", "quelato", "termo fosfato magnesiano", "termofosfato magnesiano potassico",
     "termofosfato magnesiano potássico", "termo-superfosfato", "tetrapotassio difosfato",
     "tetrapotássio difosfato", "trioxido de molibdenio", "trióxido de molibdênio",
@@ -96,29 +89,4 @@ BLOCKED_OBS_LABELS: List[str] = [
     "Kieserita", "Óxidos em geral", "Quelatos em geral", "Termo fosfato Magnesiano",
     "Termofosfato Magnesiano Potássico", "Termo-Superfosfato", "Tetrapotássio difosfato",
     "Trióxido de Molibdênio", "Uréia-Formaldeído",
-    "Fosfato Natural Reativo (FNR)",
 ]
-
-CP_CALDA_KJ_PER_KG_C = 4.0
-
-DELTA_H_SOL_KJ_PER_KG: Dict[str, float] = {
-    "ureia": 258.0,
-    "acido borico": 110.0,
-    "acido fosforico": -80.0,
-    "acido sulfurico": -250.0,
-    "acido nitrico": -120.0,
-}
-
-PKA_BY_ACID_KEY: Dict[str, Tuple[float, ...]] = {
-    "acido fosforico": (2.15, 7.20, 12.35),
-    "acido borico": (9.24,),
-}
-
-DEFAULT_ACID_MASS_FRACTION: Dict[str, float] = {
-    "acido fosforico": 0.85,
-    "acido sulfurico": 0.98,
-    "acido nitrico": 0.68,
-}
-
-EVAP_START_TEMP_C = 60.0
-EVAP_LOSS_FRAC_PER_HOUR_AT_70C = 0.01

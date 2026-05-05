@@ -133,6 +133,18 @@ class StabilityModule:
             spacing=10,
         )
 
+    def reset(self) -> None:
+        self._records.clear()
+        self._status_text.value = "Aguardando resultados do motor…"
+        self._status_text.color = None
+        self._risk_bar.content = ft.Text("Sem dados para avaliar risco.", size=12, italic=True)
+        self._risk_bar.border = ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE))
+        self._risk_bar.bgcolor = None
+        self._list.controls.clear()
+        self._details.content = ft.Text("Selecione um item para ver detalhes.", size=12)
+        if self._page:
+            self._page.update()
+
     def ingest_calc_results(self, payload: Dict[str, Any]) -> StabilityAck:
         try:
             err = self._validate_payload(payload)
@@ -156,25 +168,6 @@ class StabilityModule:
             ack = StabilityAck(False, f"Falha ao processar: {str(e)}", "", _now_iso())
             self._set_status(ack)
             return ack
-
-    def reset(self) -> None:
-        self._records.clear()
-        self._status_text.value = "Aguardando resultados do motor…"
-        self._status_text.color = ft.Colors.with_opacity(0.85, ft.Colors.WHITE)
-        self._risk_bar.content = ft.Text("Sem dados para avaliar risco.", size=12, italic=True)
-        self._risk_bar.border = ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE))
-        self._risk_bar.bgcolor = None
-        self._list.controls.clear()
-        self._details.content = ft.Text("Selecione um item para ver detalhes.", size=12)
-        if self._page:
-            self._page.update()
-
-    def last_snapshot(self) -> Optional[Dict[str, Any]]:
-        if not self._records:
-            return None
-        rec = self._records[0]
-        lab = rec.payload.get("lab") if isinstance(rec.payload, dict) else None
-        return {"summary": rec.summary or {}, "lab": (lab if isinstance(lab, dict) else {})}
 
     def _set_status(self, ack: StabilityAck) -> None:
         if ack.ok:
@@ -264,6 +257,30 @@ class StabilityModule:
             has_quelante=has_quelante,
         )
 
+        pts_kps = 50 if triggered_pairs else 0
+        pts_sat = 0
+        if sat is not None:
+            if sat >= 1.0:
+                pts_sat = 35
+            elif sat >= 0.85:
+                pts_sat = 15
+        pts_sal = 0
+        if carga_sais_pct_mv >= 40.0:
+            pts_sal = 15
+        elif carga_sais_pct_mv >= 30.0:
+            pts_sal = 5
+        total_pts = int(pts_kps + pts_sat + pts_sal)
+
+        if total_pts == 0:
+            risk_radar_pct = {"Seguro": 100.0, "KPS": 0.0, "Saturação": 0.0, "Salinidade": 0.0}
+        else:
+            risk_radar_pct = {
+                "Seguro": 0.0,
+                "KPS": (float(pts_kps) / float(total_pts)) * 100.0,
+                "Saturação": (float(pts_sat) / float(total_pts)) * 100.0,
+                "Salinidade": (float(pts_sal) / float(total_pts)) * 100.0,
+            }
+
         return {
             "received_at": payload.get("timestamp") or "",
             "volume_l": volume_l,
@@ -279,6 +296,7 @@ class StabilityModule:
             "best_has_quelante": bool(has_quelante),
             "risk_level": risk,
             "risk_reasons": list(risk_reasons),
+            "risk_radar_pct": dict(risk_radar_pct),
         }
 
     def _risk_from_metrics(
@@ -326,6 +344,11 @@ class StabilityModule:
         if (s.get("best_alerts") or []) or (s.get("best_triggered_pairs") or []):
             return True
         return str(s.get("risk_level") or "").strip().lower() in {"amarelo", "vermelho"}
+
+    def last_snapshot(self) -> Optional[Dict[str, Any]]:
+        if not self._records:
+            return None
+        return {"summary": self._records[0].summary, "lab": self._records[0].payload.get("lab", {})}
 
     def _update_risk_bar(self, summary: Dict[str, Any]) -> None:
         level = str(summary.get("risk_level") or "").strip().lower()
@@ -424,6 +447,99 @@ class StabilityModule:
             wrap=True,
         )
 
+        radar = s.get("risk_radar_pct") or {}
+        if not isinstance(radar, dict):
+            radar = {}
+        if not radar:
+            radar = {"Seguro": 100.0, "KPS": 0.0, "Saturação": 0.0, "Salinidade": 0.0}
+
+        def _radar_val(key: str) -> float:
+            v = _safe_float(radar.get(key))
+            return float(v) if (v is not None and v > 0) else 0.0
+
+        sections: List[ft.PieChartSection] = []
+        v_kps = _radar_val("KPS")
+        v_sat = _radar_val("Saturação")
+        v_sal = _radar_val("Salinidade")
+        v_ok = _radar_val("Seguro")
+
+        def _legend_item(label: str, color: str) -> ft.Control:
+            return ft.Row(
+                [
+                    ft.Container(width=12, height=12, bgcolor=color, border_radius=2),
+                    ft.Text(label, size=12),
+                ],
+                spacing=8,
+            )
+
+        legend_items: List[ft.Control] = []
+        if v_kps > 0:
+            legend_items.append(_legend_item("KPS", ft.Colors.RED_400))
+        if v_sat > 0:
+            legend_items.append(_legend_item("Saturação", ft.Colors.ORANGE_400))
+        if v_sal > 0:
+            legend_items.append(_legend_item("Salinidade", ft.Colors.BLUE_400))
+        if v_ok > 0:
+            legend_items.append(_legend_item("Seguro", ft.Colors.GREEN_400))
+        legend = ft.Column(legend_items, spacing=6)
+
+        def _pct_to_flex(v: float) -> int:
+            return max(0, int(round(float(v) * 10.0)))
+
+        bar_segments: List[ft.Control] = []
+        parts = [
+            ("KPS", v_kps, ft.Colors.RED_400),
+            ("Saturação", v_sat, ft.Colors.ORANGE_400),
+            ("Salinidade", v_sal, ft.Colors.BLUE_400),
+            ("Seguro", v_ok, ft.Colors.GREEN_400),
+        ]
+        for _name, val, color in parts:
+            if val <= 0:
+                continue
+            bar_segments.append(
+                ft.Container(
+                    expand=_pct_to_flex(val),
+                    height=18,
+                    bgcolor=color,
+                    border_radius=6,
+                    alignment=ft.Alignment.CENTER,
+                    content=ft.Text(f"{val:.1f}%", size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                )
+            )
+
+        if not bar_segments:
+            bar_segments = [
+                ft.Container(
+                    expand=1,
+                    height=18,
+                    bgcolor=ft.Colors.with_opacity(0.15, ft.Colors.WHITE),
+                    border_radius=6,
+                    alignment=ft.Alignment.CENTER,
+                    content=ft.Text("N/D", size=10, italic=True),
+                )
+            ]
+
+        chart = ft.Container(
+            width=320,
+            content=ft.Row(bar_segments, spacing=2),
+            padding=6,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+            border_radius=10,
+        )
+
+        radar_view = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Text("Análise de Risco (Causas)", size=13, weight=ft.FontWeight.BOLD),
+                    ft.Row([chart, legend], alignment=ft.MainAxisAlignment.CENTER, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=20),
+                ],
+                spacing=6,
+            ),
+            padding=10,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+            border_radius=10,
+        )
+
         diag_cards: List[ft.Control] = []
         def add_card(title: str, body: str, color: str) -> None:
             diag_cards.append(
@@ -508,6 +624,7 @@ class StabilityModule:
             [
                 ft.Text(f"Recebido em: {rec.received_at} | id={rec.id}", size=12),
                 metrics,
+                radar_view,
                 ft.Divider(),
                 ft.Text("Indicadores de Risco", size=13, weight=ft.FontWeight.BOLD),
                 ft.Row(diag_cards, wrap=True, spacing=10),

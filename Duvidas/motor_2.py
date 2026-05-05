@@ -68,331 +68,6 @@ def _canonical_key(value: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
-def _match_best_key(name: str, keys: Sequence[str]) -> Optional[str]:
-    cn = _canonical_key(name)
-    best = None
-    best_len = 0
-    for k in keys:
-        ck = _canonical_key(k)
-        if ck and ck in cn and len(ck) > best_len:
-            best = k
-            best_len = len(ck)
-    return best
-
-def _parse_pct_from_name(name: str) -> Optional[float]:
-    s = _canonical_key(name)
-    m = re.search(r"(\d+(?:[.,]\d+)?)\s*%", s)
-    if m:
-        v = _safe_float(m.group(1))
-        if v is not None and 0 < v <= 100:
-            return v / 100.0
-    m2 = re.search(r"\b(\d{2})(?:[.,]\d+)?\b", s)
-    if m2:
-        v = _safe_float(m2.group(1))
-        if v is not None and 30 <= v <= 99:
-            return v / 100.0
-    return None
-
-def _estimate_mix_time_min(lines: Sequence[FormulaLine], insumos: Sequence[Insumo], volume_l: float) -> float:
-    if not lines:
-        return 0.0
-    sat = _saturation_index_total(lines, insumos, volume_l)
-    by_name = {i.nome: i for i in insumos}
-    weights = []
-    for l in lines:
-        ins = by_name.get(l.insumo_nome)
-        if not ins:
-            continue
-        rk = int(ins.rank_solubilidade or 3)
-        sol_txt = _norm_text(ins.solubilidade or "")
-        if "misc" in sol_txt or "total" in sol_txt:
-            w = 0.6
-        else:
-            m = re.search(r"(\d+(?:[.,]\d+)?)", sol_txt)
-            val = _safe_float(m.group(1)) if m else None
-            w = 1.0
-            if val is not None:
-                if val < 10:
-                    w = 2.0
-                elif val < 30:
-                    w = 1.6
-                elif val < 60:
-                    w = 1.2
-                else:
-                    w = 0.9
-        w *= (1.0 + 0.15 * max(0, rk - 1))
-        weights.append(w)
-    base = 12.0
-    wmean = sum(weights) / len(weights) if weights else 1.0
-    sat_mult = 1.0 + max(0.0, sat - 0.70) * 2.0
-    v_mult = 1.0 + max(0.0, (float(volume_l or 0.0) - 100.0) / 300.0)
-    t = base * wmean * sat_mult * v_mult
-    return float(max(8.0, min(75.0, t)))
-
-def _estimate_evap_loss_kg(volume_l: float, densidade: float, temp_c: float, minutes: float) -> float:
-    t = float(temp_c or 25.0)
-    if t <= float(EVAP_START_TEMP_C):
-        return 0.0
-    factor = max(0.0, (t - float(EVAP_START_TEMP_C)) / 10.0)
-    frac_per_hour = float(EVAP_LOSS_FRAC_PER_HOUR_AT_70C) * factor
-    frac = frac_per_hour * (max(0.0, float(minutes or 0.0)) / 60.0)
-    frac = min(0.05, max(0.0, frac))
-    return max(0.0, float(volume_l or 0.0) * float(densidade or 1.0) * frac)
-
-def _thermal_balance_estimate(
-    lines: Sequence[FormulaLine],
-    insumos: Sequence[Insumo],
-    volume_l: float,
-    temp_in_c: float,
-) -> Optional[Dict[str, float]]:
-    if not lines or volume_l <= 0:
-        return None
-    dens = _estimated_density(lines, insumos, volume_l) or 1.0
-    m_total = float(volume_l) * float(dens)
-    if m_total <= 0:
-        return None
-    keys = list(DELTA_H_SOL_KJ_PER_KG.keys())
-    q_kj = 0.0
-    for l in lines:
-        if not l.insumo_nome:
-            continue
-        hit = _match_best_key(l.insumo_nome, keys)
-        if not hit:
-            continue
-        dh = float(DELTA_H_SOL_KJ_PER_KG.get(hit, 0.0) or 0.0)
-        q_kj += float(max(0.0, l.massa_kg)) * dh
-    cp = float(CP_CALDA_KJ_PER_KG_C or 4.0)
-    denom = m_total * cp
-    if denom <= 0:
-        return None
-    delta_t = q_kj / denom
-    t_out = float(temp_in_c or 25.0) - float(delta_t)
-    heat_kj = max(0.0, float(temp_in_c or 25.0) - t_out) * denom
-    return {
-        "q_kj": float(q_kj),
-        "delta_t_c": float(-delta_t),
-        "temp_out_c": float(t_out),
-        "heat_kcal_to_hold": float(heat_kj / 4.186),
-        "densidade": float(dens),
-    }
-
-def _estimate_ph_theoretical(lines: Sequence[FormulaLine], volume_l: float) -> Optional[float]:
-    if not lines or volume_l <= 0:
-        return None
-    keys = list(PKA_BY_ACID_KEY.keys()) + ["acido sulfurico", "acido nitrico"]
-    mw = {
-        "acido fosforico": 97.995,
-        "acido sulfurico": 98.079,
-        "acido nitrico": 63.012,
-        "acido borico": 61.83,
-    }
-    strong = {"acido sulfurico", "acido nitrico"}
-    h_strong = 0.0
-    h_weak = 0.0
-    for l in lines:
-        if not l.insumo_nome:
-            continue
-        hit = _match_best_key(l.insumo_nome, keys)
-        if not hit:
-            continue
-        ck = _canonical_key(hit)
-        frac = _parse_pct_from_name(l.insumo_nome)
-        if frac is None:
-            frac = float(DEFAULT_ACID_MASS_FRACTION.get(ck, 1.0))
-        frac = float(max(0.0, min(1.0, frac)))
-        m_acid_kg = float(max(0.0, l.massa_kg)) * frac
-        mw_g = float(mw.get(ck, 0.0))
-        if mw_g <= 0:
-            continue
-        mol = (m_acid_kg * 1000.0) / mw_g
-        c = mol / float(volume_l)
-        if c <= 0:
-            continue
-        if ck in strong:
-            h_strong += c
-        else:
-            pka = (PKA_BY_ACID_KEY.get(ck) or ())
-            if not pka:
-                continue
-            ka = 10 ** (-float(pka[0]))
-            h = (-(ka) + math.sqrt(ka * ka + 4.0 * ka * c)) / 2.0
-            h_weak += max(0.0, h)
-    h_total = max(1e-14, h_strong + h_weak)
-    ph = -math.log10(h_total)
-    return float(max(0.0, min(14.0, ph)))
-
-def _estimate_ionic_strength(lines: Sequence[FormulaLine], volume_l: float, *, ph_est: Optional[float] = None) -> float:
-    if not lines or volume_l <= 0:
-        return 0.0
-    v_l = float(volume_l)
-    phv = None if ph_est is None else float(ph_est)
-    if phv is None:
-        phv = _estimate_ph_theoretical(lines, volume_l)
-
-    VALENCIAS_IONICAS: Dict[str, float] = {
-        "cloreto": -1.0,
-        "nitrato": -1.0,
-        "sulfato": -2.0,
-        "fosfato_acido": -1.0,
-        "potassio": 1.0,
-        "calcio": 2.0,
-        "magnesio": 2.0,
-        "zinco": 2.0,
-        "amonio": 1.0,
-    }
-
-    COMPOSTOS_IONICOS: Dict[str, Dict[str, Any]] = {
-        "kcl": {"mw": 74.551, "ions": [("potassio", 1), ("cloreto", 1)]},
-        "cacl2": {"mw": 110.984, "ions": [("calcio", 1), ("cloreto", 2)]},
-        "kno3": {"mw": 101.103, "ions": [("potassio", 1), ("nitrato", 1)]},
-        "mgso4": {"mw": 120.366, "ions": [("magnesio", 1), ("sulfato", 1)]},
-        "znso4": {"mw": 161.44, "ions": [("zinco", 1), ("sulfato", 1)]},
-        "map": {"mw": 115.025, "ions": [("amonio", 1), ("fosfato_acido", 1)]},
-    }
-
-    def _mass_for_compound(key: str) -> float:
-        needles = {
-            "kcl": ("cloreto de potassio", "cloreto de potássio", "kcl"),
-            "cacl2": ("cloreto de calcio", "cloreto de cálcio", "cacl2", "cloreto calcico", "cloreto cálcico"),
-            "kno3": ("nitrato de potassio", "nitrato de potássio", "kno3"),
-            "mgso4": ("sulfato de magnesio", "sulfato de magnésio", "mgso4"),
-            "znso4": ("sulfato de zinco", "znso4"),
-            "map": ("fosfato monoamonico", "fosfato monoamônico", "map", "monoammonium phosphate"),
-        }.get(key, ())
-        m = 0.0
-        for l in lines:
-            nm = _norm_text(l.insumo_nome or "")
-            if any(_norm_text(n) in nm for n in needles):
-                m += float(max(0.0, l.massa_kg))
-        return float(m)
-
-    def molarity_from_mass(mass_kg: float, mw_g_mol: float) -> float:
-        if mw_g_mol <= 0:
-            return 0.0
-        return (float(mass_kg) * 1000.0) / float(mw_g_mol) / v_l
-
-    sum_ci_z2 = 0.0
-    any_compound = False
-    for comp_key, meta in COMPOSTOS_IONICOS.items():
-        m_kg = _mass_for_compound(comp_key)
-        if m_kg <= 0:
-            continue
-        any_compound = True
-        c_comp = molarity_from_mass(m_kg, float(meta.get("mw") or 0.0))
-        for ion_name, sto in (meta.get("ions") or []):
-            z = float(VALENCIAS_IONICAS.get(str(ion_name), 0.0))
-            ci = c_comp * float(sto or 0.0)
-            sum_ci_z2 += ci * (z ** 2)
-
-    if any_compound:
-        return 0.5 * float(max(0.0, sum_ci_z2))
-
-    totals = _totals_from_lines(lines)
-
-    def mass_kg_from_pct(key: str) -> float:
-        return (float(totals.get(key, 0.0) or 0.0) * v_l) / 100.0
-
-    c_ca = molarity_from_mass(mass_kg_from_pct("Ca"), 40.078)
-    c_mg = molarity_from_mass(mass_kg_from_pct("Mg"), 24.305)
-    c_k = 2.0 * molarity_from_mass(mass_kg_from_pct("K2O"), 94.196)
-    c_so4 = molarity_from_mass(mass_kg_from_pct("SO4"), 96.06)
-    c_p = 2.0 * molarity_from_mass(mass_kg_from_pct("P2O5"), 141.944)
-    c_po4 = c_p
-    z_po4 = -1.0
-    if phv is not None:
-        if phv >= 7.0:
-            z_po4 = -2.0
-        elif phv >= 5.5:
-            z_po4 = -1.5
-
-    sum_ci_z2 = 0.0
-    sum_ci_z2 += c_ca * (2.0 ** 2)
-    sum_ci_z2 += c_mg * (2.0 ** 2)
-    sum_ci_z2 += c_k * (1.0 ** 2)
-    sum_ci_z2 += c_so4 * (2.0 ** 2)
-    sum_ci_z2 += c_po4 * (float(abs(z_po4)) ** 2)
-    return 0.5 * float(max(0.0, sum_ci_z2))
-
-def _infer_hlb_from_text(text: str) -> Optional[float]:
-    s = _canonical_key(text)
-    m = re.search(r"\bhlb\s*[:=]?\s*(\d+(?:[.,]\d+)?)\b", s)
-    if m:
-        v = _safe_float(m.group(1))
-        return None if v is None else float(v)
-    return None
-
-def _infer_aditivo_hlb(a: Aditivo) -> Optional[float]:
-    v = float(getattr(a, "hlb", 0.0) or 0.0)
-    if v > 0:
-        return v
-    n = _norm_text(f"{a.nome or ''} {a.abreviatura or ''}")
-    if "tween 80" in n:
-        return 15.0
-    if "span 80" in n:
-        return 4.3
-    if ("nonilfenol" in n and "9.5" in n) or ("nonylphenol" in n and "9.5" in n):
-        return 13.0
-    for src in (a.abreviatura, a.nome, a.observacoes, a.grupo, a.funcao_principal):
-        hit = _infer_hlb_from_text(str(src or ""))
-        if hit is not None and hit > 0:
-            return float(hit)
-    return None
-
-def _infer_limite_forca_ionica(a: Aditivo) -> float:
-    v = float(getattr(a, "limite_forca_ionica", 0.0) or 0.0)
-    if v > 0:
-        return v
-    hay = _norm_text(f"{a.nome or ''} {a.grupo or ''} {a.funcao_principal or ''} {a.observacoes or ''}")
-    if any(k in hay for k in ("xantana", "xanthan")):
-        return 0.8
-    if any(k in hay for k in ("carboximetil", "cmc")):
-        return 0.4
-    if any(k in hay for k in ("atapulg", "benton", "bentonita")):
-        return 999.0
-    if any(k in hay for k in ("benton", "hector", "attapulg", "silicat", "argil", "caulim")):
-        return 1.2
-    if any(k in hay for k in ("xantana", "xanthan", "celulos", "carboximetil", "cmc", "poliacril", "carbomer", "goma")):
-        return 0.4
-    return 0.7
-
-def _infer_tipo_reologia(a: Aditivo) -> str:
-    t = str(getattr(a, "tipo_reologia", "") or "").strip()
-    if t:
-        return t
-    hay = _norm_text(f"{a.nome or ''} {a.grupo or ''} {a.funcao_principal or ''} {a.observacoes or ''}")
-    if any(k in hay for k in ("newton",)):
-        return "Newtoniano"
-    if any(k in hay for k in ("pseudoplast", "shear thinning", "tixotrop", "thix", "gel")):
-        return "Não-Newtoniano"
-    if any(k in hay for k in ("xantana", "benton", "hector", "silicat", "argil", "carbomer", "poliacril")):
-        return "Não-Newtoniano"
-    return ""
-
-def _calculate_required_hlb_from_lines(lines: Sequence[FormulaLine]) -> Optional[float]:
-    oils = []
-    for l in lines:
-        nm = _norm_text(l.insumo_nome or "")
-        if any(k in nm for k in ("oleo", "óleo", "mineral oil", "paraf", "solvente", "hidrocarbon", "isopar")):
-            oils.append(l)
-    if not oils:
-        return None
-
-    def oil_req_hlb(name: str) -> float:
-        n = _norm_text(name)
-        if "mineral" in n or "paraf" in n or "isopar" in n:
-            return 10.5
-        if "veget" in n or "soja" in n or "canola" in n:
-            return 7.0
-        if "ester" in n:
-            return 11.0
-        return 10.0
-
-    total = sum(float(max(0.0, o.massa_kg)) for o in oils)
-    if total <= 0:
-        return None
-    req = sum(oil_req_hlb(o.insumo_nome) * (float(max(0.0, o.massa_kg)) / total) for o in oils)
-    return float(req)
-
 
 def _safe_float(value: Any) -> Optional[float]:
     if value is None: return None
@@ -704,14 +379,7 @@ def _estimated_density(lines: Sequence[FormulaLine], insumos: Sequence[Insumo], 
     denom = agua_livre + total_fv
     return massa_total / denom if denom > 0 else None
 
-def calcular_agua_qsp(
-    volume_alvo_l: float,
-    linhas_formula: Sequence[FormulaLine],
-    insumos_bd: Sequence[Insumo],
-    *,
-    temp_c: float = 25.0,
-    mix_time_min: Optional[float] = None,
-) -> float:
+def calcular_agua_qsp(volume_alvo_l: float, linhas_formula: Sequence[FormulaLine], insumos_bd: Sequence[Insumo]) -> float:
     by_name = {i.nome: i for i in insumos_bd}
     vol_sais = 0.0
     massa_agua = 0.0
@@ -723,26 +391,10 @@ def calcular_agua_qsp(
         nm = _norm_text(l.insumo_nome)
         if "sorbitol" in nm or "glicerina" in nm: massa_agua += m_kg * 0.30
         elif "acido fosforico" in nm: massa_agua += m_kg * 0.15
-    base = float(volume_alvo_l) - vol_sais - massa_agua
-    dens = _estimated_density(linhas_formula, insumos_bd, volume_alvo_l) or 1.0
-    evap_kg = _estimate_evap_loss_kg(float(volume_alvo_l), float(dens), float(temp_c or 25.0), float(mix_time_min or 30.0))
-    base -= evap_kg
-    return max(base, 0.0)
+    return max(float(volume_alvo_l) - vol_sais - massa_agua, 0.0)
 
-def verificar_viabilidade_termodinamica(
-    volume_alvo_l: float,
-    linhas_formula: Sequence[FormulaLine],
-    insumos_bd: Sequence[Insumo],
-    formula_index: int = 1,
-    temp_c: float = 25.0,
-) -> ThermoStatus:
-    mix_time_min = _estimate_mix_time_min(linhas_formula, insumos_bd, volume_alvo_l)
-    nm_lines = [(_norm_text(l.insumo_nome or ""), float(l.massa_kg)) for l in linhas_formula]
-    ureia_kg = sum(m for n, m in nm_lines if "ureia" in n or "uréia" in n)
-    borico_kg = sum(m for n, m in nm_lines if "acido borico" in n or "ácido bórico" in n or ("boric" in n and "acid" in n))
-    needs_heat = (volume_alvo_l > 0) and ((ureia_kg / volume_alvo_l) >= 0.12 or (borico_kg / volume_alvo_l) >= 0.04)
-    eff_temp_c = max(float(temp_c or 25.0), 60.0) if needs_heat else float(temp_c or 25.0)
-    agua_balanco = calcular_agua_qsp(volume_alvo_l, linhas_formula, insumos_bd, temp_c=eff_temp_c, mix_time_min=mix_time_min)
+def verificar_viabilidade_termodinamica(volume_alvo_l: float, linhas_formula: Sequence[FormulaLine], insumos_bd: Sequence[Insumo], formula_index: int = 1) -> ThermoStatus:
+    agua_balanco = calcular_agua_qsp(volume_alvo_l, linhas_formula, insumos_bd)
     densidade = _estimated_density(linhas_formula, insumos_bd, volume_alvo_l) or 1.0
     tier = 1 if 1 <= formula_index <= 4 else (2 if 5 <= formula_index <= 8 else 3)
     instr = "Soluções Verdadeiras / Frio" if tier == 1 else ("Permite Suspensão / Co-solventes Seguros" if tier == 2 else "Reator com Aquecimento e Alto Torque")
@@ -812,7 +464,6 @@ def recommend_process_and_aditivos(
     temp_c: float,
     *,
     ph_estimated: Optional[float] = None,
-    formula_index: Optional[int] = None,
     reactor_level_available: Optional[int] = None,
     experimental: bool = False,
     strategy_label: Optional[str] = None,
@@ -864,10 +515,16 @@ def recommend_process_and_aditivos(
         if a and not any(x.id == a.id for x in chosen):
             chosen.append(a)
 
+    def _is_extreme_solvent(a: Aditivo) -> bool:
+        hay = _norm_text(f"{a.nome or ''} {a.abreviatura or ''} {a.grupo or ''} {a.observacoes or ''}")
+        return ("dmso" in hay) or ("nmp" in hay) or ("liquido ionico" in hay) or ("ionic liquid" in hay) or ("des" in hay) or ("reline" in hay) or ("glyceline" in hay) or ("peg" in hay) or ("polietilenoglicol" in hay)
+
     def dose_max_pct(a: Aditivo) -> float:
         src = a.dose_maxima_tecnica_pct if experimental else a.dose_maxima_legal_pct
         v = _safe_float(src)
         pct = 0.0 if v is None else max(0.0, v)
+        if experimental and _is_extreme_solvent(a):
+            pct = max(float(pct), 30.0)
         if experimental and extreme_adjuvants and pct > 0:
             pct = pct * 1.5
         return pct
@@ -903,14 +560,6 @@ def recommend_process_and_aditivos(
         return 6.0
 
     ph_value = _estimate_ph_value()
-    fi = int(formula_index or 0)
-    is_tier3 = fi >= 9
-    quelante_policy_note = ""
-    sat = _saturation_index_total(lines, insumos, volume_l)
-    sc_mode = float(sat) > 1.10
-    ionic_strength = _estimate_ionic_strength(lines, volume_l, ph_est=ph_value)
-    req_hlb = _calculate_required_hlb_from_lines(lines)
-    rheology_profile = "Não-Newtoniano" if sc_mode else "Newtoniano"
 
     def _aditivo_matches_ph(a: Aditivo) -> bool:
         r = _parse_ph_range(a.faixa_ph_ideal or "")
@@ -939,21 +588,6 @@ def recommend_process_and_aditivos(
         if not candidates:
             return None
 
-        nonlocal quelante_policy_note
-        if ph_value < 3.0:
-            sensitive = {"edta", "hedta", "dtpa", "nta"}
-            filtered = []
-            for a in candidates:
-                ab = _norm_text(a.abreviatura or "")
-                nm = _norm_text(a.nome or "")
-                if any(k in ab for k in sensitive) or any(k in nm for k in sensitive):
-                    continue
-                filtered.append(a)
-            if not filtered:
-                quelante_policy_note = "ALERTA (Quelantes): pH teórico < 3.0: EDTA/HEDTA/DTPA/NTA desativados (acidez extrema)."
-                return None
-            candidates = filtered
-
         if (ph_value > 7.0) and has_fe:
             preferred = []
             for a in candidates:
@@ -962,10 +596,6 @@ def recommend_process_and_aditivos(
                     preferred.append(a)
             if preferred:
                 candidates = preferred
-            else:
-                quelante_policy_note = "ALERTA (Quelantes): pH teórico > 7.0 com Fe: forçar HBED/EDDHA (não encontrado no cadastro)."
-                if is_tier3:
-                    return None
 
         candidates.sort(key=lambda a: (dose_max_pct(a), (a.nome or "").strip()), reverse=True)
         return candidates[0]
@@ -974,27 +604,26 @@ def recommend_process_and_aditivos(
     selected_anti = pick_best(lambda a: contains_any(a.grupo or "", ["Anticristalizante", "Umectante"]))
     selected_quelante = _pick_quelante()
     selected_acid_phos = pick_best(lambda a: (a.nome or "").strip().casefold() in {"ácido fosfórico", "acido fosforico"} and contains_any(a.grupo or "", ["Acidificante"]))
-    selected_rheo = pick_best(lambda a: contains_any(a.grupo or "", ["Espessante", "Reologia", "Rheologia", "Rheology"]) or contains_any(a.funcao_principal or "", ["Espessante", "Reologia"]))
-
-    selected_emuls = None
-    if req_hlb is not None:
-        emul_pool = []
-        for a in aditivos_pool:
-            if contains_any(a.grupo or "", ["Emuls", "Tenso", "Surfact"]) or contains_any(a.funcao_principal or "", ["Emuls", "Tenso", "Surfact"]):
-                hlb = _infer_aditivo_hlb(a)
-                if hlb is not None:
-                    emul_pool.append((abs(float(hlb) - float(req_hlb)), a))
-        emul_pool.sort(key=lambda x: x[0])
-        selected_emuls = emul_pool[0][1] if emul_pool else None
 
     if has_ureia: add_if_found(selected_nbpt)
     if (target_b >= 1.5) or (total_b >= 1.5) or (high_complexity or alta_carga_sais or has_solid): add_if_found(selected_anti)
     if (has_ca or has_micros or has_kps_risk or (has_mg and has_p)) and (not _lines_have_quelante(lines)): add_if_found(selected_quelante)
     if has_map or has_dap: add_if_found(selected_acid_phos)
-    if sc_mode:
-        add_if_found(selected_rheo)
-    if selected_emuls is not None:
-        add_if_found(selected_emuls)
+
+    if experimental:
+        sat_now = _saturation_index_total(lines, insumos, volume_l)
+        k2o_val = float(targets.get("K2O", 0.0) or 0.0)
+        k2o_val = max(k2o_val, float(totals.get("K2O", 0.0) or 0.0))
+
+        if sat_now > 1.2:
+            picked = pick_best(lambda a: _is_extreme_solvent(a) and ("dmso" in _norm_text(f"{a.nome or ''} {a.abreviatura or ''}")))
+            if not picked:
+                picked = pick_best(lambda a: _is_extreme_solvent(a) and (("liquido ionico" in _norm_text(f"{a.nome or ''} {a.abreviatura or ''} {a.grupo or ''} {a.observacoes or ''}")) or ("ionic liquid" in _norm_text(f"{a.nome or ''} {a.abreviatura or ''} {a.grupo or ''} {a.observacoes or ''}"))))
+            add_if_found(picked)
+
+        if has_ureia and (k2o_val >= 8.0):
+            des = pick_best(lambda a: _is_extreme_solvent(a) and (("des" in _norm_text(f"{a.nome or ''} {a.abreviatura or ''} {a.observacoes or ''}")) or ("reline" in _norm_text(f"{a.nome or ''} {a.abreviatura or ''} {a.observacoes or ''}")) or ("glyceline" in _norm_text(f"{a.nome or ''} {a.abreviatura or ''} {a.observacoes or ''}"))))
+            add_if_found(des)
 
     chosen = chosen[:6]
     process: List[str] = []
@@ -1043,36 +672,10 @@ def recommend_process_and_aditivos(
         )
     if has_kps_risk:
         process.append(f"Passo 0: ALERTA - {KPS_ALERT_TEXT}")
-    if quelante_policy_note:
-        process.append(f"Passo 0: {quelante_policy_note}")
-    if sc_mode:
-        process.append("Passo 0: MODO SC - Dispersão/SC detectada (índice de saturação > 1.10). Requer reologia e dispersão de alto cisalhamento.")
-    if req_hlb is not None:
-        process.append(f"Passo 0: EMULSÃO - HLB requerido estimado: {format_num(float(req_hlb), 2)}.")
-    if ionic_strength > 0:
-        process.append(f"Passo 0: COLOIDES - Força iônica estimada I={format_num(float(ionic_strength), 3)} (mol/L, estimativa).")
     process.append(f"Passo 0: SETUP - {setup}")
-
-    if selected_rheo:
-        rheology_profile = _infer_tipo_reologia(selected_rheo) or rheology_profile
-        lim_I = _infer_limite_forca_ionica(selected_rheo)
-        if ionic_strength > lim_I:
-            hay = _norm_text(f"{selected_rheo.nome or ''} {selected_rheo.grupo or ''} {selected_rheo.funcao_principal or ''}")
-            is_mineral = any(k in hay for k in ("benton", "hector", "silicat", "argil", "caulim"))
-            if not is_mineral:
-                mineral = pick_best(lambda a: contains_any(a.nome or "", ["Benton", "Hector", "Silicat", "Argil", "Caulim"]) or contains_any(a.grupo or "", ["Mineral"]))
-                if mineral:
-                    chosen = [x for x in chosen if x.id != selected_rheo.id]
-                    chosen.append(mineral)
-                    rheology_profile = _infer_tipo_reologia(mineral) or "Não-Newtoniano"
-                    process.append(f"Passo 0: ALERTA - Risco de Colapso de Viscosidade (Salting-out): I={format_num(float(ionic_strength),3)} > limite do espessante; substituído por carga mineral.")
-                else:
-                    process.append(f"Passo 0: ALERTA - Risco de Colapso de Viscosidade (Salting-out): I={format_num(float(ionic_strength),3)} > limite do espessante; risco elevado.")
 
     agua_total = calcular_agua_qsp(volume_l, lines, insumos)
     v_inicial = agua_total * 0.70
-    if sc_mode:
-        step = add_step(step, "Etapa 0 (SC): Hidratação de espessante em água pura por 40 min antes de adicionar eletrólitos.")
     step = add_step(step, f"Adicionar {format_num(v_inicial, 1)} L de água (70% da água livre).")
 
     for a in chosen:
@@ -1403,11 +1006,8 @@ def diagnosticar_operacoes_unitarias(
     aditivos_sugeridos: Sequence[AditivoSuggestion],
     volume_l: float,
     temp_c: float,
-    *,
-    formula_index: int = 1,
-) -> List[Dict[str, Any]]:
+) -> List[str]:
     sat = _saturation_index_total(lines, insumos, volume_l)
-    sc_mode = float(sat) > 1.10
 
     def has_suspensor() -> bool:
         for s in aditivos_sugeridos:
@@ -1416,266 +1016,25 @@ def diagnosticar_operacoes_unitarias(
                 return True
         return any("susp" in _norm_text(l.insumo_nome or "") for l in lines)
 
+    if sat < 0.6:
+        regime = "Agitação Laminar (Simples)"
+    elif (sat > 0.8) or has_suspensor():
+        regime = "Agitação Turbulenta/High Shear"
+    else:
+        regime = "Agitação Moderada"
+
     nm_lines = [(_norm_text(l.insumo_nome or ""), float(l.massa_kg)) for l in lines]
     ureia_kg = sum(m for n, m in nm_lines if "ureia" in n or "uréia" in n)
     borico_kg = sum(m for n, m in nm_lines if "acido borico" in n or "ácido bórico" in n or ("boric" in n and "acid" in n))
 
-    thermal = _thermal_balance_estimate(lines, insumos, volume_l, float(temp_c or 25.0))
-    ph_est = _estimate_ph_theoretical(lines, volume_l)
-    mix_time_min = _estimate_mix_time_min(lines, insumos, volume_l)
-    ionic_strength = _estimate_ionic_strength(lines, volume_l, ph_est=ph_est)
     needs_heat = (volume_l > 0) and ((ureia_kg / volume_l) >= 0.12 or (borico_kg / volume_l) >= 0.04)
-    if thermal and (thermal.get("temp_out_c") is not None) and float(thermal["temp_out_c"]) < 15.0:
-        needs_heat = True
 
-    tier = 1 if 1 <= int(formula_index) <= 4 else (2 if 5 <= int(formula_index) <= 8 else 3)
-    if sat >= 1.0 or has_suspensor():
-        tier = max(tier, 3)
-    elif sat >= 0.85:
-        tier = max(tier, 2)
+    def has_strong_acid() -> bool:
+        acids = ("acido fosforico", "ácido fosfórico", "acido sulfurico", "ácido sulfúrico", "acido nitrico", "ácido nítrico")
+        return any(a in (l.insumo_nome or "").casefold() for a in acids for l in lines)
 
-    pop, pcc = [], []
-    if tier == 3:
-        pop, pcc = load_dados_seguranca()
-    else:
-        pop = [
-            {"etapa": "Preparação da Matriz", "procedimento": "Adicionar 70% da água Q.S.P.", "notas": "Agitação média"},
-            {"etapa": "Dissolução", "procedimento": "Adicionar sais por ordem de solubilidade.", "notas": "Evitar grumos"},
-            {"etapa": "Finalização", "procedimento": "Completar volume e ajustar pH.", "notas": "Homogeneização e estabilização"},
-        ]
-        pcc = [{"id": "PCC-STD", "parametro": "pH", "limite": "Conforme TDS", "acao": "Ajustar ou Rejeitar"}]
-
-    def _map_pcc(stage_name: str) -> List[Dict[str, str]]:
-        sn = _norm_text(stage_name)
-        keys = set()
-        if "matriz" in sn or "prepar" in sn:
-            keys.update(["agua", "agita", "rpm", "temper", "dens"])
-        if "complex" in sn:
-            keys.update(["ph", "quel", "micro", "metal"])
-        if "dissol" in sn:
-            keys.update(["temper", "rpm", "agita", "visco"])
-        if "final" in sn:
-            keys.update(["ph", "filtr", "visco", "dens", "estab"])
-        mapped: List[Dict[str, str]] = []
-        for item in (pcc or []):
-            pr = _norm_text(str(item.get("parametro") or ""))
-            if not pr:
-                continue
-            if any(k in pr for k in keys) or ("ph" in pr and "ph" in keys):
-                mapped.append(dict(item))
-        return mapped
-
-    def _map_pop(stage_name: str) -> List[str]:
-        sn = _norm_text(stage_name)
-        out: List[str] = []
-        for it in (pop or []):
-            et = _norm_text(str(it.get("etapa") or ""))
-            pr = _norm_text(str(it.get("procedimento") or ""))
-            if not et and not pr:
-                continue
-            if ("matriz" in sn and ("agua" in pr or "matriz" in et)) or ("complex" in sn and ("quel" in pr or "aditiv" in pr)) or ("dissol" in sn and ("sal" in pr or "dissol" in et)) or ("final" in sn and ("ph" in pr or "final" in et)):
-                txt = str(it.get("procedimento") or "").strip()
-                notas = str(it.get("notas") or "").strip()
-                out.append(f"{txt}" + (f" ({notas})" if notas else ""))
-        return out
-
-    micros = {"B", "Zn", "Cu", "Mn", "Mo", "Fe", "Co", "Ni", "Se"}
-
-    def _has_micros() -> bool:
-        return any(any((l.contrib_pct.get(k, 0.0) or 0.0) > 0 for k in micros) for l in lines)
-
-    def _has_ca() -> bool:
-        return any((l.contrib_pct.get("Ca", 0.0) or 0.0) > 0 for l in lines)
-
-    def _rpm_for_regime() -> int:
-        if sat < 0.6:
-            return 40
-        if sat >= 1.0 or has_suspensor():
-            return 120
-        return 80
-
-    def _target_temp() -> float:
-        if needs_heat:
-            return 60.0
-        return float(temp_c or 25.0)
-
-    def _time_for_stage(stage_name: str) -> str:
-        sn = _norm_text(stage_name)
-        if tier == 3 and ("dissol" in sn or "complex" in sn):
-            return "Agitar por 30–45 min"
-        if "matriz" in sn:
-            return "Agitar por 10 min"
-        if "complex" in sn:
-            return "Agitar por 15–20 min"
-        if "dissol" in sn:
-            mins = int(round(float(mix_time_min or 25.0)))
-            mins = max(15, min(75, mins))
-            return f"Agitar por {mins} min"
-        if "final" in sn:
-            return "Repouso 10 min (desaeração)"
-        return "Agitar por 10–15 min"
-
-    by_name = {i.nome: i for i in insumos}
-    stage2: List[FormulaLine] = []
-    stage3: List[FormulaLine] = []
-    stage4: List[FormulaLine] = []
-
-    def is_stage2(l: FormulaLine) -> bool:
-        if _norm_text(l.fornecedor or "") == "aditivo":
-            return True
-        nm = _norm_text(l.insumo_nome or "")
-        return ("co solvente" in nm) or ("edta" in nm) or ("hbed" in nm) or ("eddha" in nm) or ("quelant" in nm) or ("umect" in nm) or ("anticrist" in nm)
-
-    def is_micro(l: FormulaLine) -> bool:
-        if any((l.contrib_pct.get(k, 0.0) or 0.0) > 0 for k in micros):
-            return True
-        nm = _norm_text(l.insumo_nome or "")
-        return "micro" in nm and "nutr" in nm
-
-    for l in lines:
-        if is_stage2(l):
-            stage2.append(l)
-        elif is_micro(l):
-            stage3.append(l)
-        else:
-            stage4.append(l)
-
-    def sort_rank(ls: List[FormulaLine]) -> List[FormulaLine]:
-        def rk(l: FormulaLine) -> int:
-            ins = by_name.get(l.insumo_nome)
-            return int(ins.rank_solubilidade) if ins else 3
-        return sorted(ls, key=rk, reverse=True)
-
-    stage3 = sort_rank(stage3)
-    stage4 = sort_rank(stage4)
-
-    def list_names(ls: Sequence[FormulaLine]) -> str:
-        return ", ".join(f"{l.insumo_nome} ({format_num(float(l.massa_kg), 3)} kg)" for l in ls) if ls else "-"
-
-    etapas: List[Dict[str, Any]] = []
-
-    setup = "Tanque simples de PEAD/Fibra (frio)"
-    if tier == 2:
-        setup = "Tanque inox com agitação mecânica"
-    if tier == 3:
-        setup = "Reator encamisado (alto torque) com controle térmico"
-    if sc_mode:
-        setup = "Dispersor High Shear (Disco Cowles) para Suspensão Concentrada (SC)"
-
-    dens_pred = float((thermal or {}).get("densidade") or (_estimated_density(lines, insumos, volume_l) or 1.0))
-    evap_loss_kg = _estimate_evap_loss_kg(
-        float(volume_l or 0.0),
-        dens_pred,
-        float(_target_temp()),
-        float(mix_time_min or 30.0),
-    )
-    predicoes = {
-        "ph_est": (None if ph_est is None else float(ph_est)),
-        "temp_out_c": (None if (not thermal or thermal.get("temp_out_c") is None) else float(thermal.get("temp_out_c"))),
-        "delta_t_c": (None if (not thermal or thermal.get("delta_t_c") is None) else float(thermal.get("delta_t_c"))),
-        "mix_time_min": float(mix_time_min or 0.0),
-        "evap_loss_kg": float(evap_loss_kg or 0.0),
-        "ionic_strength": float(ionic_strength or 0.0),
-        "reologia": ("Não-Newtoniano" if sc_mode else "Newtoniano"),
-        "sc_mode": bool(sc_mode),
-    }
-
-    etapas.append({
-        "nome_etapa": "Preparação da Matriz",
-        "instrucao_processo": f"Iniciar com 70% da água Q.S.P e agitar até vórtice estável. Setup: {setup}.",
-        "parametros_maquina": {"equipamento": setup, "rpm": (2000 if sc_mode else (40 if tier == 1 else 60)), "rpm_faixa": ("1500-3000" if sc_mode else ""), "temp_c": _target_temp()},
-        "gate_ph": {"medir": False, "alvo": None, "texto": ""},
-        "tempo": _time_for_stage("Preparação da Matriz"),
-        "pccs": _map_pcc("Preparação da Matriz"),
-        "pop": _map_pop("Preparação da Matriz"),
-    })
-    etapas[0]["predicoes"] = predicoes
-
-    insert_at = 1
-    if sc_mode:
-        etapas.insert(insert_at, {
-            "nome_etapa": "Hidratação de Espessante (SC)",
-            "instrucao_processo": "Hidratação de espessante em água pura (sem eletrólitos) antes de iniciar a carga de sais.",
-            "parametros_maquina": {"equipamento": setup, "rpm": 2000, "rpm_faixa": "1500-3000", "temp_c": float(temp_c or 25.0)},
-            "gate_ph": {"medir": False, "alvo": None, "texto": ""},
-            "tempo": "Agitar por 40 min",
-            "pccs": _map_pcc("Preparação da Matriz"),
-            "pop": [],
-        })
-        insert_at += 1
-
-    if thermal and (thermal.get("temp_out_c") is not None) and float(thermal.get("temp_out_c") or 0.0) < 15.0:
-        etapas.insert(insert_at, {
-            "nome_etapa": "AQUECIMENTO OBRIGATÓRIO (Mín. 30°C)",
-            "instrucao_processo": "AQUECIMENTO OBRIGATÓRIO (Mín. 30°C): elevar temperatura antes de dissolver sais para evitar cristalização por choque térmico.",
-            "parametros_maquina": {"equipamento": setup, "rpm": (2000 if sc_mode else _rpm_for_regime()), "rpm_faixa": ("1500-3000" if sc_mode else ""), "temp_c": 30.0},
-            "gate_ph": {"medir": False, "alvo": None, "texto": ""},
-            "tempo": "Agitar por 10 min",
-            "pccs": _map_pcc("Dissolução"),
-            "pop": [],
-        })
-
-    gate_txt = ""
-    if _has_micros() or _has_ca():
-        gate_txt = "NÃO INICIAR A ETAPA DE MICRONUTRIENTES SE pH > 5.5. Medir pH e ajustar antes de adicionar metais."
-    etapas.append({
-        "nome_etapa": "Complexação",
-        "instrucao_processo": f"Adicionar condicionadores/quelantes/co-solventes lentamente: {list_names(stage2)}.",
-        "parametros_maquina": {"equipamento": setup, "rpm": (2000 if sc_mode else _rpm_for_regime()), "rpm_faixa": ("1500-3000" if sc_mode else ""), "temp_c": _target_temp()},
-        "gate_ph": {"medir": bool(gate_txt), "alvo": "<= 5.5", "texto": gate_txt},
-        "tempo": _time_for_stage("Complexação"),
-        "pccs": _map_pcc("Complexação"),
-        "pop": _map_pop("Complexação"),
-    })
-
-    etapas.append({
-        "nome_etapa": "Dissolução / Saturação",
-        "instrucao_processo": (
-            f"Adicionar sais por ordem de solubilidade, em pequenas frações: {list_names(stage4)}."
-            + (
-                ""
-                if not thermal
-                else (
-                    f" Balanço térmico estimado: T {format_num(float(temp_c or 25.0), 1)}°C -> "
-                    f"{format_num(float(thermal.get('temp_out_c') or 0.0), 1)}°C "
-                    f"(Q={format_num(float(thermal.get('q_kj') or 0.0), 0)} kJ)."
-                    + (
-                        f" Para manter {format_num(float(temp_c or 25.0), 0)}°C: injetar ~{format_num(float(thermal.get('heat_kcal_to_hold') or 0.0), 0)} kcal."
-                        if float(thermal.get("q_kj") or 0.0) > 0
-                        else " Monitorar pico exotérmico e controlar adição."
-                    )
-                )
-            )
-            + ("" if ph_est is None else f" pH teórico (estimativa): ~{format_num(float(ph_est), 1)}.")
-        ),
-        "parametros_maquina": {"equipamento": setup, "rpm": (2000 if sc_mode else _rpm_for_regime()), "rpm_faixa": ("1500-3000" if sc_mode else ""), "temp_c": _target_temp()},
-        "gate_ph": {"medir": False, "alvo": None, "texto": ""},
-        "tempo": _time_for_stage("Dissolução"),
-        "pccs": _map_pcc("Dissolução"),
-        "pop": _map_pop("Dissolução"),
-    })
-
-    etapas.append({
-        "nome_etapa": "Micronutrientes",
-        "instrucao_processo": f"Adicionar micronutrientes sob agitação constante: {list_names(stage3)}.",
-        "parametros_maquina": {"equipamento": setup, "rpm": (2000 if sc_mode else (80 if tier < 3 else 120)), "rpm_faixa": ("1500-3000" if sc_mode else ""), "temp_c": _target_temp()},
-        "gate_ph": {"medir": bool(gate_txt), "alvo": "<= 5.5", "texto": gate_txt},
-        "tempo": _time_for_stage("Micronutrientes"),
-        "pccs": _map_pcc("Complexação"),
-        "pop": _map_pop("Complexação"),
-    })
-
-    etapas.append({
-        "nome_etapa": "Finalização",
-        "instrucao_processo": "Completar volume (Q.S.P), homogeneizar, ajustar pH final e filtrar se necessário.",
-        "parametros_maquina": {"equipamento": setup, "rpm": (1200 if sc_mode else 60), "rpm_faixa": ("1500-3000" if sc_mode else ""), "temp_c": float(temp_c or 25.0)},
-        "gate_ph": {"medir": True, "alvo": "Conforme TDS", "texto": "Medir pH final e registrar antes de liberar envase."},
-        "tempo": _time_for_stage("Finalização"),
-        "pccs": _map_pcc("Finalização"),
-        "pop": _map_pop("Finalização"),
-    })
-
-    return etapas
+    instr: List[str] = []
+    instr.append(f"Regime de Agitação: {regime} (índice de saturação={format_num(sat, 3)}; T={format_num(temp_c, 1)}°C).")
 
     if needs_heat:
         sat_hot = _saturation_index_total(lines, insumos, volume_l, use_hot_solubility=True)
@@ -1770,7 +1129,6 @@ def build_top12_outputs(
             outputs.append(FormulaOutput([], [], [], [], [], 0.0))
             continue
         lines = list(base_lines)
-        ph_est = _estimate_ph_theoretical(lines, volume_l)
         steps, ad_sug = recommend_process_and_aditivos(
             targets,
             lines,
@@ -1778,11 +1136,9 @@ def build_top12_outputs(
             insumos,
             volume_l,
             temp_c,
-            ph_estimated=ph_est,
-            formula_index=idx,
             reactor_level_available=reactor_level_available,
         )
-        instrucoes = diagnosticar_operacoes_unitarias(lines, insumos, ad_sug, volume_l, temp_c, formula_index=idx)
+        instrucoes = diagnosticar_operacoes_unitarias(lines, insumos, ad_sug, volume_l, temp_c)
         aditivos_usados: List[Dict[str, float]] = []
         for l in lines:
             if _norm_text(l.fornecedor or "") == "aditivo":
@@ -1808,6 +1164,53 @@ def _build_optimized_forms(
     limite_diversificacao = float(limite_diversificacao or 0.0)
     limite_diversificacao = max(50.0, min(100.0, limite_diversificacao))
     cap_share = limite_diversificacao / 100.0
+
+    solvent_relief: List[float] = [0.0 for _ in valid_insumos]
+    added_solvents: set = set()
+
+    def _extreme_solvent_relief(a: Aditivo) -> float:
+        hay = _norm_text(f"{a.nome or ''} {a.abreviatura or ''} {a.grupo or ''} {a.observacoes or ''}")
+        if "dmso" in hay:
+            return 0.020
+        if "nmp" in hay:
+            return 0.018
+        if ("liquido ionico" in hay) or ("liquido ionico" in hay) or ("ionic liquid" in hay):
+            return 0.020
+        if "des" in hay or "reline" in hay or "glyceline" in hay:
+            return 0.016
+        if "peg" in hay or "polietilenoglicol" in hay:
+            return 0.012
+        return 0.0
+
+    for a in aditivos:
+        relief = _extreme_solvent_relief(a)
+        if relief <= 0:
+            continue
+        nm = f"{a.nome} ({a.abreviatura})" if (a.abreviatura or "").strip() else (a.nome or "")
+        if not nm:
+            continue
+        key = _canonical_key(nm)
+        if not key or key in added_solvents:
+            continue
+        added_solvents.add(key)
+        price = float(a.preco_unit or 0.0)
+        if price <= 0:
+            price = 20.0
+        valid_insumos.append(Insumo(
+            id=f"solvente_{a.id}",
+            nome=nm,
+            solubilidade="Totalmente miscível",
+            natureza_fisica="Líquida",
+            teor_por_nutriente_pct={},
+            rank_solubilidade=1,
+            rank_custo=5,
+            fator_v=1.0,
+            preco_unit=price,
+            fornecedor="Aditivo",
+            lead_time="N/A",
+            is_local=False,
+        ))
+        solvent_relief.append(float(relief))
 
     forced_quelante_idx: Optional[int] = None
     forced_quelante_lb_kg = 0.0
@@ -1840,6 +1243,7 @@ def _build_optimized_forms(
                     lead_time="N/A",
                     is_local=False,
                 ))
+                solvent_relief.append(0.0)
                 forced_quelante_idx = len(valid_insumos) - 1
 
     nutrient_keys = [k for k, _ in NUTRIENT_COLUMNS if (targets.get(k, 0.0) or 0.0) > 0]
@@ -1884,7 +1288,14 @@ def _build_optimized_forms(
             max_saturation_index = float(max_saturation_index or 0.0)
             max_saturation_index = max(0.05, min(1.0, max_saturation_index))
             if has_sol_limits:
-                row = [(1.0 / float(sol_limits[j])) if (sol_limits[j] is not None and sol_limits[j] > 0) else 0.0 for j in range(num_insumos)]
+                row = []
+                for j in range(num_insumos):
+                    relief = float(solvent_relief[j] or 0.0) if j < len(solvent_relief) else 0.0
+                    if relief > 0:
+                        row.append(-relief)
+                        continue
+                    lim = sol_limits[j]
+                    row.append((1.0 / float(lim)) if (lim is not None and lim > 0) else 0.0)
                 A_ub.append(row)
                 b_ub.append(float(max_saturation_index))
 
@@ -1984,13 +1395,6 @@ def _build_optimized_forms(
                         if x_val > max_mass:
                             max_mass = x_val
                             max_insumo = ins.nome
-
-                if tier == 2:
-                    massa_glicerina = volume_l * 0.02
-                    best_lines.append(FormulaLine("Glicerina (Co solvente)", massa_glicerina, {}, 4.00, massa_glicerina * 4.00, fornecedor="Aditivo", is_local=False))
-                elif tier == 3:
-                    massa_sorbitol = volume_l * 0.05
-                    best_lines.append(FormulaLine("Sorbitol 70% (Co solvente)", massa_sorbitol, {}, 5.00, massa_sorbitol * 5.00, fornecedor="Aditivo", is_local=False))
                 
                 forms.append(best_lines)
                 if max_insumo:
@@ -2013,7 +1417,7 @@ def _build_tier3_alchemy_forms(
     limite_diversificacao: float = 75.0,
     max_saturation_index: float = 1.0,
 ) -> List[List[FormulaLine]]:
-    alchemy_insumos = list(insumos)
+    base_insumos = list(insumos)
 
     forced_quelante_idx: Optional[int] = None
     forced_quelante_lb_kg = 0.0
@@ -2032,7 +1436,7 @@ def _build_tier3_alchemy_forms(
             forced_quelante_lb_kg = (volume_l * float(dose_pct)) / 100.0
             if forced_quelante_lb_kg > 0:
                 nm = f"{q.nome} ({q.abreviatura})" if (q.abreviatura or "").strip() else (q.nome or "Quelante")
-                alchemy_insumos.append(Insumo(
+                base_insumos.append(Insumo(
                     id=str(q.id),
                     nome=nm,
                     solubilidade="Totalmente miscível",
@@ -2046,35 +1450,45 @@ def _build_tier3_alchemy_forms(
                     lead_time="N/A",
                     is_local=False,
                 ))
-                forced_quelante_idx = len(alchemy_insumos) - 1
+                forced_quelante_idx = len(base_insumos) - 1
 
-    alchemy_insumos.append(Insumo(
-        id="alchemy_sorbitol_70",
-        nome="Sorbitol 70% (Co solvente variável)",
-        solubilidade="Totalmente miscível",
-        natureza_fisica="Líquida",
-        teor_por_nutriente_pct={},
-        rank_solubilidade=1,
-        rank_custo=1,
-        fator_v=0.0,
-        preco_unit=5.00,
-        fornecedor="Aditivo",
-        lead_time="N/A",
-        is_local=False,
-    ))
-    sorbitol_idx = len(alchemy_insumos) - 1
+    def _pick_by_keywords(keywords: Sequence[str]) -> Optional[Aditivo]:
+        ks = tuple(_norm_text(k) for k in keywords if k)
+        matches: List[Aditivo] = []
+        for a in aditivos:
+            hay = _norm_text(f"{a.nome or ''} {a.abreviatura or ''} {a.grupo or ''} {a.observacoes or ''}")
+            if any(k in hay for k in ks):
+                matches.append(a)
+        if not matches:
+            return None
+        def price(a: Aditivo) -> float:
+            p = float(a.preco_unit or 0.0)
+            return p if p > 0 else 1e9
+        matches.sort(key=lambda a: (price(a), (a.nome or "").strip()))
+        return matches[0]
+
+    strategies = [
+        {"keys": ["sorbitol", "glicerina"], "relief": 0.010},
+        {"keys": ["peg", "polietilenoglicol", "propilenoglicol"], "relief": 0.020},
+        {"keys": ["dmso", "nmp"], "relief": 0.030},
+        {"keys": ["liquido ionico", "ionic liquid", "cloreto de colina", "choline chloride", "des"], "relief": 0.040},
+    ]
+
+    chosen_solvents: List[Optional[Aditivo]] = []
+    for idx in range(4):
+        pick = _pick_by_keywords(strategies[idx]["keys"])
+        if pick is None and idx > 0:
+            pick = chosen_solvents[idx - 1]
+        chosen_solvents.append(pick)
 
     nutrient_keys = [k for k, _ in NUTRIENT_COLUMNS if (targets.get(k, 0.0) or 0.0) > 0]
-    num_vars = len(alchemy_insumos)
-
-    A_eq: List[List[float]] = []
+    A_eq_base: List[List[float]] = []
     for k in nutrient_keys:
         if k == "S":
-            row = [_effective_teor_pct(i, "S") / 100.0 for i in alchemy_insumos]
+            row = [_effective_teor_pct(i, "S") / 100.0 for i in base_insumos]
         else:
-            row = [float(i.teor_por_nutriente_pct.get(k, 0.0) or 0.0) / 100.0 for i in alchemy_insumos]
-        A_eq.append(row)
-
+            row = [float(i.teor_por_nutriente_pct.get(k, 0.0) or 0.0) / 100.0 for i in base_insumos]
+        A_eq_base.append(row)
     b_eq = [targets.get(k, 0.0) * volume_l / 100.0 for k in nutrient_keys]
 
     limite_diversificacao = float(limite_diversificacao or 0.0)
@@ -2084,21 +1498,55 @@ def _build_tier3_alchemy_forms(
     max_saturation_index = float(max_saturation_index or 0.0)
     max_saturation_index = max(0.05, min(1.0, max_saturation_index))
 
-    sol_limits = [_solubility_limit_mass_kg(i, volume_l) for i in alchemy_insumos]
-    has_sol_limits = any((v is not None and v > 0) for v in sol_limits)
-
-    base_bounds: List[Tuple[float, Optional[float]]] = []
-    for j, _ins in enumerate(alchemy_insumos):
-        if j == sorbitol_idx:
-            base_bounds.append((0.0, float(volume_l) * 0.10))
-            continue
-        lb = forced_quelante_lb_kg if (forced_quelante_idx is not None and j == forced_quelante_idx) else 0.0
-        base_bounds.append((float(lb), None))
-
     forms: List[List[FormulaLine]] = []
     blocked_names: set = set()
 
-    for _var_idx in range(4):
+    for level in range(4):
+        solvent_a = chosen_solvents[level]
+        alchemy_insumos = list(base_insumos)
+        solvent_idx: Optional[int] = None
+        sat_relief_per_kg = float(strategies[level]["relief"])
+
+        if solvent_a is not None:
+            nm = f"{solvent_a.nome} ({solvent_a.abreviatura})" if (solvent_a.abreviatura or "").strip() else (solvent_a.nome or "")
+            price = float(solvent_a.preco_unit or 0.0)
+            if price <= 0:
+                price = 20.0
+            alchemy_insumos.append(Insumo(
+                id=f"alchemy_solvent_{level}_{solvent_a.id}",
+                nome=nm,
+                solubilidade="Totalmente miscível",
+                natureza_fisica="Líquida",
+                teor_por_nutriente_pct={},
+                rank_solubilidade=1,
+                rank_custo=5,
+                fator_v=1.0,
+                preco_unit=price,
+                fornecedor="Aditivo",
+                lead_time="N/A",
+                is_local=False,
+            ))
+            solvent_idx = len(alchemy_insumos) - 1
+
+        num_vars = len(alchemy_insumos)
+        A_eq: List[List[float]] = []
+        for r in A_eq_base:
+            row = list(r)
+            if solvent_idx is not None:
+                row.append(0.0)
+            A_eq.append(row)
+
+        sol_limits = [_solubility_limit_mass_kg(i, volume_l) for i in alchemy_insumos]
+        has_sol_limits = any((v is not None and v > 0) for v in sol_limits)
+
+        bounds: List[Tuple[float, Optional[float]]] = []
+        for j, _ins in enumerate(alchemy_insumos):
+            if solvent_idx is not None and j == solvent_idx:
+                bounds.append((0.0, float(volume_l) * 0.15))
+                continue
+            lb = forced_quelante_lb_kg if (forced_quelante_idx is not None and j == forced_quelante_idx) else 0.0
+            bounds.append((float(lb), None))
+
         c: List[float] = []
         for ins in alchemy_insumos:
             w = float(ins.preco_unit or 0.0)
@@ -2121,10 +1569,9 @@ def _build_tier3_alchemy_forms(
             b_ub.append(float(ub))
 
         if has_sol_limits:
-            sat_relief_per_kg = 0.012
             row = []
             for j in range(num_vars):
-                if j == sorbitol_idx:
+                if solvent_idx is not None and j == solvent_idx:
                     row.append(-float(sat_relief_per_kg))
                     continue
                 lim = sol_limits[j]
@@ -2152,7 +1599,7 @@ def _build_tier3_alchemy_forms(
                 A_ub.append(row)
                 b_ub.append(float(cap_mass))
 
-        res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=base_bounds, method="highs")
+        res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method="highs")
         if not res.success:
             forms.append([])
             continue
@@ -2164,9 +1611,9 @@ def _build_tier3_alchemy_forms(
             if x_val <= 0.001:
                 continue
             ins = alchemy_insumos[idx_val]
-            contrib = {} if idx_val == sorbitol_idx else _contrib_pct_map(volume_l, float(x_val), ins)
+            contrib = {} if (solvent_idx is not None and idx_val == solvent_idx) else _contrib_pct_map(volume_l, float(x_val), ins)
             best_lines.append(FormulaLine(ins.nome, float(x_val), contrib, ins.preco_unit, float(x_val) * float(ins.preco_unit), ins.fornecedor, ins.lead_time, ins.is_local))
-            if float(x_val) > max_mass and idx_val != sorbitol_idx:
+            if float(x_val) > max_mass and (solvent_idx is None or idx_val != solvent_idx):
                 max_mass = float(x_val)
                 max_insumo = ins.nome
 

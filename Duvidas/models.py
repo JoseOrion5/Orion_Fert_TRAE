@@ -70,9 +70,6 @@ class Aditivo:
     alerta_incompatibilidade: str
     observacoes: str
     preco_unit: float = 0.0
-    hlb: float = 0.0
-    limite_forca_ionica: float = 0.0
-    tipo_reologia: str = ""
 
 
 @dataclass(frozen=True)

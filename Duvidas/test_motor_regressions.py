@@ -191,8 +191,6 @@ class TestMotorRegressions(unittest.TestCase):
         for l in best.lines:
             self.assertLessEqual(float(l.contrib_pct.get("N", 0.0) or 0.0), cap + 1e-6)
 
-<<<<<<< HEAD
-=======
     def test_quelante_prioritized_for_fe_high_ph(self):
         vol = 100.0
         lines = [
@@ -263,7 +261,6 @@ class TestMotorRegressions(unittest.TestCase):
         self.assertTrue(ad_sug)
         self.assertTrue(any((s.aditivo.abreviatura or "").strip().upper() in {"HBED"} or "EDDHA" in (s.aditivo.abreviatura or "").upper() for s in ad_sug))
 
->>>>>>> 719263f18fa5f1f6d8803061ff8917b3ff208def
 
 if __name__ == "__main__":
     unittest.main()

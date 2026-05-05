@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.exe
 *.zip
 *.7z
@@ -13,3 +14,7 @@ __pycache__/
 .1src/1.__pycache__/
 *.pyc
 *.log
+=======
+__pycache__/
+*.pyc
+>>>>>>> 719263f18fa5f1f6d8803061ff8917b3ff208def
