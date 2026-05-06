@@ -186,18 +186,55 @@ def load_aditivos() -> List[Aditivo]:
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT id, nome, abreviatura, categoria, funcao, nutrientes_compativeis, ph_ideal, dose_legal, dose_tecnica, setup, alerta, observacoes, preco_unit FROM aditivos")
+        cursor.execute("PRAGMA table_info(aditivos)")
+        cols = {str(r[1]) for r in (cursor.fetchall() or [])}
+        has_hlb = "hlb" in cols
+        has_lim = "limite_forca_ionica" in cols
+        has_rheo = "tipo_reologia" in cols
+
+        sel = [
+            "id",
+            "nome",
+            "abreviatura",
+            "categoria",
+            "funcao",
+            "nutrientes_compativeis",
+            "ph_ideal",
+            "dose_legal",
+            "dose_tecnica",
+            "setup",
+            "alerta",
+            "observacoes",
+            "preco_unit",
+        ]
+        if has_hlb:
+            sel.append("hlb")
+        if has_lim:
+            sel.append("limite_forca_ionica")
+        if has_rheo:
+            sel.append("tipo_reologia")
+        cursor.execute(f"SELECT {', '.join(sel)} FROM aditivos")
         rows = cursor.fetchall()
 
         aditivos: List[Aditivo] = []
         for r in rows:
+            hlb = 0.0
+            lim = 0.0
+            rheo = ""
+            if has_hlb:
+                hlb = float(r[13] or 0.0)
+            if has_lim:
+                lim = float(r[14 if has_hlb else 13] or 0.0)
+            if has_rheo:
+                idx = 15 if (has_hlb and has_lim) else (14 if (has_hlb or has_lim) else 13)
+                rheo = "" if r[idx] is None else str(r[idx])
             aditivos.append(Aditivo(
                 id=r[0], nome=r[1], abreviatura=r[2], grupo=r[3], funcao_principal=r[4],
                 nutrientes_compativeis=r[5], faixa_ph_ideal=r[6],
                 dose_maxima_legal_pct=r[7], dose_maxima_tecnica_pct=r[8],
                 modo_aplicacao=r[9], alerta_incompatibilidade=r[10],
                 observacoes=r[11], preco_unit=r[12],
-                hlb=0.0, limite_forca_ionica=0.0, tipo_reologia=""
+                hlb=hlb, limite_forca_ionica=lim, tipo_reologia=rheo
             ))
         conn.close()
         return aditivos
