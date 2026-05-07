@@ -1,0 +1,45 @@
+[
+  {
+    "data_hora": "30/04/2026 14:11",
+    "tier": 1,
+    "titulo": "ORDEM DE PRODUÇÃO - TIER 1",
+    "densidade": 1.100511073253833,
+    "agua_balanco": 88.82575757575758,
+    "volume_l": 100.0,
+    "bom_lines": [
+      {
+        "insumo_nome": "Ureia (prilled/granular)",
+        "massa_kg": 16.666666666666668
+      },
+      {
+        "insumo_nome": "Ureia revestida (polímero/enxofre)",
+        "massa_kg": 5.681818181818182
+      }
+    ],
+    "pop_etapas": [
+      {
+        "etapa": "1. Início",
+        "procedimento": "Adicionar 70% da água QSP.",
+        "notas": "Agitação média"
+      },
+      {
+        "etapa": "2. Sais",
+        "procedimento": "Adicionar sais por ordem de solubilidade.",
+        "notas": "Evitar grumos"
+      },
+      {
+        "etapa": "3. Final",
+        "procedimento": "Completar volume e ajustar pH.",
+        "notas": "Estabilização"
+      }
+    ],
+    "pcc_pontos": [
+      {
+        "id": "PCC-STD",
+        "parametro": "pH e Densidade",
+        "limite": "Conforme TDS",
+        "acao": "Ajustar ou Rejeitar"
+      }
+    ]
+  }
+]

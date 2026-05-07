@@ -1,0 +1,291 @@
+﻿
+            # Botao ESTUDAR
+            def on_estudar(_e):
+                \"\"\"Abre dialogo com o estudo quimico completo.\"\"\"
+                nonlocal idx, output, lines, v, targets
+                try:
+                    estudo = estudo_quimico.gerar_estudo_completo(
+                        idx, output, insumos_cache, targets, v, get_temp_c()
+                    )
+                except Exception as ex:
+                    page.snack_bar = ft.SnackBar(ft.Text(f"Erro ao gerar estudo: {ex}"))
+                    page.snack_bar.open = True
+                    page.update()
+                    return
+
+                secoes_ui = []
+                for secao in estudo:
+                    secoes_ui.append(
+                        ft.Text(secao.titulo, size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_200)
+                    )
+                    secoes_ui.append(
+                        ft.Container(
+                            content=ft.Text(secao.explicacao, size=12, color=ft.Colors.WHITE70),
+                            padding=ft.padding.only(left=8, top=4, bottom=4),
+                        )
+                    )
+                    if secao.alerta:
+                        if "ALERTA" in secao.alerta.upper() or "CRITICO" in secao.alerta.upper() or "MUITO" in secao.alerta.upper():
+                            cor_alerta = ft.Colors.RED_400
+                        elif "ATENCAO" in secao.alerta.upper() or "ELEVADO" in secao.alerta.upper() or "MODERADO" in secao.alerta.upper():
+                            cor_alerta = ft.Colors.ORANGE_400
+                        else:
+                            cor_alerta = ft.Colors.GREEN_400
+                        secoes_ui.append(
+                            ft.Container(
+                                content=ft.Text(secao.alerta, size=12, weight=ft.FontWeight.W_600, color=cor_alerta),
+                                bgcolor=ft.Colors.with_opacity(0.15, cor_alerta),
+                                padding=10,
+                                border_radius=8,
+                                margin=ft.margin.only(left=8, top=4, bottom=4),
+                            )
+                        )
+                    if secao.recomendacao:
+                        secoes_ui.append(
+                            ft.Container(
+                                content=ft.Row([
+                                    ft.Icon(ft.Icons.LIGHTBULB_OUTLINE, color=ft.Colors.AMBER_400, size=18),
+                                    ft.Text(secao.recomendacao, size=12, color=ft.Colors.AMBER_200),
+                                ]),
+                                bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.AMBER),
+                                padding=10,
+                                border_radius=8,
+                                margin=ft.margin.only(left=8, top=4, bottom=8),
+                            )
+                        )
+                    if secao.dados:
+                        dados = secao.dados
+                        if dados.get("tipo") in ("barras", "radar", "barras_duplas") and dados.get("dados"):
+                            texto_grafico = f"Grafico: {dados['titulo']}:\n"
+                            for item in dados["dados"]:
+                                texto_grafico += f"  - {item.get('insumo') or item.get('nutriente') or item.get('sigla', '')}: "
+                                if "contrib_pct_saturacao" in item:
+                                    texto_grafico += f"{item['contrib_pct_saturacao']:.1f}% do indice de saturacao"
+                                elif "obtido_pct" in item and "alvo_pct" in item:
+                                    texto_grafico += f"Obtido: {item['obtido_pct']:.2f}% | Alvo: {item['alvo_pct']:.2f}% | Atingido: {item.get('atingido_pct', 0):.1f}%"
+                                elif "calor_kj" in item:
+                                    texto_grafico += f"{item['calor_kj']:.1f} kJ ({item.get('tipo', '-')})"
+                                texto_grafico += "\n"
+                            secoes_ui.append(
+                                ft.Container(
+                                    content=ft.Text(texto_grafico, size=11, color=ft.Colors.CYAN_200),
+                                    bgcolor=ft.Colors.with_opacity(0.08, ft.Colors.CYAN),
+                                    padding=10,
+                                    border_radius=8,
+                                    margin=ft.margin.only(left=8, top=4, bottom=4),
+                                )
+                            )
+                        elif dados.get("tipo") == "indicador":
+                            valor = dados.get("valor", 0)
+                            unidade = dados.get("unidade", "")
+                            cor_valor = ft.Colors.GREEN_400
+                            for faixa in dados.get("faixas", []):
+                                if float(valor) < float(faixa["limite"]):
+                                    cor_map = {"verde": ft.Colors.GREEN_400, "amarelo": ft.Colors.AMBER_400, "vermelho": ft.Colors.RED_400}
+                                    cor_valor = cor_map.get(faixa.get("cor", "verde"), ft.Colors.GREEN_400)
+                                    break
+                            secoes_ui.append(
+                                ft.Container(
+                                    content=ft.Text(f"{dados['titulo']}: {valor}{unidade}", size=14, weight=ft.FontWeight.BOLD, color=cor_valor),
+                                    padding=10,
+                                    margin=ft.margin.only(left=8, top=4, bottom=4),
+                                )
+                            )
+                    secoes_ui.append(ft.Divider(height=1, color=ft.Colors.WHITE12))
+
+                def close_dialog(e):
+                    dlg.open = False
+                    page.update()
+
+                dlg = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text(f"Estudo Quimico - F{idx}", weight=ft.FontWeight.BOLD),
+                    content=ft.Container(
+                        content=ft.Column(
+                            controls=secoes_ui,
+                            scroll=ft.ScrollMode.AUTO,
+                            expand=True,
+                        ),
+                        width=700,
+                        height=600,
+                        padding=10,
+                    ),
+                    actions=[
+                        ft.TextButton("Fechar", on_click=close_dialog),
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
+
+                page.dialog = dlg
+                dlg.open = True
+                page.update()
+
+            # Montagem da UI da formula
+            return ft.Stack(
+                [
+                    ft.Column(
+                        controls=[
+                            build_thermo_alert(status),
+                            build_data_table(lines, insumos_cache, v, targets, bool(supply_chain_switch.value), page=page),
+                            roteiro_ui,
+                            ft.ElevatedButton(
+                                "SELECIONAR P/ PDF",
+                                icon=ft.Icons.PICTURE_AS_PDF,
+                                on_click=lambda _, l=lines, i=idx: on_generate_pdf_for_selection(l, i),
+                            ),
+                            ft.ElevatedButton(
+                                "ENVIAR PARA LAUDO / OP",
+                                icon=ft.Icons.FILE_DOWNLOAD,
+                                on_click=lambda _, l=lines, i=idx: on_send_to_laudo(l, i),
+                            ),
+                            ft.ElevatedButton(
+                                "ESTUDAR",
+                                icon=ft.Icons.SCIENCE,
+                                on_click=on_estudar,
+                            ),
+                            recomendacoes_ui,
+                            ft.Container(height=100),
+                        ],
+                        scroll=ft.ScrollMode.AUTO,
+                        expand=True,
+                    ),
+                    ft.Container(
+                        content=build_risk_chart(output, v),
+                        right=20,
+                        bottom=20,
+                    ),
+                ],
+                expand=True,
+            )
+
+        except Exception as e:
+            return ft.Container(content=ft.Text(f"Erro: {str(e)}", color=ft.Colors.RED_400))
+
+    # --- AUXILIARES DE RENDERIZACAO ---
+
+    def build_top12_tabs(forms: List[FormulaOutput]) -> None:
+        labels = []
+        views = []
+
+        for i, f in enumerate(forms):
+            idx = i + 1
+            if idx <= 4:
+                label = f"F{idx} (Tier 1 - Conservador)"
+            elif idx <= 8:
+                label = f"F{idx} (Tier 2 - Audacioso / exploratorio)"
+            else:
+                label = f"F{idx} (Tier 3 - Alquimia / nao ortodoxo)"
+
+            labels.append(label)
+            views.append(build_top12_formula_view(idx, f))
+
+        set_tabs(top12_tabs, labels, views)
+        page.update()
+
+    def on_send_to_laudo(lines, idx):
+        nonlocal current_relatorio
+        status = verificar_viabilidade_termodinamica(v, lines, insumos_cache, idx, temp_c=get_temp_c())
+        if not status.viable:
+            page.snack_bar = ft.SnackBar(ft.Text(f"A Formula F{idx} INVALVEL para producao."))
+            page.snack_bar.open = True
+            page.update()
+            return
+
+        try:
+            totals = {}
+            for l in lines:
+                for k, val in (l.contrib_pct or {}).items():
+                    try:
+                        fv = float(val or 0.0)
+                    except Exception:
+                        fv = 0.0
+                    totals[str(k)] = float(totals.get(str(k), 0.0) or 0.0) + float(fv)
+
+            targets_used = parse_targets_from_fields(targets_fields)
+            triggered = motor._kps_triggered_pairs(totals, targets_used)
+            risco_kps = len(triggered) > 0
+
+            bom_lines = []
+            for l in lines:
+                ins = None
+                for i in insumos_cache:
+                    if i.nome == l.insumo_nome:
+                        ins = i
+                        break
+                if ins:
+                    bom_lines.append(l)
+
+            agua_balanco = v
+            for l in bom_lines:
+                try:
+                    agua_balanco -= float(l.massa_kg or 0.0)
+                except Exception:
+                    pass
+
+            volume_val = get_volume()
+            ph_est = motor._estimate_ph_theoretical(lines, volume_val)
+            thermal = motor._thermal_balance_estimate(lines, insumos_cache, volume_val, float(get_temp_c() or 25.0))
+            ionic = motor._estimate_ionic_strength(lines, volume_val, ph_est=ph_est)
+            mix_min = motor._estimate_mix_time_min(lines, insumos_cache, volume_val)
+            dens = motor._estimated_density(lines, insumos_cache, volume_val)
+            sat = float(output.indice_saturacao or 0.0) if hasattr(output, 'indice_saturacao') else 0.0
+
+            current_relatorio = motor.Relatorio(
+                formula_idx=idx,
+                bom_lines=bom_lines,
+                agua_balanco=float(agua_balanco or 0.0),
+                ph_teorico=float(ph_est or 0.0),
+                temperatura_saida=float(thermal.get("temp_out_c", 0.0) or 0.0) if thermal else 0.0,
+                forca_ionica=float(ionic or 0.0),
+                densidade=float(dens or 1.0),
+                tempo_mistura_min=float(mix_min or 0.0),
+                saturacao=float(sat),
+                process_steps=list(output.process_steps or []),
+                aditivos_sugeridos=list(output.aditivos_sugeridos or []),
+                instrucoes_producao=list(output.instrucoes_producao or []),
+                pop_etapas=[],
+                pcc_pontos=[],
+            )
+            page.snack_bar = ft.SnackBar(ft.Text(f"F{idx} enviada para laudo!"))
+            page.snack_bar.open = True
+            page.update()
+        except Exception as e:
+            print(f"Erro on_send_to_laudo: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+            page.snack_bar = ft.SnackBar(ft.Text(f"Erro: {str(e)}"))
+            page.snack_bar.open = True
+            page.update()
+
+    def on_generate_pdf_for_selection(lines, idx):
+        \"\"\"Seleciona a formula para geracao de PDF.\"\"\"
+        nonlocal current_relatorio
+        on_send_to_laudo(lines, idx)
+        if current_relatorio:
+            page.snack_bar = ft.SnackBar(ft.Text(f"F{idx} selecionada para PDF. Use GERAR PDF no menu."))
+            page.snack_bar.open = True
+        else:
+            page.snack_bar = ft.SnackBar(ft.Text(f"Nao foi possivel selecionar F{idx} para PDF."))
+            page.snack_bar.open = True
+        page.update()
+
+    # --- INICIO DA CONSTRUCAO DA UI ---
+
+    page.add(header, main_tabs)
+    page.update()
+
+    # Carrega dados iniciais nos campos
+    reload_data()
+
+def main(page: ft.Page) -> None:
+    try:
+        _main_impl(page)
+    except Exception:
+        import traceback
+        err = traceback.format_exc()
+        print(f"[ERRO FATAL]\n{err}", flush=True)
+        _write_error_log(err)
+        page.add(ft.Text("Erro fatal. Verifique orionagroquim_error.log"))
+
+if __name__ == "__main__":
+    ft.run(main)

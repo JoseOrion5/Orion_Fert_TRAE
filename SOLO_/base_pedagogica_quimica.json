@@ -1,0 +1,316 @@
+{
+  "metadados": {
+    "nome": "Base Pedagógica de Química de Formulações",
+    "versao": "1.0.0",
+    "idioma": "pt-BR",
+    "publico_alvo": [
+      "Estudante de Engenharia Química",
+      "Iniciante em programação",
+      "Usuário de simulador de formulações"
+    ],
+    "objetivo": "Explicar fórmulas, riscos, cálculos e decisões de processo de forma progressiva, conectando química, matemática, lógica e Python."
+  },
+  "niveis_de_explicacao": [
+    {
+      "id": "intuitivo",
+      "descricao": "Explicação em linguagem simples, focada em entendimento conceitual."
+    },
+    {
+      "id": "tecnico",
+      "descricao": "Explicação de engenharia química com vocabulário técnico acessível."
+    },
+    {
+      "id": "matematico",
+      "descricao": "Expressa a relação quantitativa ou a fórmula usada no raciocínio."
+    },
+    {
+      "id": "logico",
+      "descricao": "Mostra a regra de decisão usada pelo sistema."
+    },
+    {
+      "id": "python",
+      "descricao": "Traduz a lógica para pseudocódigo ou Python introdutório."
+    }
+  ],
+  "conceitos": [
+    {
+      "id": "indice_saturacao",
+      "titulo": "Índice de Saturação",
+      "categoria": "solubilidade",
+      "objetivo_didatico": "Mostrar quando a formulação se aproxima do limite de solubilidade e por que isso gera cristalização.",
+      "explicacao_intuitiva": "Imagine que a água é como um ônibus com número limitado de assentos. Cada sal dissolvido ocupa parte desses assentos. Quando o ônibus lota, qualquer passageiro extra fica de fora. Em uma formulação, isso significa cristalização ou precipitação.",
+      "explicacao_tecnica": "O índice de saturação compara a massa dissolvida de cada insumo com seu limite de solubilidade nas condições do sistema. Quando a soma das frações se aproxima ou ultrapassa 1, a solução perde margem operacional e pode precipitar, principalmente em baixas temperaturas.",
+      "matematica": "Índice de saturação ≈ Σ(massa do insumo / limite de solubilidade do insumo)",
+      "logica_algoritmica": "Se o índice for menor que 0,60, a solução é considerada segura. Entre 0,60 e 0,84, a margem fica moderada. Entre 0,85 e 0,99, o sistema entra em alerta. A partir de 1,00, assume-se risco real de cristalização.",
+      "python_iniciante": "sat = sum(massa / limite for massa, limite in pares if limite > 0)\nif sat >= 1.0:\n    status = 'crítico'\nelif sat >= 0.85:\n    status = 'elevado'\nelse:\n    status = 'aceitável'",
+      "perguntas_guia": [
+        "A solução ainda tem margem de segurança?",
+        "Qual insumo mais contribui para a saturação?",
+        "A temperatura pode piorar esse quadro?"
+      ],
+      "faixas": [
+        {
+          "min": 0.0,
+          "max": 0.59,
+          "rotulo": "seguro",
+          "significado": "Há boa margem para variações normais de processo."
+        },
+        {
+          "min": 0.6,
+          "max": 0.84,
+          "rotulo": "moderado",
+          "significado": "A fórmula funciona, mas já exige monitoramento."
+        },
+        {
+          "min": 0.85,
+          "max": 0.99,
+          "rotulo": "elevado",
+          "significado": "A formulação está próxima do limite e precisa mitigação."
+        },
+        {
+          "min": 1.0,
+          "max": 999.0,
+          "rotulo": "crítico",
+          "significado": "A solução tende a cristalizar ou precipitar."
+        }
+      ],
+      "analogias": [
+        "Ônibus lotado",
+        "Copo de açúcar em água até o ponto de não dissolver mais"
+      ]
+    },
+    {
+      "id": "carga_salina",
+      "titulo": "Carga Salina",
+      "categoria": "concentracao",
+      "objetivo_didatico": "Explicar como a massa total de sais afeta a estabilidade da formulação.",
+      "explicacao_intuitiva": "Mesmo que cada sal sozinho consiga se dissolver, a soma de muitos sais deixa a mistura 'apertada'. Quanto mais lotada a solução, mais fácil surgirem interações indesejadas.",
+      "explicacao_tecnica": "A carga salina representa a relação entre massa total de sais e volume da formulação. Cargas elevadas aumentam a força iônica, a viscosidade e a chance de incompatibilidades físico-químicas.",
+      "matematica": "Carga salina (% m/v) = massa total de sais / volume final × 100",
+      "logica_algoritmica": "A regra de interpretação pode usar três zonas: abaixo de 30% é baixa, entre 30% e 45% é moderada e acima de 45% é alta.",
+      "python_iniciante": "carga = massa_total / volume * 100\nif carga > 45:\n    risco = 'alto'\nelif carga >= 30:\n    risco = 'moderado'\nelse:\n    risco = 'baixo'",
+      "perguntas_guia": [
+        "A fórmula está muito concentrada?",
+        "A carga salina ajuda a explicar o risco observado?",
+        "Diluir resolveria parte do problema?"
+      ]
+    },
+    {
+      "id": "pares_kps",
+      "titulo": "Pares Críticos e Kps",
+      "categoria": "precipitacao",
+      "objetivo_didatico": "Ensinar por que certos nutrientes combinados podem formar precipitados insolúveis.",
+      "explicacao_intuitiva": "Alguns íons 'não convivem bem' na mesma solução. Quando se encontram em concentração suficiente, preferem formar um sólido e sair da mistura.",
+      "explicacao_tecnica": "O produto iônico de certas combinações pode exceder o produto de solubilidade do sal correspondente. Isso favorece precipitação de compostos como sulfato de cálcio ou fosfatos de cálcio e magnésio.",
+      "matematica": "Se [íon A] × [íon B] > Kps, a precipitação se torna termodinamicamente favorável.",
+      "logica_algoritmica": "O sistema procura pares críticos conhecidos, como Ca com SO4 ou Ca com fosfatos. Se ambos aparecem em níveis relevantes e não há quelante, o alerta é acionado.",
+      "python_iniciante": "pares_criticos = [('Ca', 'SO4'), ('Ca', 'P2O5'), ('Mg', 'P2O5')]\nfor a, b in pares_criticos:\n    if totais.get(a, 0) > 0 and totais.get(b, 0) > 0:\n        alertas.append(f'Possível precipitação entre {a} e {b}')",
+      "perguntas_guia": [
+        "Quais íons podem reagir entre si?",
+        "Existe quelante ou sequestrante na fórmula?",
+        "O pH piora ou melhora esse risco?"
+      ],
+      "pares_exemplo": [
+        {
+          "par": "Ca + SO4",
+          "risco": "sulfato de cálcio",
+          "efeito": "formação de precipitado branco"
+        },
+        {
+          "par": "Ca + PO4",
+          "risco": "fosfato de cálcio",
+          "efeito": "perda de solubilidade em pH inadequado"
+        },
+        {
+          "par": "Mg + PO4",
+          "risco": "fosfato de magnésio",
+          "efeito": "queda de estabilidade e sólidos em suspensão"
+        }
+      ]
+    },
+    {
+      "id": "balance_termico",
+      "titulo": "Balanço Térmico",
+      "categoria": "energia",
+      "objetivo_didatico": "Mostrar que dissolução também altera temperatura e impacta a solubilidade.",
+      "explicacao_intuitiva": "Nem toda dissolução é neutra. Alguns insumos 'roubam' calor da mistura e a esfriam. Outros liberam calor e a aquecem.",
+      "explicacao_tecnica": "A entalpia de dissolução de cada componente contribui para a variação de temperatura do sistema. Quedas bruscas de temperatura podem reduzir solubilidade; aquecimentos excessivos podem trazer risco operacional.",
+      "matematica": "ΔT ≈ calor total de dissolução / capacidade térmica aproximada do sistema",
+      "logica_algoritmica": "Somam-se as contribuições endotérmicas e exotérmicas dos insumos conhecidos. A temperatura final estimada é usada para disparar recomendações de aquecimento ou cautela.",
+      "python_iniciante": "calor_total = 0\nfor item in linhas:\n    calor_total += item['massa_kg'] * item['delta_h_kj_kg']\nif temperatura_saida < 15:\n    acao = 'aquecer'",
+      "perguntas_guia": [
+        "A formulação esfria ou aquece durante a dissolução?",
+        "A temperatura final ameaça a solubilidade?",
+        "É necessário aquecimento preventivo?"
+      ]
+    },
+    {
+      "id": "ph_teorico",
+      "titulo": "pH Teórico",
+      "categoria": "acidez_basicidade",
+      "objetivo_didatico": "Explicar como acidez e basicidade alteram a compatibilidade da fórmula.",
+      "explicacao_intuitiva": "O pH funciona como o 'humor químico' da solução. Dependendo desse ambiente, certos nutrientes permanecem estáveis ou saem da solução.",
+      "explicacao_tecnica": "O pH influencia solubilidade de micronutrientes, corrosividade do meio, estabilidade de quelantes e compatibilidade entre componentes. Faixas muito ácidas ou muito alcalinas podem inviabilizar a fórmula.",
+      "matematica": "pH = -log10([H+]) em definição rigorosa; no simulador pode ser estimado heuristicamente pela composição.",
+      "logica_algoritmica": "Se predominam ácidos fortes, o pH estimado cai. Se predominam bases, o pH sobe. O valor é comparado com janelas de segurança para metais e processo.",
+      "python_iniciante": "if ph < 3:\n    alerta = 'muito ácido'\nelif ph > 5.5:\n    alerta = 'pode precipitar micronutrientes'\nelse:\n    alerta = 'faixa favorável'",
+      "perguntas_guia": [
+        "O pH favorece ou prejudica a estabilidade?",
+        "Metais podem precipitar nessa faixa?",
+        "Há risco de corrosão ou incompatibilidade?"
+      ]
+    },
+    {
+      "id": "forca_ionica",
+      "titulo": "Força Iônica",
+      "categoria": "interacoes_ionicas",
+      "objetivo_didatico": "Apresentar o efeito da concentração de íons sobre a atividade e a estabilidade.",
+      "explicacao_intuitiva": "Quando há muitos íons juntos, a solução fica 'eletricamente congestionada'. Isso muda o comportamento químico real das espécies.",
+      "explicacao_tecnica": "A força iônica mede o ambiente eletrostático do meio. Valores altos reduzem a atividade efetiva dos íons e podem favorecer efeitos como salting out, alteração de viscosidade e instabilidade coloidal.",
+      "matematica": "μ = 1/2 × Σ(ci × zi²)",
+      "logica_algoritmica": "O sistema estima concentração e carga dos íons principais. Depois compara o valor com faixas de referência para indicar estabilidade ou risco.",
+      "python_iniciante": "mu = 0\nfor ion in ions:\n    mu += ion['concentracao'] * (ion['carga'] ** 2)\nmu *= 0.5",
+      "perguntas_guia": [
+        "A solução está eletricamente muito carregada?",
+        "O valor ajuda a explicar perda de estabilidade?",
+        "A força iônica reforça os alertas de salinidade?"
+      ]
+    },
+    {
+      "id": "hlb",
+      "titulo": "HLB e Emulsão",
+      "categoria": "emulsoes",
+      "objetivo_didatico": "Explicar quando a fórmula deixa de ser solução verdadeira e passa a exigir emulsificação.",
+      "explicacao_intuitiva": "Água e óleo não gostam de ficar juntos. O emulsificante atua como um mediador entre os dois mundos.",
+      "explicacao_tecnica": "Quando há fase oleosa, o HLB requerido da mistura orienta a escolha do sistema tensoativo. A proximidade entre HLB requerido e HLB do emulsificante tende a melhorar estabilidade da emulsão.",
+      "matematica": "HLB requerido ≈ média ponderada dos componentes oleosos",
+      "logica_algoritmica": "Se a fórmula contém óleo ou solvente orgânico, o módulo de explicação deve incluir seção de emulsão e HLB.",
+      "python_iniciante": "if fase_oleosa:\n    incluir_secao_hlb = True\n    hlb_requerido = sum(hlb * fracao for hlb, fracao in componentes)",
+      "perguntas_guia": [
+        "A fórmula é solução ou emulsão?",
+        "Existe fase oleosa suficiente para exigir emulsificante?",
+        "O HLB escolhido faz sentido?"
+      ]
+    },
+    {
+      "id": "reologia",
+      "titulo": "Reologia",
+      "categoria": "escoamento",
+      "objetivo_didatico": "Mostrar como a composição influencia o comportamento de bombeamento e mistura.",
+      "explicacao_intuitiva": "Nem todo líquido se comporta como água. Alguns ficam mais 'pesados' para misturar ou bombear, especialmente quando há excesso de sólidos ou suspensão concentrada.",
+      "explicacao_tecnica": "A reologia descreve a relação entre tensão e taxa de deformação. Em sistemas muito concentrados ou com sólidos dispersos, o comportamento pode deixar de ser newtoniano.",
+      "matematica": "A viscosidade aparente pode depender da taxa de cisalhamento em fluidos não newtonianos.",
+      "logica_algoritmica": "Se a saturação é muito alta ou há modo SC, a fórmula passa a ser descrita como não newtoniana e exige equipamento mais robusto.",
+      "python_iniciante": "if indice_saturacao > 1.10:\n    reologia = 'não newtoniana'\nelse:\n    reologia = 'aprox. newtoniana'",
+      "perguntas_guia": [
+        "A mistura será fácil de bombear?",
+        "Há indícios de suspensão concentrada?",
+        "O equipamento industrial é compatível?"
+      ]
+    },
+    {
+      "id": "aditivos",
+      "titulo": "Aditivos e Mitigadores",
+      "categoria": "estabilizacao",
+      "objetivo_didatico": "Explicar que aditivos não são enfeites, mas ferramentas de correção e proteção da formulação.",
+      "explicacao_intuitiva": "Quando a fórmula sozinha não se mantém estável, os aditivos funcionam como apoios: alguns seguram metais, outros evitam cristais, outros controlam espuma ou suspensão.",
+      "explicacao_tecnica": "Quelantes, cristalizantes, dispersantes, suspensores e antiespumantes atuam em mecanismos distintos. A recomendação depende do risco químico diagnosticado e da faixa operacional.",
+      "matematica": "A dose pode ser estimada por equivalência, relação percentual de massa ou faixa prática recomendada.",
+      "logica_algoritmica": "A explicação deve ligar cada aditivo a um motivo: precipitação, saturação, espuma, reologia, emulsão ou estabilidade geral.",
+      "python_iniciante": "for aditivo in aditivos:\n    print(aditivo['nome'], 'foi sugerido porque', aditivo['motivo'])",
+      "perguntas_guia": [
+        "Por que este aditivo foi sugerido?",
+        "Qual problema ele tenta corrigir?",
+        "A dose proposta faz sentido pedagógico?"
+      ]
+    },
+    {
+      "id": "tiers",
+      "titulo": "Tiers de Formulação",
+      "categoria": "estrategia",
+      "objetivo_didatico": "Explicar que uma fórmula também é resultado de uma estratégia industrial, não apenas de estequiometria.",
+      "explicacao_intuitiva": "Nem toda solução ótima no papel é a melhor na prática. Às vezes a indústria prefere rotas mais seguras e simples. Em outras, aceita mais risco para ganhar concentração ou desempenho.",
+      "explicacao_tecnica": "Os tiers representam graus distintos de conservadorismo técnico e liberdade de processo, equilibrando custo, viabilidade, risco operacional e complexidade fabril.",
+      "matematica": "Não é uma fórmula única, mas uma regra de priorização multicritério.",
+      "logica_algoritmica": "Tier 1 privilegia segurança e rotas ortodoxas. Tier 2 aceita exploração moderada. Tier 3 explora composições e processos mais agressivos.",
+      "python_iniciante": "if idx <= 4:\n    tier = 1\nelif idx <= 8:\n    tier = 2\nelse:\n    tier = 3",
+      "perguntas_guia": [
+        "Esta fórmula é conservadora ou ousada?",
+        "O risco é coerente com o tier?",
+        "O equipamento disponível sustenta essa estratégia?"
+      ]
+    }
+  ],
+  "gatilhos_didaticos": [
+    {
+      "conceito_id": "indice_saturacao",
+      "condicao": "sempre",
+      "motivo": "Toda fórmula precisa ser explicada em termos de solubilidade global."
+    },
+    {
+      "conceito_id": "carga_salina",
+      "condicao": "sempre",
+      "motivo": "Ajuda o estudante a entender concentração total e dificuldade de formulação."
+    },
+    {
+      "conceito_id": "pares_kps",
+      "condicao": "quando houver pares críticos ou metais/fosfatos/sulfatos relevantes",
+      "motivo": "Explica precipitação por incompatibilidade iônica."
+    },
+    {
+      "conceito_id": "balance_termico",
+      "condicao": "quando houver insumos com entalpia de dissolução relevante",
+      "motivo": "Mostra que dissolução também altera temperatura e segurança."
+    },
+    {
+      "conceito_id": "ph_teorico",
+      "condicao": "sempre que houver estimativa de pH",
+      "motivo": "O pH organiza grande parte dos riscos químicos."
+    },
+    {
+      "conceito_id": "forca_ionica",
+      "condicao": "quando houver solução iônica relevante",
+      "motivo": "Conecta concentração com atividade e estabilidade."
+    },
+    {
+      "conceito_id": "hlb",
+      "condicao": "quando existir fase oleosa ou solvente orgânico",
+      "motivo": "Explica a necessidade de emulsificação."
+    },
+    {
+      "conceito_id": "reologia",
+      "condicao": "quando a saturação for alta ou houver modo SC",
+      "motivo": "Conecta estabilidade com bombeamento e mistura."
+    },
+    {
+      "conceito_id": "aditivos",
+      "condicao": "quando houver aditivos sugeridos",
+      "motivo": "Ensina a função de cada aditivo."
+    },
+    {
+      "conceito_id": "tiers",
+      "condicao": "sempre",
+      "motivo": "Ajuda a ler a fórmula como escolha de estratégia industrial."
+    }
+  ],
+  "template_de_explicacao": {
+    "cabecalho": [
+      "Identificação da fórmula",
+      "Objetivo da formulação",
+      "Leitura rápida do risco"
+    ],
+    "corpo": [
+      "Explicação intuitiva",
+      "Explicação técnica",
+      "Leitura matemática",
+      "Lógica de decisão do sistema",
+      "Trecho em Python para iniciantes",
+      "Perguntas que o estudante deve saber responder"
+    ],
+    "fechamento": [
+      "Resumo pedagógico",
+      "Riscos principais",
+      "Ação recomendada"
+    ]
+  }
+}

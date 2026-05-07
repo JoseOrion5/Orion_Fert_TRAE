@@ -1,0 +1,120 @@
+PROTOCOLO EXPERIMENTAL — ESTABILIDADE FÍSICO-QUÍMICA EM CAMPO (CAUDA DO PRODUTOR)
+Data: 24-04-26
+Pasta: c:\Users\orion\Documents\GitHub\Orion_Fert-NTB\Formulas\
+
+Escopo
+- Avaliar o comportamento físico-químico após mistura na cauda do produtor, com foco em: precipitação, cristalização insolúvel e “empedramento” que possa obstruir a saída da embalagem/bico.
+- Condições fixadas:
+  - Temperatura de referência: 25 °C
+  - Água: fonte natural (não tratada)
+  - Energia de mistura: dispersão/rotação baixa
+  - Dinâmica de aplicação: vibração/agitação intermitente (simulando o trator balançando durante a aplicação)
+
+Hipóteses de falha (mecanismos típicos)
+1) Precipitação por incompatibilidade iônica
+   - Exemplos: Ca + SO4 -> CaSO4 (gesso); Ca + fosfato -> fosfatos de cálcio; Mg + fosfato -> fosfatos de magnésio.
+2) Cristalização por supersaturação
+   - Queda de temperatura, evaporação, água insuficiente, força iônica elevada (salting-out) e nucleação por vibração.
+3) Compactação de sedimento (“caking/empedramento”)
+   - Sedimento que endurece com o tempo/vibração e não redispersa, gerando obstrução.
+4) Gelificação/aumento de viscosidade
+   - Interação de espessantes/polímeros com eletrólitos em alta força iônica.
+
+1) Triagem (antes do envelhecimento)
+1.1) Caracterização da água (obrigatório)
+- pH
+- Condutividade (EC)
+- Dureza total (como CaCO3) e, se possível, Ca2+ e Mg2+ separados
+- Alcalinidade (como CaCO3/HCO3-)
+- Turbidez (se a água já contiver sólidos)
+
+1.2) Triagem de risco químico
+- Se a água tiver dureza relevante: aumentar vigilância em fórmulas com SO4 e/ou fosfato (P2O5/MAP), pois o Ca/Mg da água pode gerar sólidos mesmo sem fontes de Ca na fórmula.
+- Fórmulas muito concentradas: maior risco de cristalização por supersaturação (sensível a pequenas variações operacionais).
+
+2) Medidas imediatas (T0) — duplicata/triplicata
+2.1) Preparação de amostras para separar “efeito da água” vs “efeito da fórmula”
+- Para cada formulação:
+  - Triplicata com água de fonte natural (real)
+  - Triplicata com água DI/destilada (controle)
+- Mistura em rotação baixa, replicando a sequência real de adição.
+- Simular dinâmica de trator após mistura:
+  - Agitação intermitente por 10 min (10 s agita / 50 s repousa) ou equivalente em agitador orbital leve.
+
+2.2) Leituras em T0
+- Tempo 0 h (logo após mistura), 1 h e 24 h:
+  - Inspeção visual padronizada (com foto):
+    - Fundo branco, iluminação constante, foto frontal e lateral.
+    - Registrar: limpidez/opalescência, flocos, “areia”, agulhas (cristais), gel, anel no fundo, espuma persistente.
+  - pH e EC
+  - Densidade e viscosidade (se houver instrumento; senão, ensaio de escoamento padronizado)
+  - Teste de filtrabilidade:
+    - Passar volume fixo (ex.: 200 mL) por malha 100–200 µm.
+    - Medir tempo de passagem e massa retida (secagem e pesagem).
+  - Teste de escoamento na embalagem/bico:
+    - Escoar volume fixo e registrar tempo + ocorrência de entupimento.
+  - Teste de redispersão (após 24 h):
+    - 10 inversões em 30 s; registrar se retorna à homogeneidade ou se sobram grumos duros (“caking”).
+
+3) Protocolo de testes acelerados (armazenamento + transporte + tempo)
+Objetivo: forçar mecanismos reais (cristalização por ciclo térmico e caking por vibração) mantendo coerência de campo.
+
+3.1) Matriz mínima recomendada
+- Para cada fórmula e para cada água (fonte natural e DI):
+  - Condição A: 25 °C estático (baseline)
+  - Condição B: 25 °C + vibração diária (simula transporte/trator)
+  - Condição C: ciclo térmico 15 ↔ 35 °C + vibração leve (simula dia/noite e nucleação)
+- Pontos de leitura: D0, D1, D3, D7, D14, D28
+
+3.2) Vibração (simulação operacional)
+- Preferencial: mesa vibratória ou agitador orbital por 1 h/dia (amplitude baixa).
+- Alternativa manual padronizada: 30 inversões + 30 s agitação circular; repetir 3 vezes (≈5 min), 1×/dia.
+
+3.3) Ciclo térmico recomendado
+- 12 h a 15 °C e 12 h a 35 °C por 14 ciclos.
+- Finalidade: revelar cristalização por resfriamento e crescimento por ciclos (nucleação + crescimento).
+
+3.4) Luz/UV (condição opcional)
+- 48 h em luz ambiente intensa (ou câmara/lâmpada) controlando aquecimento do frasco.
+- Registrar mudança de cor/odor e aparecimento de turbidez/precipitado.
+
+4) Identificação de sólidos (quando ocorrer)
+4.1) Microscopia
+- Microscopia óptica (registro fotográfico):
+  - Agulhas/placas: típico de cristal (sal).
+  - Flocos amorfos/gel: típico de polímero/colóide/complexo.
+- Microscopia com luz polarizada (se disponível): birrefringência sugere fase cristalina.
+
+4.2) Ensaios simples de solubilidade do sólido separado
+- Testar redissolução em:
+  - Água a 25 °C
+  - Água a 40 °C
+  - Solução levemente ácida (pH 4–5)
+  - Solução levemente alcalina (pH 8–9)
+- Interpretação:
+  - Some com aquecimento: cristalização por solubilidade (supersaturação).
+  - Some com acidificação: frequentemente fosfatos/carbonatos/hidróxidos.
+  - Não some: precipitado “duro” ou contaminação.
+
+4.3) Espectroscopia / identificação definitiva (se houver acesso)
+- XRD: identificação de fase cristalina (ex.: gesso vs fosfatos).
+- FTIR/Raman: assinaturas de sulfatos/fosfatos/boratos e orgânicos.
+- SEM-EDS: composição elementar (Ca, S, P, Mg, Zn, Mn etc.).
+
+5) Critérios de aceitação (solubilidade/estabilidade focados em não obstruir)
+PASS (mínimos recomendados)
+- Sem cristal visível a olho nu após 28 dias a 25 °C.
+- Sem cristal persistente após 14 ciclos térmicos 15 ↔ 35 °C.
+- Sem “caking”: se houver sedimento, deve redispersar totalmente com 10 inversões/30 s.
+- Filtrabilidade: baixa retenção em 100–200 µm (definir limite conforme bico/saída).
+- Escoamento: 3 tentativas consecutivas sem entupimento no bico/saída.
+
+FAIL (gatilhos imediatos)
+- Empedramento (sedimento duro que não redispersa).
+- Tendência crescente clara de sólidos (D7 → D28).
+- Entupimento repetível no teste de escoamento.
+
+6) Registro e evidências
+- Fotografias padronizadas (mesmo fundo/iluminação/ângulo) em cada ponto.
+- Tabelas e gráficos de tendência (pH, EC, densidade/viscosidade, turbidez, sedimento/retido em filtro).
+- Recomendação final deve apontar o mecanismo dominante (incompatibilidade iônica vs supersaturação vs caking vs gel) e ações preventivas coerentes com o mecanismo observado.

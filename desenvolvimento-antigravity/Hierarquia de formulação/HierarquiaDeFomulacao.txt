@@ -1,0 +1,82 @@
+HIERARQUIA DE FORMULAÇÃO E TOMADA DE DECISÃO TÉCNICA - ORION AGROQUIM SIMULATOR
+(Perfil: Arquiteto de Software & Engenheiro Químico Chefe de Planta)
+
+Este documento descreve o "Cérebro" do simulador, detalhando os arquivos consultados, as bibliotecas utilizadas e a lógica de engenharia por trás de cada decisão de formulação e viabilidade industrial.
+
+---
+1. FLUXO DE CONSULTA DE ARQUIVOS E BIBLIOTECAS (O QUE E POR QUE?)
+---
+
+O sistema opera em uma hierarquia de prioridade para garantir que a planta industrial utilize sempre os dados mais atualizados e robustos:
+
+A. BASES DE DADOS (ARQUIVOS):
+1. TUDÂO-banco_de_dados_definitivo_aditivos_harmonico.xlsx:
+   - POR QUE: É a fonte primária de inteligência de aditivos. O sistema busca primeiro nesta planilha (e em sinônimos como "MASTER") para encontrar aditivos com "Padrão Ouro".
+   - O QUE BUSCA: Nome, Grupo, Função, Doses Máximas, Alertas de Perigo e Preços/Fornecedores (quando disponíveis).
+2. Unificada.insumos_IN39_2018_unificado_ordenado.csv:
+   - POR QUE: Lista oficial de fertilizantes IN39.
+   - O QUE BUSCA: Teores nutricionais (%), solubilidade, Fator V e dados financeiros/logísticos simulados (Preço Unitário, Fornecedor, Lead Time).
+3. orionagroquim_error.log:
+   - POR QUE: Diagnóstico automático de erros.
+
+B. BIBLIOTECAS UTILIZADAS:
+- pandas & openpyxl: Leitura robusta de Excel/CSV com mapeamento dinâmico de sinônimos.
+- flet: Interface gráfica (GUI) de alta performance, reativa e moderna.
+- fpdf2: Geração bifurcada de documentos (Ordem de Produção vs. Requisição de Compras).
+- re (Regex): Inteligência de estratégia para detectar padrões de formulação (F8, F10, F12).
+- pathlib: Gestão de caminhos de arquivos agnóstica ao SO.
+
+---
+2. LÓGICA DE JULGAMENTO: POR QUE UM INSUMO É MELHOR QUE OUTRO?
+---
+
+O simulador aplica uma "Matriz de Viabilidade Industrial e Financeira":
+
+CRITÉRIO 1: FATOR DE COMMODITY (VIABILIDADE LOGÍSTICA)
+- Prioridade absoluta para commodities: Ureia, MAP, Cloreto de Potássio, Sulfatos e Nitratos de Cálcio/Potássio.
+- JULGAMENTO: Um insumo raro é rejeitado em favor de uma commodity, pois esta garante menor custo e maior facilidade de compra (Supply Chain).
+
+CRITÉRIO 2: MATRIZ DE COMPATIBILIDADE QUÍMICA (HARD STOP)
+- Bloqueio Crítico Ca vs P/S: Proibição de misturar Cálcio com Fósforo ou Enxofre.
+- POR QUE: Evita a formação de precipitados insolúveis (entupimentos) na planta industrial.
+
+CRITÉRIO 3: SCORE LOGÍSTICO (LOCAL VS. IMPORTADO)
+- O sistema julga a origem do insumo. Insumos locais (ex: Paranavaí/Maringá) recebem feedback visual positivo (ícone LOCATION_ON verde). Insumos importados ou de longa distância são sinalizados com DIRECTIONS_BOAT (laranja), alertando sobre riscos de Lead Time.
+
+---
+3. MOTOR FINANCEIRO E SUPPLY CHAIN (O NOVO DIFERENCIAL)
+---
+
+O simulador Orion não é mais apenas uma ferramenta química; ele é agora um ERP de simulação:
+
+A. INTERRUPTOR DE CONTEXTO (SWITCH):
+- O "Modo Supply Chain" alterna dinamicamente a interface. No modo técnico, foca em teores e química. No modo Supply, foca em Preço Unitário (R$/kg), Custo da Linha, Fornecedor e Lead Time.
+
+B. DASHBOARD DE VIABILIDADE:
+- Custo Final da Calda (R$/L): Calculado em tempo real somando a massa total vs. custo individual.
+- Índice de Localização (%): Analisa a "Soberania Logística" da fórmula, mostrando quanto da receita depende de fornecedores locais vs. externos.
+
+---
+4. INTELIGÊNCIA DIRECIONADA DE ADITIVOS (ESTRATÉGIAS F)
+---
+
+- ESTRATÉGIA F8 (MAX TEOR): Foco em Dispersantes para alta carga salina.
+- ESTRATÉGIA F9 (MAX SOLUBILIDADE): Foco em Quelantes (EDTA/DTPA).
+- ESTRATÉGIA F10 (MATRIZ FLUIDA): PROIBIÇÃO de Sorbitol e aditivos aquosos. Exige Solventes Orgânicos (Propilenoglicol, DMSO).
+- ESTRATÉGIA F12 (GOD MODE): Permite aditivos de perigo severo e Polímeros de alta performance.
+
+---
+5. EMISSÃO BIFURCADA E BALANÇO HÍDRICO
+---
+
+- DOCUMENTAÇÃO:
+  - Ordem de Produção (OP): Contém apenas passos técnicos e segurança (EPIs). Preços são omitidos para sigilo industrial na fábrica.
+  - Requisição de Compras: Contém a BOM (Bill of Materials) completa com custos para o setor de compras.
+- BALANÇO HÍDRICO (PARADOXO DO VOLUME):
+  - O sistema identifica a água intrínseca em líquidos (ex: Sorbitol 70% contém 30% de água).
+  - Essa água é subtraída da "água livre" para garantir que o volume final Q.S.P. seja rigorosamente exato, evitando transbordamentos.
+
+---
+Data da última atualização: 2026-04-10
+Status do Motor: Industrial V2.5 (Supply Chain & Logistic Icons Enabled)
+Responsável: Arquiteto de Software / Engenheiro Químico Chefe

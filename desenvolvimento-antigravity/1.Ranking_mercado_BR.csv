@@ -1,0 +1,72 @@
+rank,categoria,insumo,nutrientes,teores_pct,solubilidade,natureza_fisica
+1,CAT1_recomendados,Ácido Fosfórico,P2O5,P2O5:60.0,Solúvel em água,Fluido
+2,CAT1_recomendados,Cloreto de Potássio,K2O,K2O:50.0,Solúvel em água,Sólido
+3,CAT1_recomendados,Cloreto de Cálcio,Ca,Ca:24.0,Solúvel em água,Sólido
+4,CAT1_recomendados,Ácido Bórico,B,B:17.0,Solúvel em água,Sólido
+5,CAT1_recomendados,Cloreto de Magnésio,Mg,Mg:10.0,Solúvel em água,Sólido
+6,CAT1_recomendados,Molibdato de Amônio,Mo|N,Mo:52.0|N:5.0,Solúvel em água,Sólido
+7,CAT1_recomendados,Molibdato de Sódio,Mo,Mo:39.0,Solúvel em água,Sólido
+8,CAT1_recomendados,Cloreto de Zinco,Zn,Zn:24.0,Solúvel em água,Sólido
+9,CAT1_recomendados,Cloreto Ferroso,Fe,Fe:23.0,Solúvel em água,Sólido
+10,CAT1_recomendados,Cloreto Cúprico,Cu,Cu:20.0,Solúvel em água,Sólido
+11,CAT1_recomendados,Fosfito de Potássio,K2O,K2O:20.0,Solúvel em água,Fluido
+12,CAT1_recomendados,Kieserita,Mg|S,Mg:15.0|S:20.0,Magnésio solúvel em água,Sólido
+13,CAT1_recomendados,Cloreto Férrico,Fe,Fe:15.0,Solúvel em água,Sólido
+14,CAT1_recomendados,Fosfito de Amônio,N,N:10.0,Solúvel em água,Fluido
+15,CAT1_recomendados,Molibdato de Potássio,K2O|Mo,K2O:27.0|Mo:28.0,Solúvel em água,Sólido
+16,CAT1_recomendados,Fosfito de Manganês,Mn,Mn:8.0,Solúvel em água,Fluido
+17,CAT1_recomendados,Fosfito de Zinco,Zn,Zn:8.0,Solúvel em água,Fluido
+18,CAT1_recomendados,Fosfito de Cobalto,Co,Co:7.0,Solúvel em água,Fluido
+19,CAT1_recomendados,Fosfito de Cálcio,Ca,Ca:5.0,Solúvel em água,Fluido
+20,CAT1_recomendados,Fosfito de Ferro,Fe,Fe:4.0,Solúvel em água,Fluido
+21,CAT1_recomendados,Fosfito de Níquel,Ni,Ni:4.0,Solúvel em água,Fluido
+22,CAT1_recomendados,Fosfito de Cobre,Cu,Cu:3.0,Solúvel em água,Fluido
+23,CAT1_recomendados,Fosfito de Magnésio,Mg,Mg:3.0,Solúvel em água,Fluido
+24,CAT1_recomendados,Citrato de Potássio,K2O,K2O:42.0,Solúvel em água,Sólido
+25,CAT1_recomendados,Formiato de Potássio,K2O,K2O:40.0,Solúvel em água,Fluido
+26,CAT1_recomendados,Acetato de Potássio,K2O,K2O:38.0,Solúvel em água,Fluido
+27,CAT1_recomendados,Formiato de Cobre,Cu,Cu:35.0,Solúvel em água,Fluido
+28,CAT1_recomendados,Acetato de Zinco,Zn,Zn:28.0,Solúvel em água,Fluido
+29,CAT1_recomendados,Acetato de Manganês,Mn,Mn:25.0,Solúvel em água,Fluido
+30,CAT1_recomendados,Formiato de Zinco,Zn,Zn:25.0,Solúvel em água,Fluido
+31,CAT1_recomendados,Formiato de Cálcio,Ca,Ca:24.0,Solúvel em água,Fluido
+32,CAT1_recomendados,Formiato Cobaltoso,Co,Co:23.0,Solúvel em água,Fluido
+33,CAT1_recomendados,Formiato de Manganês,Mn,Mn:22.0,Solúvel em água,Fluido
+34,CAT1_recomendados,Formiato Ferroso,Fe,Fe:18.0,Solúvel em água,Fluido
+35,CAT1_recomendados,Formiato de Magnésio,Mg,Mg:16.0,Solúvel em água,Fluido
+36,CAT1_recomendados,Fosfatado Acidulado Fosfórico,Ca|P2O5,Ca:10.0|P2O5:36.0,"P2O5 solúvel em CNA+água""; mínimo 60% solúvel em água",Sólido
+37,CAT1_recomendados,Cloreto de Cobalto,Co,Co:34.0,Solúvel em água,Sólido
+38,CAT1_recomendados,Cloreto de Manganês,Mn,Mn:25.0,Solúvel em água,Sólido
+39,CAT1_recomendados,Fosfatado Acidulado Sulfúrico,Ca|P2O5|S,Ca:15.0|P2O5:15.0|S:10.0,"P2O5 solúvel em CNA+água""; mínimo 60% solúvel em água",Sólido
+40,CAT1_recomendados,Fosfato de Cobalto,Co|P2O5,Co:41.0|P2O5:32.0,"Co teor total""; P2O5 solúvel em CNA+água",Sólido
+41,CAT1_recomendados,Cloreto de Amônio,N,N:25.0,Teor total (forma amoniacal),Sólido
+42,CAT1_recomendados,Bórax,B,B:10.0,Teor total,Sólido
+43,CAT1_recomendados,Amônia Anidra,N,N:82.0,Teor total,Fluido
+44,CAT1_recomendados,Borato de Zinco,B|Zn,B:14.0|Zn:29.0,Teor total,Sólido
+45,CAT2_intermediarios,Fosfato Calcinado,P2O5,P2O5:18.0,"P2O5 total""; mínimo 14% solúvel em CNA+água",Sólido
+46,CAT2_intermediarios,Fosfato Natural Reativo,Ca|P2O5,Ca:28.0|P2O5:27.0,"P2O5 total""; mínimo 30% do total solúvel em ác. cítrico 2% (1:100)",Sólido
+47,CAT2_intermediarios,Fonolito,K2O|Si,K2O:8.0|Si:25.0,"K2O total""; mínimo 1% solúvel em ác. cítrico 2% (1:100); Si total",Sólido (Pó)
+48,CAT2_intermediarios,Borra de Fosfato de Ferro e Zinco,Fe|P2O5|Zn,Fe:10.0|P2O5:20.0|Zn:3.0,"P2O5 total""; mínimo 18% P2O5 solúvel em CNA+água",Sólido
+49,CAT2_intermediarios,Farinha de Osso Calcinado,P2O5,P2O5:18.0,P2O5 total; mínimo 16% solúvel em ác. cítrico 2% (1:100),Sólido (Pó)
+50,CAT2_intermediarios,Fosfato Natural,P2O5,P2O5:5.0,"P2O5 total""; mínimo 15% do total solúvel em ác. cítrico 2% (1:100)",Sólido (Pó)
+51,CAT2_intermediarios,Enxofre Elementar,S,S:95.0,Teor total,Sólido (Pó)
+52,CAT2_intermediarios,Enxofre Granulado,S,S:90.0,Teor total,Sólido (Granulado)
+53,CAT2_intermediarios,Borra de Enxofre,S,S:50.0,Teor total,Sólido
+54,CAT2_intermediarios,Composto Natural de Folhelho Carbonoso,Ca|Mg|S,Ca:8.0|Mg:6.0|S:1.2,Teor total,Sólido (Pó)
+55,CAT3_dificeis,Carbonato de Potássio,K2O,K2O:66.0,Solúvel em água,Sólido
+56,CAT3_dificeis,Carbonato de Zinco,Zn,Zn:49.0,Teor total,Sólido
+57,CAT3_dificeis,Carbonato de Cobre,Cu,Cu:48.0,Teor total,Sólido
+58,CAT3_dificeis,Carbonato de Cobalto,Co,Co:42.0,Teor total,Sólido
+59,CAT3_dificeis,Carbonato de Ferro,Fe,Fe:41.0,Teor total,Sólido
+60,CAT3_dificeis,Carbonato de Manganês,Mn,Mn:40.0,Teor total,Sólido
+61,CAT3_dificeis,Carbonato de Níquel,Ni,Ni:39.0,Teor total,Sólido
+62,CAT3_dificeis,Carbonato de Cálcio,Ca,Ca:32.0,Teor total (forma carbonato),Sólido (Pó)
+63,CAT3_dificeis,Carbonato de Magnésio,Mg,Mg:25.0,Teor total,Sólido (Pó)
+64,CAT3_dificeis,Carbonato de Cálcio e Magnésio,Ca|Mg,Ca:18.0|Mg:3.0,Teor total (forma carbonato),Sólido (Pó)
+65,CAT3_dificeis,Hidróxido de Potássio,K2O,K2O:71.0,Solúvel em água,Sólido
+66,CAT3_dificeis,Hidróxido de Cálcio,Ca,Ca:48.0,Teor total,Sólido
+67,CAT3_dificeis,Hidróxido de Magnésio,Mg,Mg:35.0,Teor total,Sólido
+68,CAT3_dificeis,Hidróxido de Cálcio e Magnésio,Ca|Mg,Ca:24.0|Mg:4.0,Teor total,Sólido
+69,CAT4_ultimo_caso,Óxido de Cálcio,Ca,Ca:64.0,Teor total,Sólido
+70,CAT4_ultimo_caso,Óxido de Magnésio,Mg,Mg:45.0,Teor total,Sólido
+71,CAT4_ultimo_caso,Óxido de Cálcio e Magnésio,Ca|Mg,Ca:32.0|Mg:6.0,Teor total,Sólido

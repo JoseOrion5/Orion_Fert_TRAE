@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1200" viewBox="0 0 1400 1200">
+  <defs>
+    <style>
+      .title { font: 700 22px Arial, sans-serif; fill: #111; }
+      .h2 { font: 700 16px Arial, sans-serif; fill: #111; }
+      .txt { font: 12px Arial, sans-serif; fill: #111; }
+      .muted { font: 12px Arial, sans-serif; fill: #555; }
+      .box { fill: #fff; stroke: #111; stroke-width: 2; }
+      .soft { fill: #f7f7f7; stroke: #111; stroke-width: 2; }
+      .arrow { stroke: #111; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+      .sep { stroke: #999; stroke-width: 1; stroke-dasharray: 6 6; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#111"/>
+    </marker>
+  </defs>
+
+  <rect x="20" y="20" width="1360" height="1160" class="soft"/>
+  <text x="40" y="58" class="title">OrionAgroquim — Fluxos de navegação v1</text>
+  <text x="40" y="82" class="muted">Fluxo baseado nos módulos atuais: CÁLCULOS (PRINCIPAL/TOP/MANUAL/LAUDO) e ESTABILIDADE (runs + detalhes)</text>
+  <line x1="40" y1="110" x2="1360" y2="110" class="sep"/>
+
+  <text x="40" y="150" class="h2">Nível 1 (Tabs)</text>
+
+  <rect x="60" y="180" width="600" height="150" class="box"/>
+  <text x="80" y="210" class="txt">CÁLCULOS</text>
+  <text x="80" y="232" class="muted">Subtabs: Principal / Top / Manual / Laudo</text>
+  <text x="80" y="258" class="muted">Evento principal: “Calcular” gera payload automático p/ Estabilidade</text>
+
+  <rect x="740" y="180" width="600" height="150" class="box"/>
+  <text x="760" y="210" class="txt">ESTABILIDADE</text>
+  <text x="760" y="232" class="muted">Lista de runs + detalhes + alertas automáticos</text>
+  <text x="760" y="258" class="muted">(Futuro) Registro de medições de campo/lab</text>
+
+  <path d="M 660 255 L 740 255" class="arrow"/>
+  <text x="650" y="240" class="muted">payload</text>
+
+  <line x1="40" y1="370" x2="1360" y2="370" class="sep"/>
+
+  <text x="40" y="410" class="h2">Nível 2 (CÁLCULOS)</text>
+
+  <rect x="60" y="440" width="360" height="130" class="box"/>
+  <text x="80" y="470" class="txt">PRINCIPAL</text>
+  <text x="80" y="492" class="muted">Entradas: targets + volume + temp + reator</text>
+  <text x="80" y="514" class="muted">Saída: Melhor fórmula + tabela + recomendações</text>
+
+  <rect x="520" y="440" width="360" height="130" class="box"/>
+  <text x="540" y="470" class="txt">TOP 5/12</text>
+  <text x="540" y="492" class="muted">Navegação por F1..F12</text>
+  <text x="540" y="514" class="muted">Ação: Enviar p/ Laudo</text>
+
+  <rect x="980" y="440" width="360" height="130" class="box"/>
+  <text x="1000" y="470" class="txt">MANUAL</text>
+  <text x="1000" y="492" class="muted">Adicionar linha por linha</text>
+  <text x="1000" y="514" class="muted">Ver alerta + tabela</text>
+
+  <path d="M 240 570 L 240 640 L 600 640" class="arrow"/>
+  <text x="270" y="632" class="muted">Calcular</text>
+
+  <rect x="620" y="600" width="360" height="130" class="box"/>
+  <text x="640" y="630" class="txt">LAUDO</text>
+  <text x="640" y="652" class="muted">Pré-visualizar OP/PCC/POP</text>
+  <text x="640" y="674" class="muted">Exportar PDF / salvar</text>
+
+  <path d="M 700 570 L 700 600" class="arrow"/>
+  <text x="710" y="592" class="muted">Enviar p/ Laudo</text>
+
+  <line x1="40" y1="780" x2="1360" y2="780" class="sep"/>
+
+  <text x="40" y="820" class="h2">Fluxo de dados (alto nível)</text>
+
+  <rect x="60" y="850" width="420" height="150" class="box"/>
+  <text x="80" y="880" class="txt">Motor (motor.py como Fachada)</text>
+  <text x="80" y="902" class="muted">- build_top12_outputs</text>
+  <text x="80" y="924" class="muted">- diagnosticar_operacoes_unitarias</text>
+  <text x="80" y="946" class="muted">- gerar_relatorio_op</text>
+
+  <rect x="520" y="850" width="420" height="150" class="box"/>
+  <text x="540" y="880" class="txt">UI Cálculos</text>
+  <text x="540" y="902" class="muted">Serializa resultados + mostra tabelas</text>
+  <text x="540" y="924" class="muted">Gera payload calc_run</text>
+
+  <rect x="980" y="850" width="360" height="150" class="box"/>
+  <text x="1000" y="880" class="txt">Módulo Estabilidade</text>
+  <text x="1000" y="902" class="muted">Valida payload</text>
+  <text x="1000" y="924" class="muted">Calcula alertas</text>
+  <text x="1000" y="946" class="muted">Confirma recepção</text>
+
+  <path d="M 480 925 L 520 925" class="arrow"/>
+  <path d="M 940 925 L 980 925" class="arrow"/>
+
+  <rect x="60" y="1030" width="1280" height="130" class="soft"/>
+  <text x="80" y="1060" class="txt">Acessibilidade e responsividade (regras para todas as telas)</text>
+  <text x="80" y="1084" class="muted">- Contraste alto, fontes ≥ 12px, foco visível e navegação por teclado</text>
+  <text x="80" y="1106" class="muted">- Layout responsivo: coluna esquerda vira “accordion/drawer” em telas menores; tabelas com scroll horizontal</text>
+  <text x="80" y="1128" class="muted">- Mensagens de erro claras (SnackBar) e estados vazios (“sem resultados”, “sem runs”)</text>
+
+</svg>
