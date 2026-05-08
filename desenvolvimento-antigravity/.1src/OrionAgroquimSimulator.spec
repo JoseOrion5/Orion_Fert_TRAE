@@ -1,15 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-datas = [('D:\\GitHub\\Orion_Fert\\INSUMOS_IN39_2018.csv', '.'), ('D:\\GitHub\\Orion_Fert\\ADITIVOS_IN39_2018.csv', '.')]
-=======
 datas = [('C:\\Users\\orion\\Documents\\GitHub\\Orion_Fert-NTB\\INSUMOS_IN39_2018.csv', '.'), ('C:\\Users\\orion\\Documents\\GitHub\\Orion_Fert-NTB\\ADITIVOS_IN39_2018.csv', '.')]
->>>>>>> 719263f18fa5f1f6d8803061ff8917b3ff208def
-=======
-datas = [('D:\\GitHub\\Orion_Fert_TRAE\\INSUMOS_IN39_2018.csv', '.'), ('D:\\GitHub\\Orion_Fert_TRAE\\ADITIVOS_IN39_2018.csv', '.')]
->>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
 binaries = []
 hiddenimports = ['flet_desktop']
 tmp_ret = collect_all('flet_desktop')
@@ -17,15 +9,7 @@ datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
-<<<<<<< HEAD
-<<<<<<< HEAD
-    ['D:\\GitHub\\Orion_Fert\\.1src\\1.main.py'],
-=======
     ['C:\\Users\\orion\\Documents\\GitHub\\Orion_Fert-NTB\\.1src\\1.main.py'],
->>>>>>> 719263f18fa5f1f6d8803061ff8917b3ff208def
-=======
-    ['D:\\GitHub\\Orion_Fert_TRAE\\.1src\\1.main.py'],
->>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
     pathex=[],
     binaries=binaries,
     datas=datas,

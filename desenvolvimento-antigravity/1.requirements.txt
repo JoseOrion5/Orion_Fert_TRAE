@@ -11,10 +11,6 @@ pint
 pydantic
 loguru
 fpdf2
-<<<<<<< HEAD
-=======
-reportlab
->>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
 chempy
 CoolProp
 fluids

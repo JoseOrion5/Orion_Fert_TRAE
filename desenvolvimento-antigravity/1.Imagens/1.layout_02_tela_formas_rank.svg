@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .pill_ok { fill: #143426; stroke: #2b6b4a; stroke-width: 1; }
+      .pill_warn { fill: #3a2c12; stroke: #8b6a2b; stroke-width: 1; }
+      .pill_bad { fill: #3b171d; stroke: #8b2b3c; stroke-width: 1; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 12px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 700 18px "Segoe UI", Arial, sans-serif; }
+      .ok { fill: #41d18a; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .warn { fill: #ffb020; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .danger { fill: #ff5a70; font: 700 12px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="60">OrionAgroquim</text>
+  <text class="subtitle" x="192" y="60">Formas de Atingir — ranking por risco e robustez</text>
+
+  <rect class="panel" x="24" y="104" width="1392" height="772" rx="12"/>
+  <text class="title" x="48" y="146">Formas de Atingir (Top 3)</text>
+  <text class="subtitle" x="48" y="170">Cada opção inclui: receita, riscos, mitigadores (temperatura/aditivos) e por quê.</text>
+
+  <rect class="panel2" x="44" y="200" width="1348" height="196" rx="12"/>
+  <rect class="pill_ok" x="60" y="224" width="92" height="28" rx="14"/>
+  <text class="ok" x="86" y="244">OPÇÃO 1</text>
+  <text class="label" x="168" y="244">Receita “Solúvel” (recomendado)</text>
+  <text class="text" x="60" y="276">Bate os alvos com menor risco de precipitação e menor tendência a cristalização.</text>
+  <text class="muted" x="60" y="300">Mitigadores: nenhum obrigatório; recomenda ordem de dissolução e T mínima de preparo.</text>
+  <rect class="chip" x="60" y="320" width="1320" height="56" rx="12"/>
+  <text class="mono" x="78" y="346">MAP 12.43 kg | Nitrato de Potássio 14.20 kg | Sulfato de Zinco 0.18 kg | Água 88.95 kg</text>
+  <text class="muted" x="78" y="368">Status: ok | Densidade 1.18 kg/L | Temperatura sugerida: ≥ 20°C</text>
+
+  <rect class="panel2" x="44" y="412" width="1348" height="196" rx="12"/>
+  <rect class="pill_warn" x="60" y="436" width="92" height="28" rx="14"/>
+  <text class="warn" x="86" y="456">OPÇÃO 2</text>
+  <text class="label" x="168" y="456">Receita “Mitigada” (com aditivo IN39)</text>
+  <text class="text" x="60" y="488">Bate os alvos, mas apresenta risco de Ca + P/S e/ou densidade alta.</text>
+  <text class="muted" x="60" y="512">Mitigadores: quelante/estabilizante + ajuste de temperatura e diluição no pré-mix.</text>
+  <rect class="chip" x="60" y="532" width="1320" height="56" rx="12"/>
+  <text class="mono" x="78" y="558">Fonte Ca + Fosfato | Aditivo: EDTA (pH 4.0–7.0) | Dose até 10%</text>
+  <text class="muted" x="78" y="580">Status: atenção | Ação: adicionar EDTA antes do Ca | T sugerida: 25–30°C</text>
+
+  <rect class="panel2" x="44" y="624" width="1348" height="196" rx="12"/>
+  <rect class="pill_bad" x="60" y="648" width="92" height="28" rx="14"/>
+  <text class="danger" x="86" y="668">OPÇÃO 3</text>
+  <text class="label" x="168" y="668">Receita “Não recomendada” (risco crítico)</text>
+  <text class="text" x="60" y="700">Bate os alvos na matemática, mas tende a cristalizar/precipitar ou perder eficiência em condições usuais.</text>
+  <text class="muted" x="60" y="724">Ação: trocar fonte do nutriente, dividir em 2 caldas ou reduzir alvo.</text>
+  <rect class="chip" x="60" y="744" width="1320" height="56" rx="12"/>
+  <text class="mono" x="78" y="770">Ex.: mistura altamente concentrada com ureia + sais incompatíveis</text>
+  <text class="muted" x="78" y="792">Status: crítico | Recomendação: reformular com nitratos/quelante ou usar duas etapas</text>
+</svg>

@@ -1,0 +1,51 @@
+Este é o **Memorial Técnico de Contexto (MTC)** consolidado para o projeto **Orion_Fert**. Ele serve como a "âncora" definitiva para alinhar o desenvolvimento, evitar alucinações e garantir que as leis de engenharia química e a arquitetura do software sejam rigorosamente respeitadas em cada interação.
+
+---
+
+# ⚓ Memorial Técnico de Contexto (MTC) - Projeto Orion_Fert
+
+**Instrução de Ativação:** *"Gemini, recupere o contexto técnico deste memorial. Ignore suposições prévias e valide as próximas sugestões contra estas regras e a arquitetura aqui descrita."*
+
+## 1. Identidade e Escopo
+* **Nome do Projeto:** Orion_Fert (Simulador Industrial de Fertilizantes).
+* **Objetivo:** Otimização estequiométrica de fórmulas NPK + Micronutrientes, considerando solubilidade multicomponente, estabilidade termodinâmica e custos.
+* **Perfil Técnico:** Engenharia Química aplicada (foco em processos de dissolução, quelatização e operações unitárias).
+* **Repositório Oficial:** `https://github.com/JoseOrion5/Orion_Fert.git`.
+
+## 2. Arquitetura do Sistema
+* **Interface (Frontend):** Desenvolvida em **Flet** (Python) no ficheiro `1.main.py`.
+* **Motor de Cálculo (Backend):** Implementado no ficheiro `motor.py` utilizando o otimizador `scipy.optimize.linprog` (Método: `highs`).
+* **Base de Dados:** Excel `DATABASE_MESTRE_ORION.xlsx` com abas estruturadas:
+    * `Insumos`: Preços, concentrações e solubilidades.
+    * `Aditivos`: Quelantes, dispersantes e co-solventes.
+    * `Processos_POP`: Procedimentos Operacionais Padrão.
+    * `Processos_PCC`: Pontos Críticos de Controle.
+
+## 3. Leis de Engenharia e Regras de Negócio (Hard Constraints)
+* **Prevenção de Gesso:** Caso a formulação contenha simultaneamente Cálcio ($Ca^{2+}$) e Enxofre ($S$ ou $SO_4^{2-}$), o sistema deve obrigatoriamente injetar um **Quelante** (EDTA ou Ácido Cítrico) na massa final para evitar precipitação.
+* **Saturação Multicomponente (Sinergia Eutética):** O limite de solubilidade não é tratado individualmente. Aplica-se a soma das frações de saturação:
+    $$\sum \frac{massa_i}{solubilidade_i} \le \text{Threshold}$$
+* **Tiers de Estabilidade:**
+    * **Tier 1 (Solução Límpida):** Threshold de 0.9 (90% da capacidade da água).
+    * **Tier 2 (Suspensão):** Threshold de 1.1 (Requer adição de Glicerina/Dispersantes).
+    * **Tier 3 (Extremo):** Threshold de 1.3 (Requer Sorbitol 70% ou Propilenoglicol como co-solventes).
+
+## 4. Parâmetros de Interface e Otimização
+* **Slider de Diversificação:** Faixa de 50% a 100%. Este valor define o teto máximo (`bounds`) que um único insumo pode contribuir para o alvo nutricional, forçando o motor a diversificar fontes.
+* **Garantia de Nutrientes:** O Enxofre (S) e Micronutrientes devem ser tratados como **restrições de igualdade** no otimizador para garantir que o alvo seja atingido exatamente.
+* **Volume Padrão:** 100 Litros.
+
+## 5. Protocolo de Produção (POP/PCC)
+* **Diagnóstico de Operações:** O software deve gerar instruções automáticas de agitação (**Laminar** vs. **High Shear**) e perfil térmico (necessidade de aquecimento para insumos endotérmicos como Ureia).
+* **Sequência de Adição:** O roteiro deve seguir a lógica: 1º Água $\rightarrow$ 2º Aditivos/Quelantes $\rightarrow$ 3º Insumos Críticos.
+
+## 6. Ambiente de Desenvolvimento e Git
+* **Diretório Local:** `D:\GitHub\Orion_Fert`.
+* **Identidade Git:** `jbonottof@gmail.com` / `JoseOrion5`.
+* **Fluxo de Sincronização:** 1. `git add .`
+    2. `git commit -m "descrição"`
+    3. `git push -u origin main`
+
+---
+
+**Sugestão:** Salve este texto como `MEMORIAL_TECNICO.md` na raiz do seu projeto. Sempre que sentir que as sugestões estão perdendo a precisão técnica, utilize este documento para recalibrar o foco.

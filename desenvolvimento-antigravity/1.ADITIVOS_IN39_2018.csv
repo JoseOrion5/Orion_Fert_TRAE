@@ -1,0 +1,115 @@
+id,anexo,grupo,nome,abreviatura,funcao_principal,nutrientes_compativeis,faixa_ph_ideal,dose_maxima_pct,modo_aplicacao,alerta_incompatibilidade,observacoes
+1,II,Ácidos Aminopolicarboxílicos,Ácido Nitrilotriacético,NTA,Quelante,"Fe, Cu, Zn, Mn, Co, Ni",4.0-7.0,5,Foliar / Fertirrigação,,Quelante de amplo espectro
+2,II,Ácidos Aminopolicarboxílicos,Ácido Etilenodiaminotetraacético,EDTA,Quelante,"Fe, Cu, Zn, Mn, Ca, Mg",4.0-7.0,10,Foliar / Fertirrigação,Perde eficiência em pH > 7 com Fe,Quelante mais utilizado em fertilizantes líquidos
+3,II,Ácidos Aminopolicarboxílicos,Ácido Hidroxietiletilenodiamino-triacético,HEDTA,Quelante,"Fe, Cu, Zn, Mn",4.0-7.5,10,Foliar / Fertirrigação,,Boa estabilidade em faixa de pH mais ampla que EDTA
+4,II,Ácidos Aminopolicarboxílicos,Ácido Propilenodiaminotetraacético,PDTA,Quelante,"Fe, Cu, Zn, Mn",4.0-7.0,10,Foliar / Fertirrigação,,
+5,II,Ácidos Aminopolicarboxílicos,Ácido dietileno-triaminopentacético,DTPA,Quelante,"Fe, Zn, Cu, Mn",4.0-7.5,10,Foliar / Fertirrigação,,Indicado para Fe em pH até 7.5
+6,II,Ácidos Aminopolicarboxílicos,Ácido etilenodiamino-N-N-di(orto-hidroxifenil)acético,"[o,o] EDDHA",Quelante,Fe,7.0-9.0,5,Fertirrigação / Solo,,Melhor opção para Fe em pH alto (> 7.0)
+7,II,Ácidos Aminopolicarboxílicos,Ácido etilenodiamino-N(orto-hidroxifenil)acético-N(para-hidroxifenil)acético,"[o,p] EDDHA",Quelante,Fe,6.5-9.0,5,Fertirrigação / Solo,,Alternativa ao [o-o] EDDHA
+8,II,Ácidos Aminopolicarboxílicos,Ácido etilenodiamino-N-N-di(orto-hidroximetilfenil)acético,"[o,o] EDDHMA",Quelante,Fe,6.5-9.0,5,Fertirrigação / Solo,,
+9,II,Ácidos Aminopolicarboxílicos,Ácido etilenodiamino-N(orto-hidroximetilfenil)acético-N(para-hidroximetilfenil)acético,"[o,p] EDDHMA",Quelante,Fe,6.5-9.0,5,Fertirrigação / Solo,,
+10,II,Ácidos Aminopolicarboxílicos,Ácido etilenodiamino-N-N-di(5-carboxi2-hidroxifenil)acético,EDDCHA,Quelante,Fe,6.0-9.0,5,Fertirrigação / Solo,,
+11,II,Ácidos Aminopolicarboxílicos,Ácido etilenodiamino-N-N-di(2-hidroxi5-sulfofenil)acético,EDDHSA,Quelante,Fe,6.0-9.0,5,Fertirrigação / Solo,,
+12,II,Ácidos Aminopolicarboxílicos,Ácido D-L aspártico N-(1-2 dicarboxietil) tetra sódico (Ácido iminodissuccínico),IDHA,Quelante,"Fe, Cu, Zn, Mn",4.0-9.0,10,Foliar / Fertirrigação,,Biodegradável; boa opção sustentável
+13,II,Ácidos Aminopolicarboxílicos,Ácido N-N-di(2-hidroxibenzil)etilenodiamina-N-N-di(acético),HBED,Quelante,Fe,6.0-9.0,5,Fertirrigação / Solo,,Alta afinidade pelo Fe
+14,II,Ácidos Aminopolicarboxílicos,Aminoácidos naturais (albuminas glicina etc.),,Quelante / Complexante,"Fe, Cu, Zn, Mn, Ca, Mg",4.0-8.0,10,Foliar / Fertirrigação,,Origem natural; compatível com agricultura orgânica
+15,II,Aminas e Poliaminas,Etilenodiamina,,Complexante,"Cu, Zn, Ni",4.0-7.0,5,Foliar / Fertirrigação,Corrosivo em alta concentração;  manusear com EPI,
+16,II,Aminas e Poliaminas,Dietilenotriamina,,Complexante,"Cu, Zn, Fe",4.0-7.0,5,Foliar / Fertirrigação,,
+17,II,Aminas e Poliaminas,Trietilenotetramina,,Complexante,"Cu, Zn",4.0-7.0,5,Foliar / Fertirrigação,,
+18,II,Aminas e Poliaminas,Tetraetilenopentamina,,Complexante,"Cu, Ni, Zn",4.0-7.0,5,Foliar / Fertirrigação,,
+19,II,Ácidos Hidroxicarboxílicos,Ácido Tartárico,,Complexante / Estabilizante,"Ca, Fe, Mn",3.5-6.5,10,Foliar / Fertirrigação,Pode precipitar com Ca em pH > 7,Melhora solubilidade de micronutrientes
+20,II,Ácidos Hidroxicarboxílicos,Ácido Cítrico,,Complexante / Acidificante / Estabilizante,"Ca, Fe, Mg, Zn, Cu, Mn",3.5-6.5,10,Foliar / Fertirrigação,Pode precipitar com Ca em pH > 6.5,Muito utilizado para ajuste de pH e estabilidade
+21,II,Ácidos Hidroxicarboxílicos,Ácido Glucônico,,Complexante / Estabilizante,"Fe, Cu, Zn, Ca, Mg",4.0-7.0,10,Foliar / Fertirrigação,,Boa estabilidade em ampla faixa de pH
+22,II,Ácidos Hidroxicarboxílicos,Ácido Heptaglucônico,,Complexante / Estabilizante,"Fe, Cu, Zn, Ca, Mg",4.0-8.0,10,Foliar / Fertirrigação,,Maior cadeia que glucônico; melhor estabilidade
+23,II,Compostos Hidroxiaminas,Monoetanolamina,,Complexante / Alcalinizante,"Fe, Cu, Zn",6.0-8.0,5,Foliar / Fertirrigação,Não misturar com ácidos fortes,Usado também para ajuste de pH
+24,II,Compostos Hidroxiaminas,Dietanolamina,,Complexante / Alcalinizante,"Fe, Cu",6.0-8.0,5,Foliar / Fertirrigação,,
+25,II,Compostos Hidroxiaminas,Trietanolamina,,Complexante / Alcalinizante,"Fe, Cu, Zn",6.0-8.0,5,Foliar / Fertirrigação,,
+26,II,Compostos Hidroxiaminas,N-hidroxietiletilenodiamina,,Complexante,"Fe, Cu, Zn",4.0-7.5,5,Foliar / Fertirrigação,,
+27,II,Compostos Hidroxiaminas,N-dihidroxietilglicina,,Complexante,"Fe, Cu, Zn",4.0-7.5,5,Foliar / Fertirrigação,,
+28,II,Polióis,Sorbitol,,Complexante / Estabilizante / Anticongelante,"Ca, Mg, B",4.0-8.0,10,Foliar / Fertirrigação,,Melhora absorção foliar de Ca e B
+29,II,Polióis,Manitol,,Complexante / Estabilizante / Anticongelante,"Ca, Mg, B",4.0-8.0,10,Foliar / Fertirrigação,,Similar ao sorbitol
+30,II,Polióis,Dulcitol,,Complexante / Estabilizante,"Ca, B",4.0-8.0,10,Foliar / Fertirrigação,,
+31,II,Polióis,Glicerina,,Complexante / Anticongelante / Umectante,,4.0-9.0,10,Foliar / Fertirrigação,,Evita cristalização; melhora viscosidade
+32,II,Compostos Naturais,Lignosulfonatos,,Complexante / Estabilizante / Dispersante,"Fe, Cu, Zn, Mn",4.0-8.0,10,Foliar / Fertirrigação,,Origem natural; melhora dispersão e estabilidade
+33,II,Compostos Naturais,Poliflavonóides,,Complexante / Estabilizante,"Fe, Cu, Zn",4.0-8.0,5,Foliar / Fertirrigação,,Origem natural
+34,II,Compostos Naturais,Substâncias Húmicas,,Complexante / Estabilizante,"Fe, Zn, Cu, Mn",5.0-8.0,10,Foliar / Fertirrigação / Solo,,Melhora absorção e estabilidade
+35,II,Compostos Naturais,Extratos de Algas,,Complexante / Bioestimulante,,4.0-8.0,10,Foliar / Fertirrigação,,Melhora absorção foliar
+36,II,Compostos Naturais,D-aminoácidos,,Complexante / Estabilizante,"Fe, Cu, Zn, Mn",4.0-8.0,5,Foliar / Fertirrigação,,
+37,III,Acidificante,Ácido 5-sulfosalicílico,,Acidificante,,2.0-5.0,5,Foliar / Fertirrigação,Não misturar com bases fortes,Ajuste fino de pH
+38,III,Acidificante,Ácido Acético,,Acidificante,,3.0-6.0,5,Foliar / Fertirrigação,Odor forte; usar em concentração baixa,
+39,III,Acidificante,Ácido Adípico,,Acidificante,,3.0-6.0,5,Foliar / Fertirrigação,,
+40,III,Acidificante,Ácido Cítrico,,Acidificante / Estabilizante,,3.5-6.5,10,Foliar / Fertirrigação,Pode precipitar com Ca em pH > 6.5,Mais utilizado para ajuste de pH em fertilizantes líquidos
+41,III,Acidificante,Ácido Fosforoso,,Acidificante,,2.0-5.0,5,Foliar / Fertirrigação,Não misturar com oxidantes,Também fonte de P
+42,III,Acidificante,Ácido Glucônico,,Acidificante / Estabilizante,,4.0-7.0,10,Foliar / Fertirrigação,,
+43,III,Acidificante,Ácido Nitriloacético,,Acidificante,,3.0-6.0,5,Foliar / Fertirrigação,,
+44,III,Acidificante,Ácido Oxinesulfônico,,Acidificante,,3.0-6.0,5,Foliar / Fertirrigação,,
+45,III,Acidificante,Ácido Salicílico,,Acidificante,,3.0-6.0,5,Foliar / Fertirrigação,,
+46,III,Acidificante,Ácido Tartárico,,Acidificante / Estabilizante,,3.5-6.5,10,Foliar / Fertirrigação,Pode precipitar com Ca em pH > 7,
+47,III,Acidificante,Ácido ou Extrato Pirolenhoso,,Acidificante,,3.0-6.0,5,Foliar / Fertirrigação,,
+48,III,Acidificante,Ácido Fosfórico,,Acidificante,,2.0-5.0,10,Foliar / Fertirrigação,Corrosivo; manusear com EPI,Também fonte de P; muito usado em fertirrigação
+49,III,Acidificante,Ácido Sulfúrico,,Acidificante,,1.0-4.0,5,Fertirrigação,Altamente corrosivo; manusear com EPI,Uso cauteloso; ajuste de pH de água de irrigação
+50,III,Acidificante,Ácido Clorídrico,,Acidificante,,1.0-4.0,5,Fertirrigação,Altamente corrosivo; pode introduzir Cl na formulação,
+51,III,Alcalinizante,Monoetanolamina,,Alcalinizante,,6.0-9.0,5,Fluidos,Não misturar com ácidos fortes,Ajuste de pH para cima
+52,III,Alcalinizante,Dietanolamina,,Alcalinizante,,6.0-9.0,5,Fluidos,,
+53,III,Alcalinizante,Dietilenotriamina,,Alcalinizante,,6.0-9.0,5,Fluidos,,
+54,III,Alcalinizante,Trietanolamina,,Alcalinizante,,6.0-9.0,5,Fluidos,,
+55,III,Alcalinizante,Trietilenotetramina,,Alcalinizante,,6.0-9.0,5,Fluidos,,
+56,III,Alcalinizante,Hidróxido de Sódio,,Alcalinizante,,6.0-10.0,5,Fluidos,Corrosivo; cuidado com precipitação de micronutrientes em pH alto,Ajuste rápido de pH
+57,III,Anticongelante,Glicerina,,Anticongelante,,4.0-9.0,10,Fluidos e sólidos solúveis,,Evita congelamento de soluções
+58,III,Anticongelante,Polióis,,Anticongelante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+59,III,Anticongelante,Polissacarídeos,,Anticongelante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+60,III,Anticongelante,Propilenoglicol,,Anticongelante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+61,III,Anticongelante,Polietilenoglicol,,Anticongelante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+62,III,Anticristalizante,Glicerina,,Anticristalizante,,4.0-9.0,10,Fluidos e sólidos solúveis,,Evita formação de cristais na solução
+63,III,Anticristalizante,Polissacarídeo,,Anticristalizante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+64,III,Anticristalizante,Surfactante não iônico,,Anticristalizante,,4.0-9.0,5,Fluidos e sólidos solúveis,,
+65,III,Anticristalizante,Polióis,,Anticristalizante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+66,III,Anticristalizante,Surfactante Aniônico,,Anticristalizante,,4.0-9.0,5,Fluidos e sólidos solúveis,,
+67,III,Antievaporante,Óleo vegetal,,Antievaporante / Protetor de gotas,,4.0-9.0,5,Fluidos foliares,,Reduz evaporação das gotas de pulverização
+68,III,Antievaporante,Copolímeros poliacrilamida,,Antievaporante,,4.0-9.0,5,Fluidos foliares,,
+69,III,Antievaporante,Acrilatos,,Antievaporante,,4.0-9.0,5,Fluidos foliares,,
+70,III,Antievaporante,Goma Xantana,,Antievaporante / Espessante,,4.0-9.0,5,Fluidos foliares,,
+71,III,Antievaporante,Goma Guar,,Antievaporante / Espessante,,4.0-9.0,5,Fluidos foliares,,
+72,III,Antievaporante,Siliconados,,Antievaporante,,4.0-9.0,5,Fluidos foliares,,
+73,III,Antievaporante,CMC (Carboximetilcelulose),,Antievaporante / Espessante,,4.0-9.0,10,Fluidos foliares,,
+74,III,Dispersante / Emulsificante / Tensoativo,Tripolifosfato de Sódio,,Dispersante,,4.0-8.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,Mantém dispersão homogênea da solução
+75,III,Dispersante / Emulsificante / Tensoativo,Lignossulfonato,,Dispersante / Estabilizante,,4.0-8.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,
+76,III,Dispersante / Emulsificante / Tensoativo,Polisorbato,,Emulsificante,,4.0-8.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,
+77,III,Dispersante / Emulsificante / Tensoativo,Bentonita,,Dispersante,,4.0-9.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,
+78,III,Dispersante / Emulsificante / Tensoativo,Polietilenoglicol,,Dispersante / Emulsificante,,4.0-9.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,
+79,III,Dispersante / Emulsificante / Tensoativo,CMC (Carboximetilcelulose),,Dispersante / Espessante,,4.0-9.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,
+80,III,Dispersante / Emulsificante / Tensoativo,HMC (Hidroximetilcelulose),,Dispersante / Espessante,,4.0-9.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,
+81,III,Dispersante / Emulsificante / Tensoativo,LASS (Laurilsulfonato de Sódio),,Tensoativo Aniônico,,4.0-8.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,
+82,III,Dispersante / Emulsificante / Tensoativo,Ácido Etidrônico,,Dispersante / Estabilizante,,4.0-8.0,10,Fluidos e sólidos solúveis,Concentração máxima 10% p/p,Inibe precipitação de sais
+83,III,Espessante / Suspensor,Goma Xantana,,Espessante,,4.0-9.0,20,Fluidos,Concentração máxima 20% p/p,Aumenta viscosidade; reduz sedimentação
+84,III,Espessante / Suspensor,Goma Guar,,Espessante,,4.0-9.0,20,Fluidos,Concentração máxima 20% p/p,
+85,III,Espessante / Suspensor,CMC (Carboximetilcelulose),,Espessante,,4.0-9.0,20,Fluidos,Concentração máxima 20% p/p,
+86,III,Espessante / Suspensor,Gelatina,,Espessante,,4.0-7.0,20,Fluidos,Concentração máxima 20% p/p,Pode precipitar em pH extremo
+87,III,Espessante / Suspensor,Polietilenoglicol,,Espessante,,4.0-9.0,20,Fluidos,Concentração máxima 20% p/p,
+88,III,Espessante / Suspensor,Sílica,,Espessante,,4.0-9.0,20,Fluidos,Concentração máxima 20% p/p,
+89,III,Espessante / Suspensor,Silicato de Sódio,,Espessante / Estabilizante,,7.0-10.0,20,Fluidos,Concentração máxima 20% p/p; pode precipitar micronutrientes em pH alto,
+90,III,Espessante / Suspensor,Bentonita,,Espessante,,4.0-9.0,20,Fluidos,Concentração máxima 20% p/p,
+91,III,Estabilizante / Conservante,Ácido Cítrico,,Estabilizante,,3.5-6.5,10,Fertilizantes em geral,,Muito usado em fertilizantes líquidos foliares
+92,III,Estabilizante / Conservante,Ácido Glucônico,,Estabilizante,,4.0-7.0,10,Fertilizantes em geral,,
+93,III,Estabilizante / Conservante,Ácido Heptaglucônico,,Estabilizante,,4.0-8.0,10,Fertilizantes em geral,,
+94,III,Estabilizante / Conservante,Ácido Ascórbico,,Estabilizante / Antioxidante,,3.5-6.5,5,Fertilizantes em geral,,Evita oxidação de Fe2+ para Fe3+
+95,III,Estabilizante / Conservante,Lignossulfonato,,Estabilizante / Complexante,,4.0-8.0,10,Fertilizantes em geral,,
+96,III,Estabilizante / Conservante,Substâncias Húmicas,,Estabilizante / Complexante,,5.0-8.0,10,Fertilizantes em geral,,
+97,III,Estabilizante / Conservante,Manitol,,Estabilizante / Anticongelante,,4.0-8.0,10,Fertilizantes em geral,,
+98,III,Estabilizante / Conservante,Melaço de Cana de Açúcar,,Estabilizante,,4.0-8.0,10,Fertilizantes em geral,,Origem natural
+99,III,Estabilizante / Conservante,Polietilenoglicol,,Estabilizante,,4.0-9.0,10,Fertilizantes em geral,,
+100,III,Estabilizante / Conservante,Tripolifosfato de Sódio,,Estabilizante / Dispersante,,4.0-8.0,10,Fertilizantes em geral,,
+101,III,Inibidor de Urease,NBPT (N-(n-butil tiofosfórico triamida),,Inibidor de Urease,,4.0-8.0,1,Solo / Fertirrigação,,Reduz perdas de N por volatilização de NH3; usar com ureia
+102,III,Inibidor de Urease,NBPT + NPPT,,Inibidor de Urease,,4.0-8.0,1,Solo / Fertirrigação,,Combinação de dois inibidores; maior eficiência
+103,III,Melhorador de Absorção Foliar,Glicose,,Melhorador de absorção foliar,,4.0-7.0,10,Foliar,Concentração máxima 10% p/p,Favorece absorção foliar e protege contra injúrias
+104,III,Melhorador de Absorção Foliar,Frutose,,Melhorador de absorção foliar,,4.0-7.0,10,Foliar,Concentração máxima 10% p/p,
+105,III,Melhorador de Absorção Foliar,Sacarose,,Melhorador de absorção foliar,,4.0-7.0,10,Foliar,Concentração máxima 10% p/p,
+106,III,Tamponante,Tripolifosfato de Sódio,,Tamponante,,5.0-8.0,10,Fluidos e sólidos solúveis,,Mantém pH estável durante armazenamento
+107,III,Tamponante,Citrato de Sódio,,Tamponante,,4.0-7.0,10,Fluidos e sólidos solúveis,,
+108,III,Tamponante,Carbonato de Potássio,,Tamponante,,6.0-9.0,10,Fluidos e sólidos solúveis,,
+109,III,Umectante / Emoliente,Glicerol,,Umectante,,4.0-9.0,10,Fluidos e sólidos solúveis,,Mantém hidratação da fase sólida em solução
+110,III,Umectante / Emoliente,Manitol,,Umectante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+111,III,Umectante / Emoliente,Sorbitol,,Umectante,,4.0-9.0,10,Fluidos e sólidos solúveis,,Muito usado em formulações foliares com Ca e B
+112,III,Umectante / Emoliente,Polietilenoglicol,,Umectante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+113,III,Umectante / Emoliente,Polisorbato,,Umectante / Emulsificante,,4.0-9.0,10,Fluidos e sólidos solúveis,,
+114,III,Umectante / Emoliente,Polióis,,Umectante,,4.0-9.0,10,Fluidos e sólidos solúveis,,

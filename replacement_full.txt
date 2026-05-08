@@ -1,0 +1,19 @@
+﻿if not pred:
+                ph_est = motor._estimate_ph_theoretical(lines, v)
+                thermal = motor._thermal_balance_estimate(lines, insumos_cache, v, float(get_temp_c() or 25.0))
+                mix_min = motor._estimate_mix_time_min(lines, insumos_cache, v)
+                ionic = motor._estimate_ionic_strength(lines, v, ph_est=ph_est)
+                sat_local = float(output.indice_saturacao or 0.0)
+                sc_mode = sat_local > 1.10
+                dens = float((thermal or {}).get("densidade") or (motor._estimated_density(lines, insumos_cache, v) or 1.0))
+                evap = motor._estimate_evap_loss_kg(v, dens, float(60.0 if idx >= 9 else get_temp_c()), float(mix_min or 30.0))
+                pred = {
+                    "ph_est": ph_est,
+                    "temp_out_c": None if not thermal else thermal.get("temp_out_c"),
+                    "delta_t_c": None if not thermal else thermal.get("delta_t_c"),
+                    "mix_time_min": float(mix_min or 0.0),
+                    "evap_loss_kg": float(evap or 0.0),
+                    "ionic_strength": float(ionic or 0.0),
+                    "reologia": ("Nao-Newtoniano" if sc_mode else "Newtoniano"),
+                    "sc_mode": bool(sc_mode),
+                }

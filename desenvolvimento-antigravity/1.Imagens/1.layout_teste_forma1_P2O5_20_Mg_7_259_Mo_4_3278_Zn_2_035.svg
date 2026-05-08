@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .tab { fill: #1a2130; stroke: #2a3142; stroke-width: 1; }
+      .tab_on { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 11px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 800 26px "Segoe UI", Arial, sans-serif; }
+      .pill_bad { fill: #3b171d; stroke: #8b2b3c; stroke-width: 1; }
+      .danger { fill: #ff5a70; font: 800 12px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="62">OrionAgroquim</text>
+  <text class="subtitle" x="242" y="60">Teste — FORMA 1 (direta) | P2O5 20.00% | Mg 7.259% | Mo 4.3278% | Zn 2.035%</text>
+
+  <rect class="panel" x="24" y="104" width="420" height="772" rx="12"/>
+  <text class="title" x="48" y="146">Alvos e Condições</text>
+  <text class="subtitle" x="48" y="170">T 25°C | Q.S.P 100 L</text>
+
+  <rect class="panel2" x="44" y="192" width="380" height="112" rx="10"/>
+  <text class="label" x="60" y="220">Nutrientes-alvo (%)</text>
+  <text class="mono" x="60" y="246">P2O5 20.00 | Mg 7.259 | Mo 4.3278 | Zn 2.035</text>
+  <text class="muted" x="60" y="272">Forma 1 usa 1 fonte por nutriente (mais simples).</text>
+
+  <rect class="panel2" x="44" y="320" width="380" height="180" rx="10"/>
+  <text class="label" x="60" y="348">Resultado (Forma 1)</text>
+  <rect class="pill_bad" x="60" y="364" width="170" height="28" rx="14"/>
+  <text class="danger" x="86" y="384">SATURADO/CRÍTICO</text>
+  <text class="muted" x="60" y="420">Densidade estimada: 1.660 kg/L</text>
+  <text class="muted" x="60" y="442">Pouca água para dissolver os sais → precipita/corpo de fundo.</text>
+
+  <rect class="panel" x="464" y="104" width="952" height="772" rx="12"/>
+  <text class="title" x="488" y="146">Formas de Atingir (Top 5)</text>
+  <text class="subtitle" x="488" y="170">Aba atual: FORMA 1 — mais simples (mas pode não ser viável como solução)</text>
+
+  <rect class="panel2" x="484" y="192" width="912" height="52" rx="12"/>
+  <rect class="tab_on" x="500" y="204" width="160" height="28" rx="14"/>
+  <text class="label" x="546" y="224" fill="#071014">FORMA 1</text>
+  <rect class="tab" x="668" y="204" width="160" height="28" rx="14"/>
+  <text class="label" x="714" y="224">FORMA 2</text>
+  <rect class="tab" x="836" y="204" width="160" height="28" rx="14"/>
+  <text class="label" x="882" y="224">FORMA 3</text>
+  <rect class="btn2" x="1230" y="204" width="146" height="28" rx="10"/>
+  <text class="label" x="1250" y="224">GERAR LAUDO</text>
+
+  <rect class="panel2" x="484" y="258" width="912" height="108" rx="12"/>
+  <text class="label" x="504" y="288">Resumo</text>
+  <text class="mono" x="504" y="314">Status: saturated | Densidade 1.660 kg/L | T 25°C | Q.S.P 100 L</text>
+  <text class="muted" x="504" y="340">Observação: esta forma fecha a matemática, mas tende a precipitar pela alta concentração.</text>
+
+  <rect class="panel2" x="484" y="382" width="912" height="494" rx="12"/>
+  <text class="label" x="504" y="410">Tabela — Insumos | Massa (kg) | N | P2O5 | K2O | Ca+ | Mg | SO4 | B | Zn | Cu | Mn | Mo | Fe | Co | Ni | Se | Si</text>
+
+  <rect class="chip" x="504" y="426" width="892" height="34" rx="10"/>
+  <text class="label" x="520" y="448">Insumos</text>
+  <text class="label" x="780" y="448">Massa</text>
+  <text class="label" x="860" y="448">N</text>
+  <text class="label" x="894" y="448">P2O5</text>
+  <text class="label" x="940" y="448">K2O</text>
+  <text class="label" x="974" y="448">Ca+</text>
+  <text class="label" x="1006" y="448">Mg</text>
+  <text class="label" x="1038" y="448">SO4</text>
+  <text class="label" x="1078" y="448">B</text>
+  <text class="label" x="1108" y="448">Zn</text>
+  <text class="label" x="1142" y="448">Cu</text>
+  <text class="label" x="1174" y="448">Mn</text>
+  <text class="label" x="1206" y="448">Mo</text>
+  <text class="label" x="1240" y="448">Fe</text>
+  <text class="label" x="1272" y="448">Co</text>
+  <text class="label" x="1304" y="448">Ni</text>
+  <text class="label" x="1336" y="448">Se</text>
+  <text class="label" x="1366" y="448">Si</text>
+
+  <rect class="panel2" x="504" y="470" width="892" height="260" rx="10"/>
+  <text class="mono" x="520" y="496">Fosfato Monoamônico Cristal (MAP Cristal)</text>
+  <text class="mono" x="780" y="496">55.333</text>
+  <text class="mono" x="860" y="496">3.67</text>
+  <text class="mono" x="894" y="496">20.00</text>
+  <text class="mono" x="1006" y="496">0.00</text>
+  <text class="mono" x="1206" y="496">0.00</text>
+
+  <text class="mono" x="520" y="526">Formiato de Magnésio</text>
+  <text class="mono" x="780" y="526">75.312</text>
+  <text class="mono" x="1006" y="526">7.26</text>
+
+  <text class="mono" x="520" y="556">Acetato de Zinco</text>
+  <text class="mono" x="780" y="556">12.065</text>
+  <text class="mono" x="1108" y="556">2.04</text>
+
+  <text class="mono" x="520" y="586">Molibdato de Amônio</text>
+  <text class="mono" x="780" y="586">13.816</text>
+  <text class="mono" x="860" y="586">0.42</text>
+  <text class="mono" x="1206" y="586">4.33</text>
+
+  <text class="mono" x="520" y="616">Água</text>
+  <text class="mono" x="780" y="616">9.474</text>
+
+  <rect class="chip" x="504" y="742" width="892" height="118" rx="10"/>
+  <text class="label" x="520" y="768">Ressalvas (Forma 1)</text>
+  <text class="muted" x="520" y="792">- Fechou os alvos, porém a concentração é muito alta (água insuficiente)</text>
+  <text class="muted" x="520" y="814">- Recomendar migrar para Forma 2 (mitigadores) ou Forma 3 (estratégia em etapas)</text>
+  <text class="muted" x="520" y="836">- Ordem de preparo e temperatura tornam-se críticas para reduzir cristalização</text>
+</svg>

@@ -14,6 +14,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import flet as ft
 import estabilidade
 import motor
+<<<<<<< HEAD
+=======
+import estudo
+import estudo_quimico_integrado as estudo_quimico
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
 from motor import (
     Insumo, FormulaLine, Aditivo, AditivoSuggestion, ThermoStatus, RelatorioOP, FormulaOutput,
     NUTRIENT_COLUMNS, DEFAULT_VOLUME_L,
@@ -80,7 +85,11 @@ def build_thermo_alert(status: ThermoStatus) -> ft.Container:
             ], spacing=2, expand=True)
         ], alignment=ft.MainAxisAlignment.START),
         bgcolor=ft.Colors.with_opacity(0.1, main_color),
+<<<<<<< HEAD
         border=ft.border.all(1, ft.Colors.with_opacity(0.4, main_color)),
+=======
+        border=ft.Border.all(1, ft.Colors.with_opacity(0.4, main_color)),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         border_radius=8,
         padding=15,
         margin=ft.margin.only(bottom=10)
@@ -147,7 +156,11 @@ def build_data_table(lines: Sequence[FormulaLine], insumos_bd: Sequence[Insumo],
         vertical_lines=ft.border.BorderSide(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
         horizontal_lines=ft.border.BorderSide(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
         heading_row_color=ft.Colors.with_opacity(0.15, ft.Colors.WHITE),
+<<<<<<< HEAD
         border=ft.border.all(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
+=======
+        border=ft.Border.all(1, ft.Colors.with_opacity(0.4, ft.Colors.WHITE)),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         border_radius=8,
     )
 
@@ -291,11 +304,19 @@ def build_recommendations_view(process_steps: Sequence[str], aditivos: Sequence[
                 ft.Text(s.motivo, size=12, color=ft.Colors.with_opacity(0.8, ft.Colors.WHITE)),
                 ft.Text(f"Dose: {s.dose_recomendada_pct_texto} ({s.dose_recomendada_massa_texto})", size=12),
             ], spacing=4),
+<<<<<<< HEAD
             padding=10, border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)), border_radius=12,
         ))
 
     obs_controls = [ft.Text("Observações (fontes não incluídas)", size=14, weight=ft.FontWeight.BOLD)]
     obs_chips = [ft.Container(content=ft.Text(label, size=12), padding=ft.padding.symmetric(horizontal=10, vertical=6), border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)), border_radius=14) for label in BLOCKED_OBS_LABELS]
+=======
+            padding=10, border=ft.Border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)), border_radius=12,
+        ))
+
+    obs_controls = [ft.Text("Observações (fontes não incluídas)", size=14, weight=ft.FontWeight.BOLD)]
+    obs_chips = [ft.Container(content=ft.Text(label, size=12), padding=ft.padding.symmetric(horizontal=10, vertical=6), border=ft.Border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)), border_radius=14) for label in BLOCKED_OBS_LABELS]
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
 
     blocks: List[ft.Control] = []
     blocks.extend(process_controls)
@@ -304,7 +325,11 @@ def build_recommendations_view(process_steps: Sequence[str], aditivos: Sequence[
     blocks.extend([ft.Divider(), ft.Column(cards), ft.Divider(), ft.Row(obs_chips, wrap=True)])
     return ft.Container(
         content=ft.Column(blocks),
+<<<<<<< HEAD
         padding=10, border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)), border_radius=12,
+=======
+        padding=10, border=ft.Border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)), border_radius=12,
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
     )
 
 
@@ -405,14 +430,22 @@ def build_production_roadmap(steps: Sequence[Dict[str, Any]]) -> ft.Control:
                                 ],
                                 spacing=4,
                             ),
+<<<<<<< HEAD
                             padding=ft.padding.only(left=10, right=10, top=10, bottom=10),
+=======
+                            padding=ft.Padding.only(left=10, right=10, top=10, bottom=10),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                         ),
                     ],
                     spacing=0,
                     vertical_alignment=ft.CrossAxisAlignment.START,
                 ),
                 bgcolor=bg,
+<<<<<<< HEAD
                 border=ft.border.all(1, ft.Colors.with_opacity(0.55, accent)),
+=======
+                border=ft.Border.all(1, ft.Colors.with_opacity(0.55, accent)),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                 border_radius=12,
             )
         )
@@ -423,7 +456,11 @@ def build_production_roadmap(steps: Sequence[Dict[str, Any]]) -> ft.Control:
     return ft.Container(
         content=ft.Column([header, ft.Divider()] + items, spacing=8),
         padding=10,
+<<<<<<< HEAD
         border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+=======
+        border=ft.Border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         border_radius=12,
     )
 
@@ -476,7 +513,11 @@ def _main_impl(page: ft.Page) -> None:
             ft.Icon(ft.Icons.GRAIN, size=32, color=ft.Colors.BLUE_400),
             ft.Text("OrionAgroquim — Simulador Industrial", size=18, weight=ft.FontWeight.BOLD),
         ], alignment=ft.MainAxisAlignment.START),
+<<<<<<< HEAD
         padding=ft.padding.only(left=20, top=10, bottom=10)
+=======
+        padding=ft.Padding.only(left=20, top=10, bottom=10)
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
     )
 
     # Configurações Globais (Alvos, Condições e Motor)
@@ -554,21 +595,34 @@ def _main_impl(page: ft.Page) -> None:
     principal_table_container = ft.Container()
     principal_reco_container = ft.Container()
 
+<<<<<<< HEAD
     calc_button = ft.ElevatedButton(
         "CALCULAR E VALIDAR",
+=======
+    calc_button = ft.Button(
+        content="CALCULAR E VALIDAR",
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         style=ft.ButtonStyle(
             color=ft.Colors.BLACK,
             bgcolor=ft.Colors.CYAN_400,
             padding=20,
             shape=ft.RoundedRectangleBorder(radius=25)
         ),
+<<<<<<< HEAD
         on_click=lambda e: on_calculate_principal(e)
+=======
+        on_click=lambda e=None: on_calculate_principal(e)
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
     )
 
     reset_button = ft.OutlinedButton(
         "RESET",
         icon=ft.Icons.REFRESH,
+<<<<<<< HEAD
         on_click=lambda e: on_reset_all(e),
+=======
+        on_click=lambda e=None: on_reset_all(e),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
     )
 
     data_status_text = ft.Text("", size=11, italic=True, color=ft.Colors.GREY_400)
@@ -1793,7 +1847,11 @@ def _main_impl(page: ft.Page) -> None:
             print(f"Erro ao renderizar PDF com reportlab: {e}", flush=True)
             raise
 
+<<<<<<< HEAD
     def on_generate_pdf(_e):
+=======
+    def on_generate_pdf(_e=None):
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         nonlocal current_relatorio
         if not current_relatorio:
             page.snack_bar = ft.SnackBar(ft.Text("Nenhum laudo carregado. Use ENVIAR PARA LAUDO / OP em uma fórmula."))
@@ -1834,7 +1892,11 @@ def _main_impl(page: ft.Page) -> None:
             page.snack_bar.open = True
             page.update()
 
+<<<<<<< HEAD
     def on_save_history(_e):
+=======
+    def on_save_history(_e=None):
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         nonlocal current_relatorio
         if not current_relatorio:
             page.snack_bar = ft.SnackBar(ft.Text("Nenhum laudo carregado para salvar no histórico."))
@@ -1891,8 +1953,13 @@ def _main_impl(page: ft.Page) -> None:
                         ft.Text("Relatório e POP", size=18, weight=ft.FontWeight.BOLD),
                         ft.Row(
                             [
+<<<<<<< HEAD
                                 ft.ElevatedButton("GERAR PDF", icon=ft.Icons.PICTURE_AS_PDF, on_click=on_generate_pdf),
                                 ft.ElevatedButton("SALVAR NO HISTÓRICO", icon=ft.Icons.SAVE, on_click=on_save_history),
+=======
+                                        ft.Button(content="GERAR PDF", icon=ft.Icons.PICTURE_AS_PDF, on_click=on_generate_pdf),
+                                        ft.Button(content="SALVAR NO HISTÓRICO", icon=ft.Icons.SAVE, on_click=on_save_history),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                             ],
                             wrap=True,
                         ),
@@ -1981,6 +2048,706 @@ def _main_impl(page: ft.Page) -> None:
 
     # --- AUXILIARES DE RENDERIZAÇÃO ---
 
+<<<<<<< HEAD
+=======
+    def _render_estudo_chart(dados: Dict[str, Any]) -> ft.Control:
+        if not isinstance(dados, dict):
+            return ft.Container()
+        tp = str(dados.get("tipo") or "").strip().casefold()
+        titulo = str(dados.get("titulo") or "").strip()
+        header = ft.Text(titulo, size=12, weight=ft.FontWeight.BOLD) if titulo else ft.Container()
+
+        if tp == "indicador":
+            v = float(dados.get("valor") or 0.0)
+            unidade = str(dados.get("unidade") or "").strip()
+            pb = ft.ProgressBar(value=min(1.0, max(0.0, v / 100.0)))
+            return ft.Container(
+                content=ft.Column(
+                    [
+                        header,
+                        ft.Row([ft.Text(f"{format_num(v, 1)} {unidade}".strip(), weight=ft.FontWeight.BOLD), pb], spacing=10),
+                    ],
+                    spacing=6,
+                ),
+                padding=10,
+                border=ft.Border.all(1, ft.Colors.with_opacity(0.15, ft.Colors.WHITE)),
+                border_radius=10,
+            )
+
+        if tp == "barras":
+            rows = []
+            for d in list(dados.get("dados") or [])[:10]:
+                ins = str(d.get("insumo") or "")
+                pct = float(d.get("contrib_pct_saturacao") or 0.0)
+                rows.append(
+                    ft.DataRow(
+                        [
+                            ft.DataCell(ft.Text(ins, size=11)),
+                            ft.DataCell(ft.Text(f"{pct:.1f}%", size=11)),
+                        ]
+                    )
+                )
+            table = ft.DataTable(
+                columns=[ft.DataColumn(ft.Text("Insumo")), ft.DataColumn(ft.Text("% Saturação"))],
+                rows=rows or [ft.DataRow(cells=[ft.DataCell(ft.Text("-")), ft.DataCell(ft.Text("-"))])],
+            )
+            return ft.Container(content=ft.Column([header, table], spacing=8), padding=10, border_radius=10)
+
+        if tp == "barras_duplas":
+            rows = []
+            for d in list(dados.get("dados") or [])[:10]:
+                ins = str(d.get("insumo") or "")
+                q = float(d.get("calor_kj") or 0.0)
+                kind = str(d.get("tipo") or "")
+                rows.append(ft.DataRow(cells=[ft.DataCell(ft.Text(ins, size=11)), ft.DataCell(ft.Text(f"{q:+.1f} kJ", size=11)), ft.DataCell(ft.Text(kind, size=11))]))
+            table = ft.DataTable(
+                columns=[ft.DataColumn(ft.Text("Insumo")), ft.DataColumn(ft.Text("Calor")), ft.DataColumn(ft.Text("Tipo"))],
+                rows=rows or [ft.DataRow(cells=[ft.DataCell(ft.Text("-")), ft.DataCell(ft.Text("-")), ft.DataCell(ft.Text("-"))])],
+            )
+            resumo = dados.get("resumo") or {}
+            meta = ""
+            try:
+                if isinstance(resumo, dict):
+                    tin = resumo.get("temp_entrada_c")
+                    tout = resumo.get("temp_saida_c")
+                    dt = resumo.get("delta_t_c")
+                    meta = f"T: {format_num(float(tin), 0)}°C → {format_num(float(tout), 1)}°C | ΔT: {format_num(float(dt), 1)}°C"
+            except Exception:
+                meta = ""
+            meta_ctrl = ft.Text(meta, size=11, italic=True) if meta else ft.Container()
+            return ft.Container(content=ft.Column([header, meta_ctrl, table], spacing=8), padding=10, border_radius=10)
+
+        if tp == "radar":
+            rows = []
+            for d in list(dados.get("dados") or [])[:25]:
+                nutr = str(d.get("sigla") or "")
+                alvo = float(d.get("alvo_pct") or 0.0)
+                obt = float(d.get("obtido_pct") or 0.0)
+                ating = float(d.get("atingido_pct") or 0.0)
+                pb = ft.ProgressBar(value=min(1.0, max(0.0, (ating / 100.0) if math.isfinite(ating) else 0.0)))
+                rows.append(
+                    ft.DataRow(
+                        [
+                            ft.DataCell(ft.Text(nutr, size=11)),
+                            ft.DataCell(ft.Text(f"{alvo:.3f}", size=11)),
+                            ft.DataCell(ft.Text(f"{obt:.3f}", size=11)),
+                            ft.DataCell(ft.Text(f"{ating:.1f}%", size=11)),
+                            ft.DataCell(pb),
+                        ]
+                    )
+                )
+            table = ft.DataTable(
+                columns=[
+                    ft.DataColumn(ft.Text("Nutr.")),
+                    ft.DataColumn(ft.Text("Alvo %")),
+                    ft.DataColumn(ft.Text("Obt. %")),
+                    ft.DataColumn(ft.Text("Ating. %")),
+                    ft.DataColumn(ft.Text("Barra")),
+                ],
+                rows=rows
+                or [
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(ft.Text("-")),
+                            ft.DataCell(ft.Text("-")),
+                            ft.DataCell(ft.Text("-")),
+                            ft.DataCell(ft.Text("-")),
+                            ft.DataCell(ft.Text("-")),
+                        ]
+                    )
+                ],
+            )
+            return ft.Container(content=ft.Column([header, table], spacing=8), padding=10, border_radius=10)
+
+        return ft.Container()
+
+    def _serialize_estudo_text(idx: int, secoes: Sequence[estudo_quimico.SecaoEstudo]) -> str:
+        out: List[str] = []
+        out.append(f"ESTUDO QUÍMICO - F{idx}")
+        out.append(f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+        out.append("")
+        for s in list(secoes or []):
+            out.append("=" * 80)
+            out.append(str(s.titulo or ""))
+            out.append("=" * 80)
+            if getattr(s, "alerta", None):
+                out.append(f"ALERTA: {s.alerta}")
+            if getattr(s, "recomendacao", None):
+                out.append(f"RECOMENDAÇÃO: {s.recomendacao}")
+            if getattr(s, "quimica", ""):
+                out.append("")
+                out.append("QUÍMICA:")
+                out.append(str(s.quimica))
+            if getattr(s, "matematica", ""):
+                out.append("")
+                out.append("MATEMÁTICA:")
+                out.append(str(s.matematica))
+            if getattr(s, "logica", ""):
+                out.append("")
+                out.append("LÓGICA:")
+                out.append(str(s.logica))
+            if getattr(s, "python", ""):
+                out.append("")
+                out.append("PYTHON:")
+                out.append(str(s.python))
+            if getattr(s, "dados", None):
+                try:
+                    out.append("")
+                    out.append("DADOS (resumo):")
+                    out.append(str(s.dados))
+                except Exception:
+                    pass
+            out.append("")
+        return "\n".join(out).strip() + "\n"
+
+    def _notify(msg: str) -> None:
+        try:
+            sb = ft.SnackBar(ft.Text(msg))
+            try:
+                page.overlay.append(sb)
+            except Exception:
+                pass
+            sb.open = True
+            page.update()
+        except Exception:
+            pass
+
+    def _save_estudo_report(idx: int, secoes: Sequence[estudo_quimico.SecaoEstudo]) -> None:
+        try:
+            exports_dir = _exports_dir()
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            out_path = exports_dir / f"Estudo_F{idx}_{stamp}.txt"
+            if out_path.exists():
+                bump = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                out_path = exports_dir / f"Estudo_F{idx}_{bump}.txt"
+            out_path.write_text(_serialize_estudo_text(idx, secoes), encoding="utf-8", errors="replace")
+            try:
+                os.startfile(str(out_path))
+            except Exception:
+                pass
+            _notify(f"Estudo salvo: {out_path}")
+        except Exception as ex:
+            _notify(f"Falha ao salvar estudo: {ex}")
+
+    def _save_estudo_report_pdf(idx: int, secoes: Sequence[estudo_quimico.SecaoEstudo]) -> None:
+        try:
+            exports_dir = _exports_dir()
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            out_path = exports_dir / f"Estudo_F{idx}_{stamp}.pdf"
+            if out_path.exists():
+                bump = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                out_path = exports_dir / f"Estudo_F{idx}_{bump}.pdf"
+
+            try:
+                import reportlab
+                using_reportlab = True
+            except ModuleNotFoundError:
+                using_reportlab = False
+
+            def _sanitize_text(v: Any) -> str:
+                s = str(v or "")
+                s = s.replace("\t", " ")
+                s = s.replace("•", "-")
+                s = s.replace("→", "->")
+                s = s.replace("↔", "<->")
+                s = s.replace("\r\n", "\n").replace("\r", "\n")
+                return s
+
+            def _extract_rows_from_dados(d: Any) -> Optional[Dict[str, Any]]:
+                if not isinstance(d, dict):
+                    return None
+                tipo = str(d.get("tipo") or "").strip()
+                titulo = str(d.get("titulo") or "").strip()
+                items = d.get("dados")
+                if not isinstance(items, list) or not items:
+                    return None
+
+                if tipo == "barras":
+                    headers = ["Insumo", "Massa (kg)", "Limite (kg)", "Saturação (%)"]
+                    rows = []
+                    for it in items:
+                        if not isinstance(it, dict):
+                            continue
+                        rows.append([
+                            str(it.get("insumo", "") or ""),
+                            format_num(float(it.get("massa_kg", 0.0) or 0.0), 3),
+                            format_num(float(it.get("limite_kg", 0.0) or 0.0), 3),
+                            format_num(float(it.get("contrib_pct_saturacao", 0.0) or 0.0), 1),
+                        ])
+                    return {"titulo": titulo or "Tabela", "headers": headers, "rows": rows}
+
+                if tipo == "barras_duplas":
+                    headers = ["Insumo", "Massa (kg)", "ΔH (kJ/kg)", "Calor (kJ)", "Tipo"]
+                    rows = []
+                    for it in items:
+                        if not isinstance(it, dict):
+                            continue
+                        rows.append([
+                            str(it.get("insumo", "") or ""),
+                            format_num(float(it.get("massa_kg", 0.0) or 0.0), 3),
+                            format_num(float(it.get("delta_h_kj_kg", 0.0) or 0.0), 0),
+                            format_num(float(it.get("calor_kj", 0.0) or 0.0), 1),
+                            str(it.get("tipo", "") or ""),
+                        ])
+                    return {"titulo": titulo or "Tabela", "headers": headers, "rows": rows}
+
+                if tipo == "radar":
+                    headers = ["Nutriente", "Alvo (%)", "Obtido (%)", "Diferença", "Atingido (%)"]
+                    rows = []
+                    for it in items:
+                        if not isinstance(it, dict):
+                            continue
+                        rows.append([
+                            str(it.get("nutriente", "") or ""),
+                            format_num(float(it.get("alvo_pct", 0.0) or 0.0), 3),
+                            format_num(float(it.get("obtido_pct", 0.0) or 0.0), 3),
+                            format_num(float(it.get("diferenca", 0.0) or 0.0), 3),
+                            format_num(float(it.get("atingido_pct", 0.0) or 0.0), 1),
+                        ])
+                    return {"titulo": titulo or "Tabela", "headers": headers, "rows": rows}
+
+                return None
+
+            if using_reportlab:
+                from xml.sax.saxutils import escape
+
+                from reportlab.lib import colors
+                from reportlab.lib.pagesizes import A4
+                from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+                from reportlab.pdfbase import pdfmetrics
+                from reportlab.pdfbase.ttfonts import TTFont
+                from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+                def _find_font(candidates: List[str]) -> Optional[str]:
+                    for p in candidates:
+                        try:
+                            if Path(p).exists():
+                                return p
+                        except Exception:
+                            pass
+                    return None
+
+                normal_candidates = [
+                    r"C:\Windows\Fonts\segoeui.ttf",
+                    r"C:\Windows\Fonts\arial.ttf",
+                    r"C:\Windows\Fonts\calibri.ttf",
+                ]
+                mono_candidates = [
+                    r"C:\Windows\Fonts\consola.ttf",
+                    r"C:\Windows\Fonts\cascadiamono.ttf",
+                    r"C:\Windows\Fonts\cour.ttf",
+                ]
+
+                normal_font = _find_font(normal_candidates)
+                mono_font = _find_font(mono_candidates)
+
+                font_name = "Helvetica"
+                font_bold = "Helvetica-Bold"
+                font_italic = "Helvetica-Oblique"
+                mono_name = "Courier"
+
+                try:
+                    if normal_font:
+                        pdfmetrics.registerFont(TTFont("OrionRL", normal_font))
+                        font_name = "OrionRL"
+                        font_bold = "OrionRL"
+                        font_italic = "OrionRL"
+                except Exception:
+                    pass
+
+                try:
+                    if mono_font:
+                        pdfmetrics.registerFont(TTFont("OrionMonoRL", mono_font))
+                        mono_name = "OrionMonoRL"
+                except Exception:
+                    pass
+
+                doc = SimpleDocTemplate(
+                    str(out_path),
+                    pagesize=A4,
+                    leftMargin=36,
+                    rightMargin=36,
+                    topMargin=36,
+                    bottomMargin=36,
+                    title=f"Estudo F{idx}",
+                )
+
+                styles = getSampleStyleSheet()
+                style_title = ParagraphStyle("orion_title", parent=styles["Heading1"], fontName=font_bold, fontSize=16, leading=20, spaceAfter=10)
+                style_h2 = ParagraphStyle("orion_h2", parent=styles["Heading2"], fontName=font_bold, fontSize=13, leading=16, spaceAfter=6)
+                style_body = ParagraphStyle("orion_body", parent=styles["BodyText"], fontName=font_name, fontSize=11, leading=14, spaceAfter=6)
+                style_logic = ParagraphStyle("orion_logic", parent=styles["BodyText"], fontName=font_italic, fontSize=10, leading=13, textColor=colors.HexColor("#3C3C3C"), spaceAfter=6)
+                style_code = ParagraphStyle("orion_code", parent=styles["BodyText"], fontName=mono_name, fontSize=9, leading=11, textColor=colors.HexColor("#00FF00"))
+                style_math = ParagraphStyle("orion_math", parent=styles["BodyText"], fontName=mono_name, fontSize=11, leading=14, textColor=colors.HexColor("#006064"))
+
+                def _p(txt: str) -> Paragraph:
+                    t = escape(_sanitize_text(txt)).replace("\n\n", "<br/><br/>").replace("\n", "<br/>")
+                    return Paragraph(t, style_body)
+
+                def _p_logic(txt: str) -> Paragraph:
+                    t = escape(_sanitize_text(txt)).replace("\n\n", "<br/><br/>").replace("\n", "<br/>")
+                    return Paragraph(t, style_logic)
+
+                def _box_1cell(txt: str, *, bg: Any, style: ParagraphStyle, pad: int = 8) -> Table:
+                    t = escape(_sanitize_text(txt)).replace("\n", "<br/>")
+                    tbl = Table([[Paragraph(t, style)]], colWidths=["*"])
+                    tbl.setStyle(
+                        TableStyle(
+                            [
+                                ("BACKGROUND", (0, 0), (-1, -1), bg),
+                                ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#CCCCCC")),
+                                ("LEFTPADDING", (0, 0), (-1, -1), pad),
+                                ("RIGHTPADDING", (0, 0), (-1, -1), pad),
+                                ("TOPPADDING", (0, 0), (-1, -1), pad),
+                                ("BOTTOMPADDING", (0, 0), (-1, -1), pad),
+                            ]
+                        )
+                    )
+                    return tbl
+
+                def _data_table(titulo: str, headers: List[str], rows: List[List[str]]) -> List[Any]:
+                    data = [headers] + rows
+                    tbl = Table(data, repeatRows=1)
+                    tbl.setStyle(
+                        TableStyle(
+                            [
+                                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F0F0F0")),
+                                ("FONTNAME", (0, 0), (-1, 0), font_bold),
+                                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#D0D0D0")),
+                                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAFAFA")]),
+                            ]
+                        )
+                    )
+                    return [Paragraph(escape(titulo), style_h2), tbl, Spacer(1, 10)]
+
+                story: List[Any] = []
+                story.append(Paragraph(f"Relatório de Estudo — F{idx}", style_title))
+                story.append(Paragraph(escape(f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"), style_body))
+                story.append(Spacer(1, 12))
+
+                for s in list(secoes or []):
+                    story.append(Paragraph(escape(_sanitize_text(getattr(s, "titulo", "") or "").replace("📊", "").strip()), style_h2))
+
+                    if getattr(s, "alerta", None):
+                        story.append(_box_1cell(str(s.alerta), bg=colors.HexColor("#FFEBEE"), style=ParagraphStyle("orion_alert", parent=style_body, textColor=colors.HexColor("#C62828"), fontName=font_bold)))
+                        story.append(Spacer(1, 6))
+
+                    if getattr(s, "recomendacao", None):
+                        story.append(_box_1cell(str(s.recomendacao), bg=colors.HexColor("#E8F5E9"), style=ParagraphStyle("orion_reco", parent=style_body, textColor=colors.HexColor("#1B5E20"), fontName=font_bold)))
+                        story.append(Spacer(1, 6))
+
+                    quim = str(getattr(s, "quimica", "") or "")
+                    if quim.strip():
+                        story.append(_p(quim))
+
+                    mat = str(getattr(s, "matematica", "") or "")
+                    if mat.strip():
+                        story.append(_box_1cell(mat, bg=colors.HexColor("#F0F0F0"), style=style_math))
+                        story.append(Spacer(1, 6))
+
+                    logi = str(getattr(s, "logica", "") or "")
+                    if logi.strip():
+                        story.append(_p_logic(logi))
+
+                    py = str(getattr(s, "python", "") or "")
+                    if py.strip():
+                        story.append(_box_1cell(py, bg=colors.black, style=style_code, pad=10))
+                        story.append(Spacer(1, 6))
+
+                    tbl = _extract_rows_from_dados(getattr(s, "dados", None))
+                    if tbl:
+                        story.extend(_data_table(tbl["titulo"], tbl["headers"], tbl["rows"]))
+
+                    story.append(Spacer(1, 14))
+                    if len(story) > 0 and (len(story) % 60 == 0):
+                        story.append(PageBreak())
+
+                doc.build(story)
+                try:
+                    os.startfile(str(out_path))
+                except Exception:
+                    pass
+                _notify(f"Estudo PDF salvo: {out_path}")
+                return
+
+            try:
+                from fpdf import FPDF
+                try:
+                    from fpdf.enums import XPos, YPos
+                except Exception:
+                    class _XPos:
+                        LMARGIN = "LMARGIN"
+
+                    class _YPos:
+                        NEXT = "NEXT"
+
+                    XPos = _XPos
+                    YPos = _YPos
+            except ModuleNotFoundError:
+                raise
+
+            class OrionStudyPDF(FPDF):
+                def header(self):
+                    self.set_fill_color(30, 136, 229)
+                    self.rect(0, 0, 5, float(self.h), style="F")
+
+            pdf = OrionStudyPDF()
+            pdf.set_margins(15, 15, 15)
+            pdf.set_auto_page_break(auto=True, margin=15)
+            pdf.add_page()
+
+            using_unicode_font = False
+            using_unicode_mono = False
+            try:
+                font_candidates = [
+                    r"C:\Windows\Fonts\arial.ttf",
+                    r"C:\Windows\Fonts\segoeui.ttf",
+                    r"C:\Windows\Fonts\calibri.ttf",
+                ]
+                font_path = next((p for p in font_candidates if Path(p).exists()), None)
+                if font_path:
+                    pdf.add_font("OrionFont", "", font_path, uni=True)
+                    pdf.add_font("OrionFont", "B", font_path, uni=True)
+                    pdf.add_font("OrionFont", "I", font_path, uni=True)
+                    using_unicode_font = True
+            except Exception:
+                using_unicode_font = False
+
+            try:
+                mono_candidates = [
+                    r"C:\Windows\Fonts\consola.ttf",
+                    r"C:\Windows\Fonts\cascadiamono.ttf",
+                    r"C:\Windows\Fonts\cour.ttf",
+                ]
+                mono_path = next((p for p in mono_candidates if Path(p).exists()), None)
+                if mono_path:
+                    pdf.add_font("OrionMono", "", mono_path, uni=True)
+                    pdf.add_font("OrionMono", "B", mono_path, uni=True)
+                    using_unicode_mono = True
+            except Exception:
+                using_unicode_mono = False
+
+            def _safe_txt(v: Any) -> str:
+                s = _sanitize_text(v)
+                if using_unicode_font or using_unicode_mono:
+                    return s
+                try:
+                    return s.encode("latin-1", "replace").decode("latin-1")
+                except Exception:
+                    return s
+
+            def set_font(size: int, *, bold: bool = False, italic: bool = False) -> None:
+                if using_unicode_font:
+                    style = ("B" if bold else "") + ("I" if italic else "")
+                    pdf.set_font("OrionFont", style=style, size=size)
+                else:
+                    style = ("B" if bold else "") + ("I" if italic else "")
+                    pdf.set_font("Helvetica", style=style, size=size)
+
+            def set_mono(size: int, *, bold: bool = False) -> None:
+                if using_unicode_mono:
+                    pdf.set_font("OrionMono", style=("B" if bold else ""), size=size)
+                elif using_unicode_font:
+                    pdf.set_font("OrionFont", style=("B" if bold else ""), size=size)
+                else:
+                    pdf.set_font("Courier", style=("B" if bold else ""), size=size)
+
+            def spacer(mm: float) -> None:
+                pdf.ln(mm)
+
+            def h1(txt: str) -> None:
+                set_font(16, bold=True)
+                pdf.set_text_color(0, 0, 0)
+                pdf.multi_cell(0, 8, text=_safe_txt(txt), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                spacer(2)
+
+            def h2(txt: str) -> None:
+                set_font(13, bold=True)
+                pdf.set_text_color(0, 0, 0)
+                pdf.multi_cell(0, 7, text=_safe_txt(txt), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                spacer(1)
+
+            def para(txt: str) -> None:
+                t = _safe_txt(txt).strip()
+                if not t:
+                    return
+                set_font(11)
+                pdf.set_text_color(30, 30, 30)
+                pdf.multi_cell(0, 5, text=t, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                spacer(1)
+
+            def alert_box(txt: str, *, kind: str) -> None:
+                t = _safe_txt(txt).strip()
+                if not t:
+                    return
+                if kind == "alert":
+                    pdf.set_fill_color(255, 235, 238)
+                    pdf.set_text_color(198, 40, 40)
+                else:
+                    pdf.set_fill_color(232, 245, 233)
+                    pdf.set_text_color(27, 94, 32)
+                set_font(10, bold=True)
+                pdf.multi_cell(0, 5, text=t, fill=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                pdf.set_text_color(30, 30, 30)
+                spacer(1)
+
+            def math_box(txt: str) -> None:
+                t = _safe_txt(txt).strip()
+                if not t:
+                    return
+                pdf.set_fill_color(240, 240, 240)
+                pdf.set_text_color(0, 96, 100)
+                set_mono(11, bold=True)
+                pdf.multi_cell(0, 6, text=t, fill=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                pdf.set_text_color(30, 30, 30)
+                spacer(1)
+
+            def logic_block(txt: str) -> None:
+                t = _safe_txt(txt).strip()
+                if not t:
+                    return
+                set_font(10, italic=True)
+                pdf.set_text_color(60, 60, 60)
+                pdf.multi_cell(0, 5, text=t, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                pdf.set_text_color(30, 30, 30)
+                spacer(1)
+
+            def python_box(txt: str) -> None:
+                t = _safe_txt(txt).strip()
+                if not t:
+                    return
+                pdf.set_fill_color(0, 0, 0)
+                pdf.set_text_color(0, 255, 0)
+                set_mono(9)
+                for ln in t.splitlines():
+                    pdf.multi_cell(0, 4.5, text=ln.rstrip(), fill=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                pdf.set_text_color(30, 30, 30)
+                spacer(1)
+
+            def table_block(titulo: str, headers: List[str], rows: List[List[str]]) -> None:
+                if not headers or not rows:
+                    return
+                h2(titulo)
+                set_mono(9, bold=True)
+                pdf.set_fill_color(240, 240, 240)
+                pdf.set_text_color(0, 0, 0)
+
+                def _col_widths() -> List[int]:
+                    widths = [len(h) for h in headers]
+                    for r in rows[:30]:
+                        for i, c in enumerate(r):
+                            widths[i] = max(widths[i], len(str(c)))
+                    widths = [min(w, 48) for w in widths]
+                    return widths
+
+                colw = _col_widths()
+                header_line = "  ".join(str(headers[i])[:colw[i]].ljust(colw[i]) for i in range(len(headers)))
+                pdf.multi_cell(0, 5, text=_safe_txt(header_line), fill=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+
+                set_mono(9)
+                pdf.set_text_color(20, 20, 20)
+                for idx_row, r in enumerate(rows):
+                    if idx_row % 2 == 0:
+                        pdf.set_fill_color(255, 255, 255)
+                    else:
+                        pdf.set_fill_color(245, 245, 245)
+                    line = "  ".join(str(r[i])[:colw[i]].ljust(colw[i]) for i in range(len(headers)))
+                    pdf.multi_cell(0, 4.8, text=_safe_txt(line), fill=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                spacer(1)
+
+            h1(f"Relatório de Estudo — F{idx}")
+            para(f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+            spacer(2)
+
+            for s in list(secoes or []):
+                h2(_sanitize_text(getattr(s, "titulo", "") or "").replace("📊", "").strip())
+                if getattr(s, "alerta", None):
+                    alert_box(str(s.alerta), kind="alert")
+                if getattr(s, "recomendacao", None):
+                    alert_box(str(s.recomendacao), kind="reco")
+
+                quim = str(getattr(s, "quimica", "") or "")
+                if quim.strip():
+                    para(quim)
+                mat = str(getattr(s, "matematica", "") or "")
+                if mat.strip():
+                    math_box(mat)
+                logi = str(getattr(s, "logica", "") or "")
+                if logi.strip():
+                    logic_block(logi)
+                py = str(getattr(s, "python", "") or "")
+                if py.strip():
+                    python_box(py)
+
+                tbl = _extract_rows_from_dados(getattr(s, "dados", None))
+                if tbl:
+                    table_block(tbl["titulo"], tbl["headers"], tbl["rows"])
+
+                spacer(3)
+
+            pdf.output(str(out_path))
+            try:
+                os.startfile(str(out_path))
+            except Exception:
+                pass
+            _notify(f"Estudo PDF salvo: {out_path}")
+        except Exception as ex:
+            _notify(f"Falha ao salvar estudo PDF: {ex}")
+
+    def _open_estudo_dialog(idx: int, output: FormulaOutput) -> None:
+        try:
+            print(f"[ESTUDO] Clique em ESTUDAR: F{idx}", flush=True)
+            _notify(f"Gerando estudo da F{idx}...")
+
+            v = get_volume()
+            t = get_temp_c()
+            targets = parse_targets_from_fields(targets_fields)
+            lines = list(output.lines or [])
+            status = verificar_viabilidade_termodinamica(v, lines, insumos_cache, idx, temp_c=t)
+            secoes = estudo_quimico.gerar_estudo_completo(idx, output, insumos_cache, targets, v, t)
+
+            dlg = ft.AlertDialog(
+                modal=True,
+                title=ft.Text(f"ESTUDAR — F{idx}", weight=ft.FontWeight.BOLD),
+                content=ft.Container(
+                    content=estudo.build_study_view(secoes=list(secoes), status=status, output=output),
+                    width=1100,
+                    height=760,
+                ),
+                actions=[
+                    ft.ElevatedButton("💾 Salvar como Relatório de Estudo (PDF)", bgcolor=ft.Colors.BLUE_900, color=ft.Colors.WHITE, on_click=lambda e=None, i=idx, ss=secoes: _save_estudo_report_pdf(i, ss)),
+                    ft.TextButton("FECHAR", on_click=lambda e=None: _close_dialog()),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END,
+            )
+
+            def _close_dialog() -> None:
+                dlg.open = False
+                page.update()
+                try:
+                    if dlg in list(getattr(page, "overlay", []) or []):
+                        page.overlay.remove(dlg)
+                except Exception:
+                    pass
+
+            try:
+                if dlg not in list(getattr(page, "overlay", []) or []):
+                    page.overlay.append(dlg)
+            except Exception:
+                pass
+            dlg.open = True
+            page.update()
+        except Exception as ex:
+            import traceback
+            print(f"Falha ao gerar/abrir estudo da F{idx}: {ex}\n{traceback.format_exc()}", flush=True)
+            try:
+                _notify(f"Falha ao abrir ESTUDAR: {ex}")
+            except Exception:
+                pass
+
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
     def build_top12_formula_view(idx: int, output: FormulaOutput) -> ft.Control:
         try:
             v = get_volume()
@@ -2003,7 +2770,10 @@ def _main_impl(page: ft.Page) -> None:
                             fv = 0.0
                         totals[str(k)] = float(totals.get(str(k), 0.0) or 0.0) + float(fv)
 
+<<<<<<< HEAD
                 # Punição Máxima para incompatibilidade química (Gesso/Empedramento)
+=======
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                 triggered_pairs = motor._kps_triggered_pairs(totals, targets=None)
                 has_quelante = any(
                     any(key in (l.insumo_nome or "").lower() for key in ("edta", "hbed", "dtpa", "hedta", "nta", "eddha", "quelant"))
@@ -2011,11 +2781,17 @@ def _main_impl(page: ft.Page) -> None:
                 )
                 pts_kps = 0 if has_quelante else (60 if triggered_pairs else 0)
 
+<<<<<<< HEAD
                 # Rigor extremo com Shelf-life (Risco de cristalização no inverno)
                 sat = float(output.indice_saturacao or 0.0)
                 pts_sat = 50 if sat >= 1.0 else (30 if sat >= 0.85 else 0)
 
                 # Rigor com Viscosidade (Dificuldade de envase e bombeamento)
+=======
+                sat = float(output.indice_saturacao or 0.0)
+                pts_sat = 50 if sat >= 1.0 else (30 if sat >= 0.85 else 0)
+
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                 total_mass_kg = sum(float(getattr(l, "massa_kg", 0.0) or 0.0) for l in output.lines)
                 carga_sais_pct_mv = (total_mass_kg / float(volume_l)) * 100.0 if volume_l > 0 else 0.0
                 pts_sal = 20 if carga_sais_pct_mv >= 45.0 else (10 if carga_sais_pct_mv >= 35.0 else 0)
@@ -2038,6 +2814,7 @@ def _main_impl(page: ft.Page) -> None:
                     ("Salinidade", float(radar.get("Salinidade") or 0.0), color_sal),
                     ("Seguro", float(radar.get("Seguro") or 0.0), color_ok),
                 ]
+<<<<<<< HEAD
                 parts = [(n, v, c) for (n, v, c) in parts if v > 0.0]
 
                 def _pct_to_flex(v: float) -> int:
@@ -2045,6 +2822,15 @@ def _main_impl(page: ft.Page) -> None:
 
                 bar_segments: List[ft.Control] = []
                 for name, pct, color in parts:
+=======
+                parts = [(n, v2, c) for (n, v2, c) in parts if v2 > 0.0]
+
+                def _pct_to_flex(vv: float) -> int:
+                    return max(0, int(round(float(vv) * 10.0)))
+
+                bar_segments: List[ft.Control] = []
+                for _name, pct, color in parts:
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                     bar_segments.append(
                         ft.Container(
                             expand=_pct_to_flex(pct),
@@ -2079,15 +2865,28 @@ def _main_impl(page: ft.Page) -> None:
                     content=ft.Row([bar, legend], spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER),
                     bgcolor=ft.Colors.with_opacity(0.8, "#1A1C1E"),
                     padding=15,
+<<<<<<< HEAD
                     border=ft.border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+=======
+                    border=ft.Border.all(1, ft.Colors.with_opacity(0.2, ft.Colors.WHITE)),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                     border_radius=15,
                     blur=ft.Blur(10, 10),
                 )
 
+<<<<<<< HEAD
+=======
+            alerta_ui = build_thermo_alert(status)
+            viability_ui = build_viability_card(lines, v, status.tech_tier, aditivos_cache, status)
+            tabela_ui = build_data_table(lines, insumos_cache, v, targets, bool(supply_chain_switch.value), page=page)
+            riscos_ui = build_risk_chart(output, v)
+
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
             recomendacoes_ui = build_recommendations_view(
                 output.process_steps,
                 output.aditivos_sugeridos,
                 lines,
+<<<<<<< HEAD
                 instrucoes_producao=(),
             )
             roteiro_ui = build_production_roadmap(output.instrucoes_producao)
@@ -2223,10 +3022,54 @@ def _main_impl(page: ft.Page) -> None:
 
         except Exception as e:
             return ft.Container(content=ft.Text(f"Erro: {str(e)}", color=ft.Colors.RED_400))
+=======
+                instrucoes_producao=output.instrucoes_producao,
+            )
+            roteiro_ui = build_production_roadmap(output.instrucoes_producao)
+
+            btn_laudo = ft.Button(
+                content="ENVIAR PARA LAUDO / OP",
+                icon=ft.Icons.FILE_DOWNLOAD,
+                on_click=lambda _e=None, l=lines, i=idx: on_send_to_laudo(l, i),
+                style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_900, color=ft.Colors.WHITE),
+            )
+            btn_estudar = ft.Button(
+                content="ESTUDAR",
+                icon=ft.Icons.SCHOOL,
+                on_click=lambda _e=None, i=idx, o=output: _open_estudo_dialog(i, o),
+                style=ft.ButtonStyle(bgcolor=ft.Colors.PURPLE_800, color=ft.Colors.WHITE),
+            )
+
+            return ft.Container(
+                content=ft.Column(
+                    [
+                        alerta_ui,
+                        ft.Row([viability_ui, riscos_ui], wrap=True, spacing=12),
+                        tabela_ui,
+                        ft.Row([btn_laudo, btn_estudar], wrap=True, spacing=10),
+                        ft.Divider(),
+                        roteiro_ui,
+                        ft.Divider(),
+                        recomendacoes_ui,
+                    ],
+                    scroll=ft.ScrollMode.AUTO,
+                    expand=True,
+                    spacing=10,
+                ),
+                padding=10,
+                expand=True,
+            )
+        except Exception as e:
+            import traceback
+            print(f"Erro ao renderizar a fórmula {idx}: {e}", flush=True)
+            traceback.print_exc()
+            return ft.Container(content=ft.Text(f"Erro na fórmula {idx}: {str(e)}", color=ft.Colors.RED_400, weight=ft.FontWeight.BOLD), padding=20)
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
 
     def build_top12_tabs(forms: List[FormulaOutput]) -> None:
         labels = []
         views = []
+<<<<<<< HEAD
         
         for i, f in enumerate(forms):
             idx = i + 1
@@ -2287,6 +3130,27 @@ def _main_impl(page: ft.Page) -> None:
             roteiro[0] = head
 
         rel = gerar_relatorio_op(lines_copy, v, status)
+=======
+        for i, f in enumerate(forms or []):
+            idx = i + 1
+            if idx <= 4:
+                label = f"F{idx} (Tier 1 - Conservador)"
+            elif idx <= 8:
+                label = f"F{idx} (Tier 2 - Audacioso / exploratório)"
+            else:
+                label = f"F{idx} (Tier 3 - Alquimia / não ortodoxo)"
+            labels.append(label)
+            views.append(build_top12_formula_view(idx, f))
+        set_tabs(top12_tabs, labels, views)
+        page.update()
+
+    def _select_formula_for_report(lines: Sequence[FormulaLine], idx: int, *, open_report_tab: bool = True) -> None:
+        nonlocal current_relatorio
+        v = get_volume()
+        status = verificar_viabilidade_termodinamica(v, list(lines), insumos_cache, idx, temp_c=get_temp_c())
+        roteiro = diagnosticar_operacoes_unitarias(list(lines), insumos_cache, [], v, get_temp_c(), formula_index=idx)
+        rel = gerar_relatorio_op(list(lines), v, status)
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         rel.titulo = f"F{idx} — {rel.titulo}"
         if roteiro:
             rel.pop_etapas = list(roteiro)
@@ -2307,9 +3171,13 @@ def _main_impl(page: ft.Page) -> None:
         if open_report_tab:
             main_tabs.selected_index = 2
             page.snack_bar = ft.SnackBar(ft.Text(f"F{idx} carregada em Relatório & POP."))
+<<<<<<< HEAD
         else:
             page.snack_bar = ft.SnackBar(ft.Text(f"F{idx} selecionada para PDF (Relatório & POP)."))
         page.snack_bar.open = True
+=======
+            page.snack_bar.open = True
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         page.update()
 
     def on_send_to_laudo(lines, idx):
@@ -2329,6 +3197,7 @@ def _main_impl(page: ft.Page) -> None:
         etapas = rel.pop_etapas or []
         if etapas and isinstance(etapas[0], dict) and ("nome_etapa" in etapas[0]):
             roteiro_controls.append(ft.Text("\nROTEIRO DE PRODUÇÃO INDUSTRIAL (RITMO/ETAPAS)", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK))
+<<<<<<< HEAD
             prev_border_color: Optional[str] = None
 
             def _pick_border_color(stage_name: str, idx: int) -> str:
@@ -2361,6 +3230,8 @@ def _main_impl(page: ft.Page) -> None:
                         return c
                 return palette[(idx - 1) % len(palette)]
 
+=======
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
             for i, st in enumerate(etapas, start=1):
                 nome = str(st.get("nome_etapa") or f"Etapa {i}")
                 instr = str(st.get("instrucao_processo") or "")
@@ -2384,6 +3255,7 @@ def _main_impl(page: ft.Page) -> None:
                 pop_lines = st.get("pop") or []
                 pccs = st.get("pccs") or []
 
+<<<<<<< HEAD
                 border_color = _pick_border_color(nome, i)
                 prev_border_color = border_color
                 header_bg = ft.Colors.with_opacity(0.12, border_color)
@@ -2446,14 +3318,32 @@ def _main_impl(page: ft.Page) -> None:
                 if gate_txt:
                     bloco.append(ft.Text(gate_txt, color=ft.Colors.RED_900, size=11, weight=ft.FontWeight.BOLD))
 
+=======
+                bloco: List[ft.Control] = []
+                bloco.append(ft.Text(f"{i}. {nome}", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK, size=12))
+                if instr:
+                    bloco.append(ft.Text(instr, color=ft.Colors.BLACK87, size=11))
+                if meta:
+                    bloco.append(ft.Text(meta, color=ft.Colors.BLACK54, size=10))
+                if gate_txt:
+                    bloco.append(ft.Text(gate_txt, color=ft.Colors.RED_900, size=11, weight=ft.FontWeight.BOLD))
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                 if pop_lines:
                     bloco.append(ft.Text("POP", color=ft.Colors.BLACK, size=10, weight=ft.FontWeight.BOLD))
                     for ln in pop_lines[:6]:
                         bloco.append(ft.Text(f"- {ln}", color=ft.Colors.BLACK87, size=10))
+<<<<<<< HEAD
 
                 if pccs:
                     bloco.append(ft.Text("PCC", color=ft.Colors.BLACK, size=10, weight=ft.FontWeight.BOLD))
                     for p in pccs[:6]:
+=======
+                if pccs:
+                    bloco.append(ft.Text("PCC", color=ft.Colors.BLACK, size=10, weight=ft.FontWeight.BOLD))
+                    for p in pccs[:6]:
+                        if not isinstance(p, dict):
+                            continue
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
                         pid = str(p.get("id") or "").strip()
                         par = str(p.get("parametro") or "").strip()
                         lim = str(p.get("limite") or "").strip()
@@ -2461,6 +3351,7 @@ def _main_impl(page: ft.Page) -> None:
                         txt = f"{pid} — {par}: {lim} -> {acao}" if pid else f"{par}: {lim} -> {acao}"
                         bloco.append(ft.Text(f"- {txt}", color=ft.Colors.BLACK87, size=10))
 
+<<<<<<< HEAD
                 roteiro_controls.append(
                     ft.Container(
                         content=ft.Column(bloco, spacing=6),
@@ -2521,6 +3412,57 @@ def _main_impl(page: ft.Page) -> None:
                 ], wrap=True),
                 ft.Text("Assinatura: _________________________________________________", color=ft.Colors.BLACK87, size=11),
             ])
+=======
+                roteiro_controls.append(ft.Container(content=ft.Column(bloco, spacing=6), padding=12, border=ft.Border.all(1, ft.Colors.BLACK12), border_radius=8, margin=ft.margin.only(bottom=10)))
+        else:
+            roteiro_controls.append(ft.Text("\nPROCEDIMENTO OPERACIONAL (POP)", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK))
+            roteiro_controls.append(ft.Column([ft.Text(f"• {e['etapa']}: {e['procedimento']} ({e['notas']})", color=ft.Colors.BLACK87, size=12) for e in (rel.pop_etapas or []) if isinstance(e, dict)]))
+
+        a4 = ft.Container(
+            bgcolor=ft.Colors.WHITE,
+            padding=50,
+            width=800,
+            border_radius=2,
+            shadow=ft.BoxShadow(blur_radius=10, color=ft.Colors.BLACK54),
+            content=ft.Column(
+                [
+                    ft.Row(
+                        [
+                            ft.Text("ORION AGROQUIM", size=24, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                            ft.Column(
+                                [
+                                    ft.Text(f"DATA: {rel.data_hora}", color=ft.Colors.BLACK, size=10),
+                                    ft.Text(f"TIER: {rel.tier}", color=ft.Colors.BLACK, size=10),
+                                ],
+                                horizontal_alignment=ft.CrossAxisAlignment.END,
+                            ),
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    ),
+                    ft.Divider(color=ft.Colors.BLACK26),
+                    ft.Text(rel.titulo, size=20, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK, text_align=ft.TextAlign.CENTER),
+                    ft.Text(f"Volume Final: {get_volume()} L | Temperatura: {format_num(get_temp_c(), 1)}°C | Reator: {reactor_dd.value}", color=ft.Colors.BLACK87),
+                    ft.Text(f"Densidade: {format_num(rel.densidade, 3)} kg/L | Balanço Hídrico: {format_num(rel.agua_balanco, 2)} kg", color=ft.Colors.BLACK87),
+                    ft.Text("\nALVOS (TÍTULO)", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                    ft.DataTable(
+                        columns=[ft.DataColumn(ft.Text("Nutriente", color=ft.Colors.BLACK)), ft.DataColumn(ft.Text("%", color=ft.Colors.BLACK))],
+                        rows=targets_rows if targets_rows else [ft.DataRow([ft.DataCell(ft.Text("-", color=ft.Colors.BLACK54)), ft.DataCell(ft.Text("-", color=ft.Colors.BLACK54))])],
+                    ),
+                    ft.Text("\nCOMPOSIÇÃO DE CARGA (BOM)", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                    ft.DataTable(
+                        columns=[ft.DataColumn(ft.Text("Insumo", color=ft.Colors.BLACK)), ft.DataColumn(ft.Text("Massa (kg)", color=ft.Colors.BLACK))],
+                        rows=[ft.DataRow([ft.DataCell(ft.Text(l.insumo_nome, color=ft.Colors.BLACK)), ft.DataCell(ft.Text(format_num(l.massa_kg, 3), color=ft.Colors.BLACK))]) for l in (rel.bom_lines or [])],
+                        data_row_min_height=40,
+                        data_row_max_height=60,
+                        heading_row_height=45,
+                    ),
+                    *roteiro_controls,
+                    ft.Text("\nPONTOS CRÍTICOS DE CONTROLE (PCC)", weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                    ft.Column([ft.Text(f"! {p.get('parametro','')}: {p.get('limite','')} -> {p.get('acao','')}", color=ft.Colors.BLACK87, size=11) for p in (rel.pcc_pontos or []) if isinstance(p, dict)]),
+                ],
+                spacing=6,
+            ),
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
         )
         laudo_content.controls.append(ft.Row([a4], alignment=ft.MainAxisAlignment.CENTER))
         page.update()
@@ -2528,6 +3470,10 @@ def _main_impl(page: ft.Page) -> None:
     page.add(header, main_tabs)
     reload_data()
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
 def main(page: ft.Page) -> None:
     try:
         _main_impl(page)
@@ -2538,5 +3484,9 @@ def main(page: ft.Page) -> None:
         _write_error_log(err)
         page.add(ft.Text("Erro fatal. Verifique orionagroquim_error.log"))
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> cdbd2873ca1611d6c916c4d9a1269efe9d6f0d6c
 if __name__ == "__main__":
     ft.run(main)

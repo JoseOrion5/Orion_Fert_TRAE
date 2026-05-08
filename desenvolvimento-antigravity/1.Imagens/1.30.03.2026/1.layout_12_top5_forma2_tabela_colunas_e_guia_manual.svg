@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .tab { fill: #1a2130; stroke: #2a3142; stroke-width: 1; }
+      .tab_on { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 11px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 800 26px "Segoe UI", Arial, sans-serif; }
+      .pill_warn { fill: #3a2c12; stroke: #8b6a2b; stroke-width: 1; }
+      .warn { fill: #ffb020; font: 800 12px "Segoe UI", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="62">OrionAgroquim</text>
+  <text class="subtitle" x="242" y="60">Top 5 (Forma 2) — tabela por colunas + link para Formulação Manual</text>
+
+  <rect class="panel" x="24" y="104" width="420" height="772" rx="12"/>
+  <text class="title" x="48" y="146">Alvos e Condições</text>
+  <text class="subtitle" x="48" y="170">Ex.: N 10.00% | P2O5 5.0241% | B 1.50% | T 25°C | Q.S.P 100 L</text>
+
+  <rect class="panel2" x="44" y="192" width="380" height="92" rx="10"/>
+  <text class="label" x="60" y="220">Temperatura (°C)</text>
+  <rect class="chip" x="60" y="232" width="130" height="34" rx="8"/>
+  <text class="mono" x="74" y="254">25</text>
+  <text class="label" x="212" y="220">Volume Q.S.P (L)</text>
+  <rect class="chip" x="212" y="232" width="130" height="34" rx="8"/>
+  <text class="mono" x="226" y="254">100</text>
+
+  <rect class="panel2" x="44" y="300" width="380" height="250" rx="10"/>
+  <text class="label" x="60" y="328">Nutrientes-alvo (%)</text>
+  <rect class="chip" x="60" y="352" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="376">N</text>
+  <rect class="panel2" x="105" y="360" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="376">10.00</text>
+  <rect class="chip" x="60" y="398" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="422">P2O5</text>
+  <rect class="panel2" x="105" y="406" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="422">5.0241</text>
+  <rect class="chip" x="60" y="444" width="340" height="38" rx="10"/>
+  <text class="label" x="74" y="468">B</text>
+  <rect class="panel2" x="105" y="452" width="120" height="22" rx="6"/>
+  <text class="mono" x="116" y="468">1.50</text>
+
+  <rect class="panel2" x="44" y="566" width="380" height="212" rx="10"/>
+  <text class="label" x="60" y="594">Forma 2 (mitigada)</text>
+  <text class="muted" x="60" y="618">- Fecha alvos, mas exige controles</text>
+  <text class="muted" x="60" y="640">- B em 2 fontes (mais estável)</text>
+  <text class="muted" x="60" y="662">- Pode sugerir aditivos/ordem</text>
+  <rect class="btn2" x="60" y="694" width="340" height="40" rx="12"/>
+  <text class="label" x="94" y="720">ABRIR FORMULAÇÃO MANUAL</text>
+
+  <rect class="panel" x="464" y="104" width="952" height="772" rx="12"/>
+  <text class="title" x="488" y="146">Formas de Atingir (Top 5)</text>
+  <text class="subtitle" x="488" y="170">Aba atual: FORMA 2 — mitigada. Inclui tabela detalhada por colunas.</text>
+
+  <rect class="panel2" x="484" y="192" width="912" height="52" rx="12"/>
+  <rect class="tab" x="500" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="534" y="224">FORMA 1</text>
+  <rect class="tab_on" x="648" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="682" y="224" fill="#071014">FORMA 2</text>
+  <rect class="tab" x="796" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="830" y="224">FORMA 3</text>
+  <rect class="tab" x="944" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="978" y="224">FORMA 4</text>
+  <rect class="tab" x="1092" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="1126" y="224">FORMA 5</text>
+  <rect class="tab" x="1240" y="204" width="140" height="28" rx="14"/>
+  <text class="label" x="1252" y="224">FORM. MANUAL</text>
+
+  <rect class="panel2" x="484" y="258" width="912" height="140" rx="12"/>
+  <rect class="pill_warn" x="500" y="278" width="160" height="28" rx="14"/>
+  <text class="warn" x="536" y="298">MITIGADA</text>
+  <text class="label" x="676" y="296">B com 2 fontes + ressalvas</text>
+  <text class="muted" x="676" y="318">Objetivo: ampliar janela operacional e reduzir risco de cristalização.</text>
+  <text class="mono" x="500" y="352">Motor: pandas + numpy | filtros de risco + recomendações</text>
+  <rect class="btn2" x="1230" y="286" width="146" height="36" rx="10"/>
+  <text class="label" x="1250" y="310">GERAR LAUDO</text>
+
+  <rect class="panel2" x="484" y="412" width="912" height="464" rx="12"/>
+  <text class="label" x="504" y="440">Tabela — insumo x nutrientes (colunas)</text>
+  <text class="muted" x="504" y="462">Insumos | Massa | N | P2O5 | K2O | Ca+ | Mg | SO4 | B | Zn | Cu | Mn | Mo</text>
+
+  <rect class="chip" x="504" y="480" width="872" height="34" rx="10"/>
+  <text class="label" x="520" y="502">Insumos</text>
+  <text class="label" x="820" y="502">Massa</text>
+  <text class="label" x="900" y="502">N</text>
+  <text class="label" x="950" y="502">P2O5</text>
+  <text class="label" x="1014" y="502">K2O</text>
+  <text class="label" x="1064" y="502">Ca+</text>
+  <text class="label" x="1110" y="502">Mg</text>
+  <text class="label" x="1148" y="502">SO4</text>
+  <text class="label" x="1202" y="502">B</text>
+  <text class="label" x="1240" y="502">Zn</text>
+  <text class="label" x="1278" y="502">Cu</text>
+  <text class="label" x="1316" y="502">Mn</text>
+  <text class="label" x="1356" y="502">Mo</text>
+
+  <rect class="panel2" x="504" y="524" width="872" height="262" rx="10"/>
+  <text class="mono" x="520" y="550">MAP Cristal</text>
+  <text class="mono" x="820" y="550">10.484</text>
+  <text class="mono" x="900" y="550">0.92</text>
+  <text class="mono" x="950" y="550">5.02</text>
+  <text class="mono" x="1202" y="550">0.00</text>
+  <text class="mono" x="520" y="580">Uréia</text>
+  <text class="mono" x="820" y="580">25.260</text>
+  <text class="mono" x="900" y="580">9.08</text>
+  <text class="mono" x="520" y="610">Ácido Bórico</text>
+  <text class="mono" x="820" y="610">4.000</text>
+  <text class="mono" x="1202" y="610">0.54</text>
+  <text class="mono" x="520" y="640">Octaborato de Sódio</text>
+  <text class="mono" x="820" y="640">6.000</text>
+  <text class="mono" x="1202" y="640">0.96</text>
+  <text class="mono" x="520" y="670">Água</text>
+  <text class="mono" x="820" y="670">79.589</text>
+
+  <rect class="chip" x="504" y="804" width="872" height="58" rx="10"/>
+  <text class="label" x="520" y="830">Ressalvas</text>
+  <text class="muted" x="520" y="852">- Se houver ureia: sugerir NBPT (IN39) | - B em 2 fontes melhora janela operacional | - seguir ordem de preparo</text>
+</svg>

@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <style>
+      .bg { fill: #0f1115; }
+      .panel { fill: #151923; stroke: #2a3142; stroke-width: 1; }
+      .panel2 { fill: #111522; stroke: #2a3142; stroke-width: 1; }
+      .chip { fill: #1d2433; stroke: #2a3142; stroke-width: 1; }
+      .tab { fill: #1a2130; stroke: #2a3142; stroke-width: 1; }
+      .tab_on { fill: #16c6d4; }
+      .title { fill: #d7dde8; font: 700 22px "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #9aa6bd; font: 500 14px "Segoe UI", Arial, sans-serif; }
+      .label { fill: #c2cbe0; font: 700 13px "Segoe UI", Arial, sans-serif; }
+      .text { fill: #c2cbe0; font: 400 13px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #8b95aa; font: 400 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #c2cbe0; font: 500 12px "Consolas", "Segoe UI", monospace; }
+      .accent { fill: #16c6d4; font: 800 26px "Segoe UI", Arial, sans-serif; }
+      .pill_bad { fill: #3b171d; stroke: #8b2b3c; stroke-width: 1; }
+      .danger { fill: #ff5a70; font: 800 12px "Segoe UI", Arial, sans-serif; }
+      .warn { fill: #ffb020; font: 700 12px "Segoe UI", Arial, sans-serif; }
+      .btn { fill: #16c6d4; }
+      .btn2 { fill: #2a3142; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="900"/>
+  <rect class="panel" x="24" y="20" width="1392" height="68" rx="12"/>
+  <text class="accent" x="48" y="62">OrionAgroquim</text>
+  <text class="subtitle" x="242" y="60">Aba Forma 5 — solução mais “rebuscada” (exige mais controles)</text>
+
+  <rect class="panel" x="24" y="104" width="1392" height="772" rx="12"/>
+  <text class="title" x="48" y="146">Formas de Atingir (Top 5)</text>
+  <text class="subtitle" x="48" y="170">Forma 5 mostra o caminho mais complexo: aditivos + temperatura + possíveis duas caldas.</text>
+
+  <rect class="panel2" x="44" y="196" width="1352" height="52" rx="12"/>
+  <rect class="tab" x="60" y="208" width="160" height="28" rx="14"/>
+  <text class="label" x="106" y="228">FORMA 1</text>
+  <rect class="tab" x="228" y="208" width="160" height="28" rx="14"/>
+  <text class="label" x="274" y="228">FORMA 2</text>
+  <rect class="tab" x="396" y="208" width="160" height="28" rx="14"/>
+  <text class="label" x="442" y="228">FORMA 3</text>
+  <rect class="tab" x="564" y="208" width="160" height="28" rx="14"/>
+  <text class="label" x="610" y="228">FORMA 4</text>
+  <rect class="tab_on" x="732" y="208" width="160" height="28" rx="14"/>
+  <text class="label" x="778" y="228" fill="#071014">FORMA 5</text>
+
+  <rect class="panel2" x="44" y="264" width="1352" height="168" rx="12"/>
+  <rect class="pill_bad" x="60" y="284" width="150" height="28" rx="14"/>
+  <text class="danger" x="92" y="304">REBUSCADA</text>
+  <text class="label" x="226" y="302">Caminho viável com ressalvas e controles obrigatórios</text>
+  <text class="muted" x="226" y="324">Usar quando as formas 1–4 não fecham solubilidade/estabilidade em T ambiente.</text>
+  <text class="text" x="60" y="362">Resumo:</text>
+  <text class="mono" x="120" y="362">Status atenção/crítico | exige T alvo e aditivos IN39 | pode exigir 2 caldas</text>
+  <text class="text" x="60" y="388">Estratégia:</text>
+  <text class="mono" x="140" y="388">A) receita principal + quelante/estabilizante + anticristalizante</text>
+  <text class="mono" x="140" y="410">B) se incompatível: dividir em Calda 1 e Calda 2</text>
+
+  <rect class="panel2" x="44" y="448" width="660" height="428" rx="12"/>
+  <text class="label" x="64" y="476">Controles obrigatórios</text>
+
+  <rect class="chip" x="64" y="492" width="620" height="64" rx="10"/>
+  <text class="warn" x="80" y="520">Temperatura</text>
+  <text class="muted" x="80" y="542">Exigir preparo entre 30–35°C para dissolução; evitar resfriamento rápido.</text>
+
+  <rect class="chip" x="64" y="566" width="620" height="84" rx="10"/>
+  <text class="warn" x="80" y="594">Aditivos IN39</text>
+  <text class="muted" x="80" y="616">1) Quelante/Estabilizante (ex.: EDTA / HEDTA) considerando pH ideal.</text>
+  <text class="muted" x="80" y="638">2) Anticristalizante/Dispersante para reduzir nucleação e corpo de fundo.</text>
+
+  <rect class="chip" x="64" y="660" width="620" height="88" rx="10"/>
+  <text class="warn" x="80" y="688">Duas caldas (se necessário)</text>
+  <text class="muted" x="80" y="710">Calda 1: fontes de Ca/Mg + quelante</text>
+  <text class="muted" x="80" y="732">Calda 2: fosfatos/sulfatos/ureia/AN</text>
+
+  <rect class="chip" x="64" y="758" width="620" height="94" rx="10"/>
+  <text class="warn" x="80" y="786">Risco de N (operacional)</text>
+  <text class="muted" x="80" y="808">Se houver ureia: recomendar NBPT (inibidor de urease) conforme IN39.</text>
+  <text class="muted" x="80" y="830">Alertar sobre armazenamento quente e tempo de repouso.</text>
+
+  <rect class="panel2" x="724" y="448" width="672" height="428" rx="12"/>
+  <text class="label" x="744" y="476">Saída desta forma</text>
+
+  <rect class="chip" x="744" y="492" width="632" height="132" rx="10"/>
+  <text class="text" x="760" y="520">Receita (exemplo conceitual):</text>
+  <text class="mono" x="760" y="544">Ureia + Nitrato de Amônio (URAN) + Fonte K + micro quelatado</text>
+  <text class="mono" x="760" y="566">+ EDTA (pH 4–7) + anticristalizante (dose baixa)</text>
+  <text class="muted" x="760" y="596">Observação: sistema deve justificar tecnicamente cada aditivo sugerido.</text>
+
+  <rect class="chip" x="744" y="634" width="632" height="170" rx="10"/>
+  <text class="text" x="760" y="662">Ressalvas:</text>
+  <text class="muted" x="760" y="686">- requer controle de temperatura e sequência de adição</text>
+  <text class="muted" x="760" y="708">- risco de cristalização se T cair</text>
+  <text class="muted" x="760" y="730">- se houver Ca + P/S: precisa quelante e/ou duas caldas</text>
+  <text class="muted" x="760" y="752">- se houver ureia: sugerir NBPT (IN39) para reduzir perdas</text>
+  <text class="muted" x="760" y="774">- laudo deve registrar hipóteses e limites do modelo</text>
+
+  <rect class="btn2" x="1120" y="822" width="120" height="40" rx="12"/>
+  <text class="label" x="1144" y="848">VOLTAR</text>
+  <rect class="btn" x="1256" y="822" width="140" height="40" rx="12"/>
+  <text class="label" x="1284" y="848" fill="#071014">GERAR LAUDO</text>
+</svg>
